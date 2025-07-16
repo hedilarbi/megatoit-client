@@ -1,0 +1,17 @@
+.heroBanner {
+  background-image: url("/HeroBanner.png");
+  background-size: cover;
+  background-position: center;
+  height: calc(90vh - 80px);
+  width: 100%;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .heroBanner {
+    background-image: url("/HeroBannerPhone.png");
+  }
+}

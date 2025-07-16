@@ -1,0 +1,12 @@
+.banner {
+  background-image: url("/MatchsBanner.png");
+  background-size: cover;
+  background-position: center;
+  height: calc(60vh - 80px);
+  width: 95%;
+  margin: 0 auto;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

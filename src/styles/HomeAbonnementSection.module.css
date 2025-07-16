@@ -1,0 +1,17 @@
+.AbonnementSection {
+  background-image: url("/HomeAbonnementBanner.png");
+  background-size: cover;
+  background-position: center;
+
+  width: calc(100% - 64px);
+  position: relative;
+  margin: auto;
+  padding: 48px 32px;
+}
+
+@media (max-width: 768px) {
+  .AbonnementSection {
+    padding: 48px 12px;
+    width: calc(100% - 32px);
+  }
+}

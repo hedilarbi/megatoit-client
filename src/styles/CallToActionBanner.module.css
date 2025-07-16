@@ -1,0 +1,17 @@
+.ctaBanner {
+  background-image: url("/CallToActionBanner.png");
+  background-size: cover;
+  background-position: center;
+
+  width: calc(100% - 64px);
+  position: relative;
+  margin: 36px auto 0px auto;
+  padding: 48px 32px;
+}
+
+@media (max-width: 768px) {
+  .ctaBanner {
+    padding: 48px 12px;
+    width: calc(100% - 32px);
+  }
+}
