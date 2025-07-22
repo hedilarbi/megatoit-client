@@ -1,13 +1,11 @@
 // pages/paiement-en-attente.tsx
 "use client";
 import { useEffect } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Spinner from "@/components/spinner/Spinner";
 
-export default function PaiementEnAttente() {
-  const searchParams = useSearchParams();
+const CommandeEnCours = ({ paymentIntent }) => {
   const router = useRouter();
-  const paymentIntent = searchParams.get("payment_intent");
 
   useEffect(() => {
     if (!paymentIntent) return;
@@ -54,4 +52,6 @@ export default function PaiementEnAttente() {
       </div>
     </div>
   );
-}
+};
+
+export default CommandeEnCours;
