@@ -15,12 +15,12 @@ import { FaPhoneAlt } from "react-icons/fa";
 const SuccessContent = ({ paymentIntentId }) => {
   const [order, setOrder] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
-  const [error, setError] = React.useState(null);
+
   const [date, setDate] = React.useState(null);
 
   const fetchOrder = async () => {
     setLoading(true);
-    setError(null);
+
     try {
       const response = await getOrderByIntent(paymentIntentId);
       if (response.success) {
@@ -35,12 +35,12 @@ const SuccessContent = ({ paymentIntentId }) => {
         }
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
+      console.error("Error fetching order:", err);
     } finally {
       setLoading(false);
     }
   };
-  const formatDate = (timestamp: any) => {
+  const formatDate = (timestamp) => {
     const milliseconds =
       timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000;
 

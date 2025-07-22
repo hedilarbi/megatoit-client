@@ -15,15 +15,14 @@ import { FaCirclePlus } from "react-icons/fa6";
 import { useRouter } from "next/navigation";
 const MatchContent = ({ id }) => {
   const { user } = useAuth();
-  const [match, setMatch] = useState<any>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [match, setMatch] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [ticketsError, setTicketsError] = useState(null);
-  const [showAuthRequiredModal, setShowAuthRequiredModal] =
-    useState<boolean>(false);
+  const [showAuthRequiredModal, setShowAuthRequiredModal] = useState(false);
   const router = useRouter();
 
-  const [ticketQuantity, setTicketQuantity] = useState<number>(1);
+  const [ticketQuantity, setTicketQuantity] = useState(1);
 
   const fetchMatch = async () => {
     setLoading(true);
@@ -43,7 +42,7 @@ const MatchContent = ({ id }) => {
       setLoading(false);
     }
   };
-  const formatDate = (timestamp: any) => {
+  const formatDate = (timestamp) => {
     const milliseconds =
       timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000;
 

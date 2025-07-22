@@ -2,7 +2,7 @@
 import { getOrderByIntent } from "@/services/ticket.service";
 import { NextResponse } from "next/server";
 
-export async function GET(req: Request) {
+export async function GET(req) {
   const { searchParams } = new URL(req.url);
   const payment_intent = searchParams.get("payment_intent");
 

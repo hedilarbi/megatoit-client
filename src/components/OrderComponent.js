@@ -7,22 +7,19 @@ import Logo from "@/assets/logo-small.png"; // Adjust the path as necessary
 const OrderComponent = ({ id }) => {
   const [order, setOrder] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
-  const [error, setError] = React.useState(null);
 
   const fetchOrder = async () => {
     setLoading(true);
-    setError(null);
+
     try {
       const response = await getOrderById(id); // Assuming getOrderById is defined elsewhere
 
       if (response.success) {
         console.log("Order fetched successfully:", response.data);
         setOrder(response.data);
-      } else {
-        setError(response.error);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
+      console.error("Error fetching order:", err);
     } finally {
       setLoading(false);
     }
@@ -31,7 +28,7 @@ const OrderComponent = ({ id }) => {
   useEffect(() => {
     fetchOrder();
   }, [id]);
-  const formatDate = (timestamp: any) => {
+  const formatDate = (timestamp) => {
     const milliseconds =
       timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000;
 
@@ -150,7 +147,7 @@ const OrderComponent = ({ id }) => {
             {order.abonnement.season}
           </p>
           <p className="text-base text-gray-600 mt-1 md:text-lg">
-            <span className="font-semibold">Date d'achat: </span>
+            <span className="font-semibold">Date d&apos;achat: </span>
             {formatDate(order.createdAt).dayName},{" "}
             {formatDate(order.createdAt).date} à{" "}
             {formatDate(order.createdAt).time}

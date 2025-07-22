@@ -34,7 +34,7 @@ export const getAllMatches = async () => {
   }
 };
 
-export const getMatchByUid = async (uid: string) => {
+export const getMatchByUid = async (uid) => {
   try {
     const matchDoc = await getDoc(doc(db, "matchs", uid));
 
@@ -49,7 +49,7 @@ export const getMatchByUid = async (uid: string) => {
   }
 };
 
-export const getMatchByTitle = async (title: string) => {
+export const getMatchByTitle = async (title) => {
   try {
     const matchsCollection = collection(db, "matchs");
     const q = query(matchsCollection, where("title", "==", title));
@@ -69,10 +69,10 @@ export const getMatchByTitle = async (title: string) => {
   }
 };
 
-export const getMatchById = async (id: string) => {
+export const getMatchById = async (id) => {
   try {
     const matchDoc = await getDoc(doc(db, "matchs", id));
-    console.log("MatchDoc:", matchDoc);
+
     if (!matchDoc.exists()) {
       return { success: false, error: "Match not found" };
     }
@@ -86,7 +86,7 @@ export const getMatchById = async (id: string) => {
   }
 };
 
-export const getOrderByIntent = async (paymentIntentId: string) => {
+export const getOrderByIntent = async (paymentIntentId) => {
   try {
     const ordersCollection = collection(db, "orders");
     const q = query(

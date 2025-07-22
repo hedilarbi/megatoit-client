@@ -7,23 +7,19 @@ import { useRouter } from "next/navigation";
 const AbonnementContent = () => {
   const [abonnements, setAbonnements] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
+
   const router = useRouter();
 
   const fetchAbonnements = async () => {
     try {
-      setError(null);
       setIsLoading(true);
       const response = await getAllAbonements();
       if (response.success) {
         console.log(response.data);
         setAbonnements(response.data);
-      } else {
-        setError(response.error);
       }
     } catch (err) {
       console.log(err);
-      setError(err);
     } finally {
       setIsLoading(false);
     }

@@ -7,11 +7,11 @@ import { auth } from "@/lib/firebase";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
-  const [message, setMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState(null);
+  const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setMessage(null);
@@ -22,8 +22,9 @@ export default function ForgotPasswordPage() {
       setMessage(
         `Si un compte existe pour ${email}, vous recevrez un lien de réinitialisation sous peu.`
       );
-    } catch (err: any) {
+    } catch (err) {
       // you could inspect err.code for more specific messaging
+      console.error("Error sending password reset email:", err);
       setError(
         "Échec de l'envoi de l'email de réinitialisation. Veuillez réessayer plus tard."
       );

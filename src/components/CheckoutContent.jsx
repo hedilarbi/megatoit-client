@@ -14,14 +14,14 @@ import { FaCalendarAlt } from "react-icons/fa";
 import { getUserDocument } from "@/services/user.service";
 import { getAbonementById } from "@/services/abonement.service";
 const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
-  const [match, setMatch] = useState<any>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  const [taxes, setTaxes] = useState<any[]>([]);
+  const [match, setMatch] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [taxes, setTaxes] = useState([]);
   const [date, setDate] = useState(null);
-  const [total, setTotal] = useState<number>(0);
+  const [total, setTotal] = useState(0);
   const { user } = useAuth();
-  const [userData, setUserData] = useState<any>(null);
+  const [userData, setUserData] = useState(null);
   const [abonnement, setAbonnement] = useState(null);
 
   const router = useRouter();
@@ -110,7 +110,7 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
       fetchData();
     }
   }, [matchId, user, abonnementId]);
-  const formatDate = (timestamp: any) => {
+  const formatDate = (timestamp) => {
     const milliseconds =
       timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000;
 

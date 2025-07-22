@@ -1,11 +1,10 @@
 // pages/paiement-en-attente.tsx
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Spinner from "@/components/spinner/Spinner";
 
 export default function PaiementEnAttente() {
-  const [status, setStatus] = useState("pending");
   const searchParams = useSearchParams();
   const router = useRouter();
   const paymentIntent = searchParams.get("payment_intent");

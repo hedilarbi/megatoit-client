@@ -1,8 +1,8 @@
-const admin = require("firebase-admin");
+import admin from "firebase-admin";
 
 const serviceAccount = JSON.parse(process.env.FIREBASE_CREDENTIALS);
 
-const BUCKET = "gs://billeterie-d9233.firebasestorage.app";
+const BUCKET = process.env.FIREBASE_BUCKET;
 if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),

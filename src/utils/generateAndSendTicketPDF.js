@@ -29,7 +29,7 @@ export async function generateAndSendTicketPDF(
 
     const attachments = [];
     const downloadLinks = [];
-    const formatDate = (timestamp: any) => {
+    const formatDate = (timestamp) => {
       const milliseconds =
         timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000;
 

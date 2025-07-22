@@ -1,6 +1,6 @@
 "use client";
 import { getAllMatches } from "@/services/match.service";
-import { Match } from "@/types/match";
+
 import React, { useEffect, useState } from "react";
 import Spinner from "./spinner/Spinner";
 import Image from "next/image";
@@ -8,9 +8,9 @@ import Logo from "@/assets/logo-small.png";
 import { MdPinDrop } from "react-icons/md";
 import Link from "next/link";
 const MatchsContent = () => {
-  const [matchs, setMatchs] = useState<Match[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [matchs, setMatchs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const fetchMatchs = async () => {
     setLoading(true);
@@ -31,7 +31,7 @@ const MatchsContent = () => {
     }
   };
 
-  const formatDate = (timestamp: any) => {
+  const formatDate = (timestamp) => {
     const milliseconds =
       timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000;
 

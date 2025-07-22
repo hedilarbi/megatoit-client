@@ -5,7 +5,6 @@ import {
   createUserWithEmailAndPassword,
   signInWithPopup,
   GoogleAuthProvider,
-  sendEmailVerification,
 } from "firebase/auth";
 import { createUserDocument } from "@/services/user.service";
 import { auth } from "@/lib/firebase";
@@ -27,12 +26,12 @@ const InscriptionPage = () => {
   const [error, setError] = useState("");
   const router = useRouter();
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const { email, password, userName, phone } = formData;
 
@@ -48,7 +47,7 @@ const InscriptionPage = () => {
         email,
         password
       );
-      const user = userCredential.user;
+      //const user = userCredential.user;
 
       // Send verification email
       // await sendEmailVerification(user);
@@ -61,7 +60,7 @@ const InscriptionPage = () => {
       });
 
       router.push("/"); // Redirect to home or another page
-    } catch (err: any) {
+    } catch (err) {
       setError(err.message);
     } finally {
       setIsLoading(false);
@@ -82,7 +81,7 @@ const InscriptionPage = () => {
         createdAt: new Date(),
       });
       router.back(); // Redirect to home or another page
-    } catch (err: any) {
+    } catch (err) {
       setError(err.message);
     } finally {
       setIsLoading(false);

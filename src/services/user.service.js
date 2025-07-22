@@ -1,6 +1,5 @@
 import { db } from "@/lib/firebase";
 
-import { UserData } from "@/types/user";
 import {
   doc,
   setDoc,
@@ -11,12 +10,12 @@ import {
   query,
 } from "firebase/firestore";
 
-export const getUserDocument = async (uid: string) => {
+export const getUserDocument = async (uid) => {
   try {
     const userDoc = await getDoc(doc(db, "users", uid));
 
     if (userDoc.exists()) {
-      return userDoc.data() as Omit<UserData, "uid">;
+      return userDoc.data();
     }
     return null;
   } catch (error) {
@@ -25,10 +24,7 @@ export const getUserDocument = async (uid: string) => {
   }
 };
 
-export const createUserDocument = async (
-  uid: string,
-  userData: Omit<UserData, "uid">
-) => {
+export const createUserDocument = async (uid, userData) => {
   try {
     const usersRef = collection(db, "users");
     const emailQuery = query(usersRef, where("email", "==", userData.email));
@@ -44,7 +40,7 @@ export const createUserDocument = async (
   }
 };
 
-export const getUserOrders = async (uid: string) => {
+export const getUserOrders = async (uid) => {
   try {
     const ordersRef = collection(db, "orders");
     const ordersQuery = query(ordersRef, where("userId", "==", uid));
@@ -98,7 +94,7 @@ export const getUserOrders = async (uid: string) => {
   }
 };
 
-export const getOrderById = async (id: string) => {
+export const getOrderById = async (id) => {
   try {
     const orderDoc = await getDoc(doc(db, "orders", id));
     if (orderDoc.exists()) {
@@ -111,7 +107,7 @@ export const getOrderById = async (id: string) => {
       }
       if (orderData.tickets) {
         const tickets = await Promise.all(
-          orderData.tickets.map(async (ticketId: string) => {
+          orderData.tickets.map(async (ticketId) => {
             const ticketDoc = await getDoc(doc(db, "tickets", ticketId));
             if (ticketDoc.exists()) {
               return { id: ticketDoc.id, ...ticketDoc.data() };

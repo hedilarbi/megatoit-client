@@ -9,7 +9,7 @@ const CtaMatchsBanner = () => {
           ABONNEZ-VOUS POUR LA SAISON
         </h2>
         <p className="text-white font-lato text-lg mt-2">
-          Accédez à tous les matchs à domicile et bénéficiez d'avantages
+          Accédez à tous les matchs à domicile et bénéficiez d&apos;avantages
           exclusifs
         </p>
       </div>

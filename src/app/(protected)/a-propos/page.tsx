@@ -163,8 +163,8 @@ const page = () => {
             Rejoignez l&apos;Aventure Megatoit
           </h2>
           <p className="font-semibold font-lato text-lg mt-4 text-center">
-            Venez encourager notre équipe et vivez l'émotion du hockey comme
-            jamais auparavant
+            Venez encourager notre équipe et vivez l&apos;émotion du hockey
+            comme jamais auparavant
           </p>
           <div className="mt-10 flex md:flex-row flex-col md:px-20 justify-center items-center gap-8">
             <Link

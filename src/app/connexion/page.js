@@ -20,7 +20,7 @@ export default function ConnexionPage() {
   const [error, setError] = useState("");
   const router = useRouter();
 
-  const handleEmailSignIn = async (e: React.FormEvent) => {
+  const handleEmailSignIn = async (e) => {
     e.preventDefault();
     try {
       setError(""); // Reset error message
@@ -28,7 +28,7 @@ export default function ConnexionPage() {
       await signInWithEmailAndPassword(auth, email, password);
 
       router.back();
-    } catch (err: any) {
+    } catch (err) {
       setError(err.message);
     } finally {
       setIsLoading(false);
@@ -50,7 +50,7 @@ export default function ConnexionPage() {
         createdAt: new Date(),
       });
       router.back(); // Redirect to dashboard or another page
-    } catch (err: any) {
+    } catch (err) {
       setError(err.message);
     } finally {
       setIsLoading(false);

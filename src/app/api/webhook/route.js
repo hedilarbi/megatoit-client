@@ -1,15 +1,14 @@
 import {
   createTicketAndOrder,
-  getMatchById,
   getUserDocument,
 } from "@/services/ticket.service";
 import { generateAndSendTicketPDF } from "@/utils/generateAndSendTicketPDF";
 import Stripe from "stripe";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2023-10-16",
 });
-export async function POST(request: Request) {
+export async function POST(request) {
   try {
     const body = await request.text();
     const event = stripe.webhooks.constructEvent(

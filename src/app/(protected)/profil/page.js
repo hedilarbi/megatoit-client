@@ -8,10 +8,10 @@ import Logo from "@/assets/logo-small.png"; // Adjust the path as necessary
 import Link from "next/link";
 const Profil = () => {
   const { user } = useAuth();
-  const [userData, setUserData] = React.useState<any>(null);
+  const [userData, setUserData] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
-  const [error, setError] = React.useState<string | null>(null);
-  const [orders, setOrders] = React.useState<any[]>([]);
+  const [error, setError] = React.useState(null);
+  const [orders, setOrders] = React.useState([]);
   const [ticketsCount, setTicketsCount] = React.useState(0);
   const [abonnementCount, setAbonnementCount] = React.useState(0);
   const [filterType, setFilterType] = React.useState("tickets");
@@ -30,19 +30,13 @@ const Profil = () => {
       }
       if (ordersResponse) {
         setOrders(ordersResponse);
-        const totalAbonnements = ordersResponse.reduce(
-          (acc: number, order: any) => {
-            return acc + (order.abonnementId ? 1 : 0);
-          },
-          0
-        );
+        const totalAbonnements = ordersResponse.reduce((acc, order) => {
+          return acc + (order.abonnementId ? 1 : 0);
+        }, 0);
         setAbonnementCount(totalAbonnements);
-        const totalTickets = ordersResponse.reduce(
-          (acc: number, order: any) => {
-            return acc + (order.tickets?.length || 0);
-          },
-          0
-        );
+        const totalTickets = ordersResponse.reduce((acc, order) => {
+          return acc + (order.tickets?.length || 0);
+        }, 0);
         setTicketsCount(totalTickets);
         const tickets = ordersResponse.filter((order) => order.matchId);
 
@@ -62,7 +56,7 @@ const Profil = () => {
       setLoading(false);
     }
   };
-  const formatDate = (timestamp: any) => {
+  const formatDate = (timestamp) => {
     const milliseconds =
       timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000;
 
@@ -86,7 +80,7 @@ const Profil = () => {
     };
   };
 
-  const handleFilterChange = (type: string) => {
+  const handleFilterChange = (type) => {
     setFilterType(type);
     if (type === "tickets") {
       const tickets = orders.filter((order) => order.matchId);
