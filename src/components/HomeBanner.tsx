@@ -23,11 +23,11 @@ const HomeBanner = () => {
             </span>
           </Link>
           <Link
-            href="/matchs"
+            href="/abonnements"
             className=" border border-white text-white hover:text-black px-10 text-lg py-1 rounded-md bg-black hover:bg-white  transition-colors  "
           >
             <span className="font-bebas-neue text-center">
-              Acheter des tickets
+              Abonnement saison
             </span>
           </Link>
         </div>

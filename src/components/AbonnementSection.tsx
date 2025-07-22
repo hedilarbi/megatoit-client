@@ -29,7 +29,14 @@ const AbonnementSection = () => {
         </p>
         <p className="font-lato text-white text-lg mt-4">
           <FaCheck className="inline text-white mr-2" />
-          Evenement exclusive
+          13 matchs de saison régulière
+        </p>
+        <p className="font-lato text-white text-lg mt-4">
+          <FaCheck className="inline text-white mr-2" />1 match de hors-concours
+        </p>
+        <p className="font-lato text-white text-lg mt-4">
+          <FaCheck className="inline text-white mr-2" />1 consomation gratuite
+          par match
         </p>
         <Link
           href="/abonnement"
