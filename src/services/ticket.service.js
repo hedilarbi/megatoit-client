@@ -16,7 +16,7 @@ export const createTicketAndOrder = async ({
   try {
     const orderRef = admin.firestore().collection("orders").doc();
     let order = null;
-
+    console.log(matchId);
     if (matchId && quantity && ticketPrice) {
       const buffer = crypto.randomBytes(Math.ceil(8 / 2));
       const code = buffer.toString("hex").slice(0, 10);
