@@ -52,7 +52,7 @@ const CheckoutForm = ({
         elements,
         clientSecret,
         confirmParams: {
-          return_url: `http://localhost:3000/commande-en-cours`, // Adjust this URL to your success page
+          return_url: `${process.env.NEXT_PUBLIC_URL}/commande-en-cours`, // Adjust this URL to your success page
         },
       });
 

@@ -160,9 +160,9 @@ const MatchContent = ({ id }) => {
                   </div>
                   <div className="md:w-1/2 w-full bg-[#D9D9D9] p-3 rounded-md mt-4">
                     <p className="text-black md:text-lg text-base font-lato">
-                      Ne manquez pas ce match explosif entre Megatoit et
-                      {match.opponent.name} ! Vivez l&apos;intensité du
-                      basketball professionnel en direct au {match.place} !
+                      Ne manquez pas ce match explosif entre Megatoit et{" "}
+                      {match.opponent.name} ! Vivez l&apos;intensité du hockey
+                      professionnel en direct au {match.place} !
                     </p>
                   </div>
                 </div>
