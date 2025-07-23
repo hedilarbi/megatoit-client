@@ -17,6 +17,7 @@ const MatchsContent = () => {
     setError(null);
     try {
       const response = await getAllMatches();
+
       if (response.success) {
         setMatchs(response.data);
       } else {

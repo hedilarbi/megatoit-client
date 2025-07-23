@@ -17,7 +17,7 @@ const CommandeEnCours = ({ paymentIntent }) => {
         router.back(); // Navigate back after 3 attempts
         return;
       }
-
+      console.log("Checking payment status for:", paymentIntent);
       try {
         const res = await fetch(
           `/api/payment-status?payment_intent=${paymentIntent}`

@@ -55,101 +55,177 @@ export async function generateAndSendTicketPDF(
 
     const { dayName, date, time } = formatDate(match.date);
     for (const ticket of tickets) {
+      // const pdfDoc = await PDFDocument.create();
+      // const page = pdfDoc.addPage([500, 600]);
+
+      // const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+      // const black = rgb(0, 0, 0);
+
+      // const logoImage = await pdfDoc.embedPng(logoBytes);
+      // page.drawImage(logoImage, {
+      //   x: 30,
+      //   y: page.getHeight() - 130, // Adjusted for better positioning
+      //   width: 150,
+      //   height: 100,
+      // });
+
+      // const qrImage = await pdfDoc.embedPng(ticket.qrCodeImage);
+      // page.drawImage(qrImage, {
+      //   x: page.getWidth() - 130, // Adjusted for better positioning
+      //   y: page.getHeight() - 130,
+      //   width: 100,
+      //   height: 100,
+      // });
+
+      // const textStartY = page.getHeight() - 180; // Adjusted to start below the images
+      // const team1LogoImage = await pdfDoc.embedPng(logoBytes);
+      // const team2LogoResponse = await fetch(match.opponent.imageUrl);
+      // const team2LogoBuffer = await team2LogoResponse.arrayBuffer();
+      // const team2LogoImage = await pdfDoc.embedPng(team2LogoBuffer);
+
+      // const logosY = textStartY - 40; // Adjusted for better positioning below the QR code and logo
+      // const logosXCenter = page.getWidth() / 2;
+
+      // const logoWidth = 80;
+      // const logoHeight = 80;
+      // const spacing = 20; // Space between the logos
+
+      // page.drawImage(team1LogoImage, {
+      //   x: logosXCenter - logoWidth - spacing / 2,
+      //   y: logosY,
+      //   width: logoWidth,
+      //   height: logoHeight,
+      // });
+
+      // page.drawText("VS", {
+      //   x: logosXCenter - 10, // Center the text between the two images
+      //   y: logosY + logoHeight / 2 - 10, // Adjust to vertically center the text
+      //   size: 24, // Big font size
+      //   font,
+      //   color: black,
+      // });
+
+      // page.drawImage(team2LogoImage, {
+      //   x: logosXCenter + spacing / 2 + 12,
+      //   y: logosY,
+      //   width: logoWidth,
+      //   height: logoHeight,
+      // });
+
+      // page.drawText(`Numéro du ticket : ${ticket.TicketCode}`, {
+      //   x: 30,
+      //   y: textStartY - 80, // Adjusted for better spacing
+      //   size: 16,
+      //   font,
+      //   color: black,
+      // });
+
+      // page.drawText(`Nom et Prénom : ${user.userName}`, {
+      //   x: 30,
+      //   y: textStartY - 110, // Adjusted for better spacing
+      //   size: 16,
+      //   font,
+      //   color: black,
+      // });
+
+      // page.drawText(`Billet pour : Megatoit vs ${match.opponent.name}`, {
+      //   x: 30,
+      //   y: textStartY - 140, // Adjusted for better spacing
+      //   size: 16,
+      //   font,
+      //   color: black,
+      // });
+
+      // page.drawText(`Date : ${dayName} ${date} à ${time}`, {
+      //   x: 30,
+      //   y: textStartY - 170, // Adjusted for better spacing
+      //   size: 14,
+      //   font,
+      //   color: black,
+      // });
+
+      // page.drawText(`Lieu : ${match.place}`, {
+      //   x: 30,
+      //   y: textStartY - 200, // Adjusted for better spacing
+      //   size: 14,
+      //   font,
+      //   color: black,
+      // });
       const pdfDoc = await PDFDocument.create();
-      const page = pdfDoc.addPage([500, 600]);
+      const page = pdfDoc.addPage([600, 250]);
+      const { width, height } = page.getSize();
 
-      const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-      const black = rgb(0, 0, 0);
-
-      const logoImage = await pdfDoc.embedPng(logoBytes);
-      page.drawImage(logoImage, {
-        x: 30,
-        y: page.getHeight() - 130, // Adjusted for better positioning
-        width: 150,
-        height: 100,
+      // 2. Bordure extérieure
+      const borderWidth = 2;
+      page.drawRectangle({
+        x: borderWidth / 2,
+        y: borderWidth / 2,
+        width: width - borderWidth,
+        height: height - borderWidth,
+        borderColor: rgb(0, 0, 0),
+        borderWidth,
+        color: rgb(1, 1, 1), // fond blanc
       });
 
+      // 3. Fonts
+      const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
+      const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+
+      // 4. Header (ÉQUIPE A vs ÉQUIPE B)
+      const headerText = `Megatoit vs ${match.opponent.name}`;
+      const headerSize = 24;
+      const textWidth = fontBold.widthOfTextAtSize(headerText, headerSize);
+      page.drawText(headerText, {
+        x: (width - textWidth) / 2,
+        y: height - 40,
+        size: headerSize,
+        font: fontBold,
+        color: rgb(0, 0, 0),
+      });
+
+      // 5. Ligne de séparation
+      page.drawLine({
+        start: { x: 20, y: height - 60 },
+        end: { x: width - 20, y: height - 60 },
+        thickness: 1,
+        color: rgb(0, 0, 0),
+      });
+
+      // 6. Infos du ticket
+      let cursorY = height - 90;
+      const infoSize = 14;
+      page.drawText(`Ticket #${ticket.TicketCode}`, {
+        x: 20,
+        y: cursorY,
+        size: infoSize,
+        font: fontRegular,
+      });
+      cursorY -= 20;
+      page.drawText(`${(dayName, date)} | ${time}`, {
+        x: 20,
+        y: cursorY,
+        size: infoSize,
+        font: fontBold,
+      });
+      cursorY -= 20;
+      page.drawText(match.place, {
+        x: 20,
+        y: cursorY,
+        size: infoSize,
+        font: fontRegular,
+      });
+
+      // 7. Génération du QR code et insertion
+      // const qrDataUrl = await QRCode.toDataURL(qrData);
+      // const qrBase64 = qrDataUrl.split(",")[1];
+      // const qrImage = await pdfDoc.embedPng(qrBase64);
+      const qrSize = 100;
       const qrImage = await pdfDoc.embedPng(ticket.qrCodeImage);
       page.drawImage(qrImage, {
-        x: page.getWidth() - 130, // Adjusted for better positioning
-        y: page.getHeight() - 130,
-        width: 100,
-        height: 100,
-      });
-
-      const textStartY = page.getHeight() - 180; // Adjusted to start below the images
-      const team1LogoImage = await pdfDoc.embedPng(logoBytes);
-      const team2LogoResponse = await fetch(match.opponent.imageUrl);
-      const team2LogoBuffer = await team2LogoResponse.arrayBuffer();
-      const team2LogoImage = await pdfDoc.embedPng(team2LogoBuffer);
-
-      const logosY = textStartY - 40; // Adjusted for better positioning below the QR code and logo
-      const logosXCenter = page.getWidth() / 2;
-
-      const logoWidth = 80;
-      const logoHeight = 80;
-      const spacing = 20; // Space between the logos
-
-      page.drawImage(team1LogoImage, {
-        x: logosXCenter - logoWidth - spacing / 2,
-        y: logosY,
-        width: logoWidth,
-        height: logoHeight,
-      });
-
-      page.drawText("VS", {
-        x: logosXCenter - 10, // Center the text between the two images
-        y: logosY + logoHeight / 2 - 10, // Adjust to vertically center the text
-        size: 24, // Big font size
-        font,
-        color: black,
-      });
-
-      page.drawImage(team2LogoImage, {
-        x: logosXCenter + spacing / 2 + 12,
-        y: logosY,
-        width: logoWidth,
-        height: logoHeight,
-      });
-
-      page.drawText(`Numéro du ticket : ${ticket.TicketCode}`, {
-        x: 30,
-        y: textStartY - 80, // Adjusted for better spacing
-        size: 16,
-        font,
-        color: black,
-      });
-
-      page.drawText(`Nom et Prénom : ${user.userName}`, {
-        x: 30,
-        y: textStartY - 110, // Adjusted for better spacing
-        size: 16,
-        font,
-        color: black,
-      });
-
-      page.drawText(`Billet pour : Megatoit vs ${match.opponent.name}`, {
-        x: 30,
-        y: textStartY - 140, // Adjusted for better spacing
-        size: 16,
-        font,
-        color: black,
-      });
-
-      page.drawText(`Date : ${dayName} ${date} à ${time}`, {
-        x: 30,
-        y: textStartY - 170, // Adjusted for better spacing
-        size: 14,
-        font,
-        color: black,
-      });
-
-      page.drawText(`Lieu : ${match.place}`, {
-        x: 30,
-        y: textStartY - 200, // Adjusted for better spacing
-        size: 14,
-        font,
-        color: black,
+        x: width - qrSize - 20,
+        y: 20,
+        width: qrSize,
+        height: qrSize,
       });
 
       const pdfBytes = await pdfDoc.save();
