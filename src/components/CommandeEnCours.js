@@ -24,7 +24,7 @@ const CommandeEnCours = ({ paymentIntent }) => {
         );
 
         const data = await res.json();
-
+        console.log("Payment status response:", data);
         if (data.paiement_status) {
           clearInterval(interval);
           router.replace(`/paiement-reussi?payment_intent=${paymentIntent}`);
