@@ -5,18 +5,34 @@ import {
 import { generateAndSendTicketPDF } from "@/utils/generateAndSendTicketPDF";
 import Stripe from "stripe";
 
+export const runtime = "nodejs";
+export const config = {
+  api: {
+    bodyParser: false, // ← disable Next’s built‑in parser so we get raw bytes
+  },
+};
+
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2023-10-16",
 });
 export async function POST(request) {
   try {
-    const body = await request.text();
-    const event = stripe.webhooks.constructEvent(
-      body,
-      request.headers.get("stripe-signature"),
-      process.env.STRIPE_WEBHOOK_SECRET
-    );
-    console.log(event.type);
+    const signature = request.headers.get("stripe-signature");
+    // Grab the raw bytes exactly as Stripe sent them
+    const rawBody = Buffer.from(await request.arrayBuffer());
+
+    let event;
+    try {
+      event = stripe.webhooks.constructEvent(
+        rawBody,
+        signature,
+        process.env.STRIPE_WEBHOOK_SECRET
+      );
+    } catch (err) {
+      console.error("⚠️  Webhook signature verification failed.", err);
+      return new Response("Invalid signature", { status: 400 });
+    }
+
     if (event.type === "payment_intent.succeeded") {
       const paymentIntent = event.data.object;
       const userId = paymentIntent.metadata?.userId;
