@@ -55,11 +55,19 @@ export async function generateAndSendTicketPDF(
 
     const { dayName, date, time } = formatDate(match.date);
     for (const ticket of tickets) {
-      // … (après avoir embed les fonts et les images) …
-      const team1Name = homeTeam; // ex. 'ÉQUIPE A'
-      const team2Name = awayTeam; // ex. 'ÉQUIPE B'
+      const pdfDoc = await PDFDocument.create();
+      const page = pdfDoc.addPage([600, 250]);
+      const { width, height } = page.getSize();
+      const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
+      const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+      const team1Name = "Megatoit"; // ex. 'ÉQUIPE A'
+      const team2Name = match.opponent.name; // ex. 'ÉQUIPE B'
       const headerSize = 24;
       const spacing = 8; // écart entre éléments
+      const team1LogoImage = await pdfDoc.embedPng(logoBytes);
+      const team2LogoResponse = await fetch(match.opponent.imageUrl);
+      const team2LogoBuffer = await team2LogoResponse.arrayBuffer();
+      const team2LogoImage = await pdfDoc.embedPng(team2LogoBuffer);
 
       // 1. Dimensions logos (hauteur = headerSize, on calcule largeur conservant ratio)
       const logoDesiredHeight = headerSize;
@@ -139,7 +147,60 @@ export async function generateAndSendTicketPDF(
         height: team2Dims.height,
       });
 
-      // … (suite : séparation, infos du ticket, QR, etc.) …
+      // 2. Bordure extérieure
+      const borderWidth = 2;
+      page.drawRectangle({
+        x: borderWidth / 2,
+        y: borderWidth / 2,
+        width: width - borderWidth,
+        height: height - borderWidth,
+        borderColor: rgb(0, 0, 0),
+        borderWidth,
+        color: rgb(1, 1, 1), // fond blanc
+      });
+
+      // 3. Fonts
+
+      // 5. Ligne de séparation
+      page.drawLine({
+        start: { x: 20, y: height - 60 },
+        end: { x: width - 20, y: height - 60 },
+        thickness: 1,
+        color: rgb(0, 0, 0),
+      });
+
+      // 6. Infos du ticket
+      let cursorY = height - 90;
+      const infoSize = 14;
+      page.drawText(`Ticket #${ticket.TicketCode}`, {
+        x: 20,
+        y: cursorY,
+        size: infoSize,
+        font: fontRegular,
+      });
+      cursorY -= 20;
+      page.drawText(`${(dayName, date)} | ${time}`, {
+        x: 20,
+        y: cursorY,
+        size: infoSize,
+        font: fontBold,
+      });
+      cursorY -= 20;
+      page.drawText(match.place, {
+        x: 20,
+        y: cursorY,
+        size: infoSize,
+        font: fontRegular,
+      });
+
+      const qrSize = 100;
+      const qrImage = await pdfDoc.embedPng(ticket.qrCodeImage);
+      page.drawImage(qrImage, {
+        x: width - qrSize - 20,
+        y: 20,
+        width: qrSize,
+        height: qrSize,
+      });
 
       const pdfBytes = await pdfDoc.save();
       const fileName = `tickets/${ticket.TicketCode}.pdf`;
