@@ -64,51 +64,22 @@ export async function POST(request) {
       }
 
       if (response.success) {
-        // (async () => {
-        //   try {
-
-        //     const userData = await getUserDocument(userId);
-        //     console.log("User data:", userData);
-        //     if (response?.data.tickets.length > 0) {
-        //       await generateAndSendTicketPDF(
-        //         userData,
-        //         response?.data.tickets,
-        //         response?.data.order
-        //       );
-        //     }
-        //     if (response?.data.abonnement) {
-        //       await generateAndSendTicketPDF(
-        //         userData,
-        //         [],
-        //         response?.data.order,
-        //         response?.data.abonnement
-        //       );
-        //     }
-        //   } catch (e) {
-        //     console.error("Erreur génération/envoi PDF :", e);
-        //   }
-        // })();
-        getUserDocument(userId)
-          .then((userData) => {
-            if (response?.data.tickets.length > 0) {
-              return generateAndSendTicketPDF(
-                userData,
-                response?.data.tickets,
-                response?.data.order
-              );
-            }
-            if (response?.data.abonnement) {
-              return generateAndSendTicketPDF(
-                userData,
-                [],
-                response?.data.order,
-                response?.data.abonnement
-              );
-            }
-          })
-          .catch((e) => {
-            console.error("Erreur génération/envoi PDF :", e);
-          });
+        const userData = await getUserDocument(userId);
+        if (response.data.tickets.length) {
+          await generateAndSendTicketPDF(
+            userData,
+            response.data.tickets,
+            response.data.order
+          );
+        }
+        if (response.data.abonnement) {
+          await generateAndSendTicketPDF(
+            userData,
+            [],
+            response.data.order,
+            response.data.abonnement
+          );
+        }
       }
     }
 
