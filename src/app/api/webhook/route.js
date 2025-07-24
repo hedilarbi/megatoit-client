@@ -63,6 +63,7 @@ export async function POST(request) {
           paymentIntentId: paymentIntent.id,
         });
       }
+      console.log("response from webhook", response);
       if (response.success) {
         console.log("sucess from webhook")(async () => {
           try {

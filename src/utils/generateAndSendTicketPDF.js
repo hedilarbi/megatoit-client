@@ -217,9 +217,14 @@ export async function generateAndSendTicketPDF(
         await file.save(pdfBytes, {
           metadata: { contentType: "application/pdf" },
         });
+        console.log(`Ticket PDF saved for ${ticket.TicketCode} at ${fileName}`);
 
         await file.makePublic(); // Optional: you can use signed URLs instead
         const downloadURL = file.publicUrl();
+        console.log(
+          `Download URL for ticket ${ticket.TicketCode}:`,
+          downloadURL
+        );
         downloadLinks.push(downloadURL);
         await updateTicketDownLoadUrl(ticket.TicketCode, downloadURL);
 
