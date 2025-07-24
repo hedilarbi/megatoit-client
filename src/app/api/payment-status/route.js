@@ -15,7 +15,6 @@ export async function GET(req) {
 
   // Option 1: Check from your database
   const order = await getOrderByIntent(payment_intent);
-  console.log("Order from database:", order);
 
   if (!order) {
     return NextResponse.json({ message: "not created" });

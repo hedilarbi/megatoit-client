@@ -7,9 +7,8 @@ import Stripe from "stripe";
 
 export const runtime = "nodejs";
 export const config = {
-  api: {
-    bodyParser: false, // ← disable Next’s built‑in parser so we get raw bytes
-  },
+  api: { bodyParser: false },
+  background: { maxDuration: 300 }, // keep it alive for up to 5 minutes
 };
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
@@ -65,29 +64,52 @@ export async function POST(request) {
       }
 
       if (response.success) {
-        (async () => {
-          try {
-            const userData = await getUserDocument(userId);
+        // (async () => {
+        //   try {
+
+        //     const userData = await getUserDocument(userId);
+        //     console.log("User data:", userData);
+        //     if (response?.data.tickets.length > 0) {
+        //       await generateAndSendTicketPDF(
+        //         userData,
+        //         response?.data.tickets,
+        //         response?.data.order
+        //       );
+        //     }
+        //     if (response?.data.abonnement) {
+        //       await generateAndSendTicketPDF(
+        //         userData,
+        //         [],
+        //         response?.data.order,
+        //         response?.data.abonnement
+        //       );
+        //     }
+        //   } catch (e) {
+        //     console.error("Erreur génération/envoi PDF :", e);
+        //   }
+        // })();
+        getUserDocument(userId)
+          .then((userData) => {
             console.log("User data:", userData);
             if (response?.data.tickets.length > 0) {
-              await generateAndSendTicketPDF(
+              return generateAndSendTicketPDF(
                 userData,
                 response?.data.tickets,
                 response?.data.order
               );
             }
             if (response?.data.abonnement) {
-              await generateAndSendTicketPDF(
+              return generateAndSendTicketPDF(
                 userData,
                 [],
                 response?.data.order,
                 response?.data.abonnement
               );
             }
-          } catch (e) {
+          })
+          .catch((e) => {
             console.error("Erreur génération/envoi PDF :", e);
-          }
-        })();
+          });
       }
     }
 
