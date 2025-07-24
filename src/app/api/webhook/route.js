@@ -20,7 +20,7 @@ export async function POST(request) {
     const signature = request.headers.get("stripe-signature");
     // Grab the raw bytes exactly as Stripe sent them
     const rawBody = Buffer.from(await request.arrayBuffer());
-    console.log("Received webhook event with signature:", signature);
+
     let event;
     try {
       event = stripe.webhooks.constructEvent(

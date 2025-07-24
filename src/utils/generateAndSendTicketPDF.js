@@ -19,6 +19,7 @@ export async function generateAndSendTicketPDF(
   subscription
 ) {
   try {
+    console.log("Generating and sending ticket PDF...");
     const bucket = getStorage().bucket();
     const logoPath = path.join(process.cwd(), "public", "logo-big.png");
     const logoBytes = fs.readFileSync(logoPath);
