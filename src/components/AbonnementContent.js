@@ -15,7 +15,6 @@ const AbonnementContent = () => {
       setIsLoading(true);
       const response = await getAllAbonements();
       if (response.success) {
-        console.log(response.data);
         setAbonnements(response.data);
       }
     } catch (err) {
@@ -48,6 +47,9 @@ const AbonnementContent = () => {
                 <h3 className="font-bebas-neue text-2xl ">
                   {abonnement.title} ( {abonnement.season})
                 </h3>
+                <p className="text-gray-600 font-bebas-neue text-lg mt-2">
+                  {abonnement.description}
+                </p>
 
                 <p className="text-gray-600 font-bebas-neue text-2xl mt-3">
                   ${abonnement.price.toFixed(2)}
