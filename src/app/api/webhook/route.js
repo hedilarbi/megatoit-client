@@ -64,7 +64,7 @@ export async function POST(request) {
         });
       }
       if (response.success) {
-        (async () => {
+        console.log("sucess from webhook")(async () => {
           try {
             const userData = await getUserDocument(userId);
             if (response?.data.tickets.length > 0) {
