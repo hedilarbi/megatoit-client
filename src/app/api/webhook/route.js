@@ -63,11 +63,12 @@ export async function POST(request) {
           paymentIntentId: paymentIntent.id,
         });
       }
-      console.log("response from webhook", response);
+
       if (response.success) {
-        console.log("sucess from webhook")(async () => {
+        (async () => {
           try {
             const userData = await getUserDocument(userId);
+            console.log("User data:", userData);
             if (response?.data.tickets.length > 0) {
               await generateAndSendTicketPDF(
                 userData,
