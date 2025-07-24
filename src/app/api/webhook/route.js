@@ -90,7 +90,6 @@ export async function POST(request) {
         // })();
         getUserDocument(userId)
           .then((userData) => {
-            console.log("User data:", userData);
             if (response?.data.tickets.length > 0) {
               return generateAndSendTicketPDF(
                 userData,

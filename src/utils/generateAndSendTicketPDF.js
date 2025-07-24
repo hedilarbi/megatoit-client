@@ -23,10 +23,11 @@ export async function generateAndSendTicketPDF(
     const bucket = getStorage().bucket();
     const logoPath = path.join(process.cwd(), "public", "logo-big.png");
     const logoBytes = fs.readFileSync(logoPath);
-
+    console.log("Logo bytes read successfully");
     let match = null;
 
     if (tickets.length > 0) {
+      console.log("Tickets found, generating PDFs for tickets...");
       match = await getMatchById(tickets[0].matchId);
 
       const attachments = [];
@@ -57,6 +58,7 @@ export async function generateAndSendTicketPDF(
 
       const { dayName, date, time } = formatDate(match.date);
       for (const ticket of tickets) {
+        console.log(`Generating PDF for ticket: ${ticket.TicketCode}`);
         const pdfDoc = await PDFDocument.create();
         const page = pdfDoc.addPage([600, 250]);
         const { width, height } = page.getSize();
