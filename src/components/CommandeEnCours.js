@@ -17,20 +17,20 @@ const CommandeEnCours = ({ paymentIntent }) => {
         router.back(); // Navigate back after 3 attempts
         return;
       }
-      console.log("Checking payment status for:", paymentIntent);
+
       try {
         const res = await fetch(
           `/api/payment-status?payment_intent=${paymentIntent}`
         );
 
         const data = await res.json();
-        console.log("Payment status response:", data);
-        if (data.paiement_status) {
+
+        if (data) {
           clearInterval(interval);
-          router.replace(`/paiement-reussi?payment_intent=${paymentIntent}`);
-        } else if (data.paiement_status === false) {
+          router.replace(`/commande-reussi?payment_intent=${paymentIntent}`);
+        } else {
           clearInterval(interval);
-          router.push("/paiement-echoue");
+          router.push("/commande-echoue");
         }
       } catch (error) {
         console.error("Error fetching payment status:", error);
