@@ -23,10 +23,7 @@ const AbonnementSection = () => {
         <h4 className="text-white text-2xl mt-10 font-semibold ">
           $160 / Saison
         </h4>
-        <p className="font-lato text-white text-lg mt-4">
-          <FaCheck className="inline text-white mr-2" />
-          Tous les matchs à domicile
-        </p>
+
         <p className="font-lato text-white text-lg mt-4">
           <FaCheck className="inline text-white mr-2" />
           13 matchs de saison régulière
