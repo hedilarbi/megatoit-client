@@ -17,7 +17,7 @@ export async function GET(req) {
   const order = await getOrderByIntent(payment_intent);
 
   if (!order) {
-    return NextResponse.json({ message: "not created" });
+    return NextResponse.json({ success: false, message: "not created" });
   }
 
   return NextResponse.json(order);

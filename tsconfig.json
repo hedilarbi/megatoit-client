@@ -50,7 +50,7 @@
     "src/components/OrderComponent.js",
     "src/app/(protected)/profil/achats/[id]/page.js",
     "src/components/SuccessContent.js",
-    "src/app/(protected)/paiement-reussi/page.js",
+    "src/app/(protected)/commande-reussi/page.js",
     "src/components/MatchsContent.js",
     "src/app/(protected)/matchs/[Id]/page.js",
     "src/components/CheckoutContent.jsx",

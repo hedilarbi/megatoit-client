@@ -24,13 +24,15 @@ const CommandeEnCours = ({ paymentIntent }) => {
         );
 
         const data = await res.json();
+        console.log("Payment status data:", data);
 
         if (data) {
           clearInterval(interval);
           router.replace(`/commande-reussi?payment_intent=${paymentIntent}`);
-        } else {
+        }
+        if (data.success === false && attempts >= 4) {
           clearInterval(interval);
-          router.push("/commande-echoue");
+          router.replace(`/commande-echouee?payment_intent=${paymentIntent}`);
         }
       } catch (error) {
         console.error("Error fetching payment status:", error);
