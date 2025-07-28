@@ -58,15 +58,15 @@ export const createTicketAndOrder = async ({
         const ticketRef = admin.firestore().collection("tickets").doc();
         const ticketId = ticketRef.id;
         order.tickets.push(ticketId);
-
-        const qrImageBuffer = await QRCode.toBuffer(ticketId, {
+        const toQrCode = "t/" + ticketId;
+        const qrImageBuffer = await QRCode.toBuffer(toQrCode, {
           errorCorrectionLevel: "H",
           type: "png",
           width: 300,
           margin: 1,
         });
         const bucket = getStorage().bucket();
-        const file = bucket.file(`qrcodes/${ticketId}.png`);
+        const file = bucket.file(`qrcodes/${toQrCode}.png`);
         await file.save(qrImageBuffer, {
           metadata: {
             contentType: "image/png",
@@ -118,14 +118,15 @@ export const createTicketAndOrder = async ({
         .doc();
       const subscriptionId = subscriptionRef.id;
       order.subscriptionId = subscriptionId;
-      const qrImageBuffer = await QRCode.toBuffer(subscriptionId, {
+      const toQrCode = "s/" + subscriptionId;
+      const qrImageBuffer = await QRCode.toBuffer(toQrCode, {
         errorCorrectionLevel: "H",
         type: "png",
         width: 300,
         margin: 1,
       });
       const bucket = getStorage().bucket();
-      const file = bucket.file(`qrcodes/${subscriptionId}.png`);
+      const file = bucket.file(`qrcodes/${toQrCode}.png`);
       await file.save(qrImageBuffer, {
         metadata: {
           contentType: "image/png",
