@@ -144,6 +144,7 @@ export const createTicketAndOrder = async ({
         orderId,
         qrCodeURL,
         code,
+        matchs: [],
         price: abonnementPrice,
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
         isActive: true,

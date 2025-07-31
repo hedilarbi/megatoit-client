@@ -35,10 +35,11 @@ const OrderComponent = ({ id }) => {
     const date = new Date(milliseconds);
 
     const dayName = date.toLocaleDateString("fr-FR", { weekday: "long" });
-    const time = date.toLocaleTimeString("fr-FR", {
+    let time = date.toTimeString("fr-FR", {
       hour: "2-digit",
       minute: "2-digit",
     });
+    time = time.substring(0, 5); // Extracting only the time part (HH:MM)
     const formattedDateShort = date.toLocaleDateString("fr-FR", {
       month: "short",
       day: "2-digit",

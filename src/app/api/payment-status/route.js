@@ -20,5 +20,5 @@ export async function GET(req) {
     return NextResponse.json({ success: false, message: "not created" });
   }
 
-  return NextResponse.json(order);
+  return NextResponse.json({ success: true });
 }

@@ -19,11 +19,10 @@ export async function generateAndSendTicketPDF(
   subscription
 ) {
   try {
-    console.log("Generating and sending ticket PDF...");
     const bucket = getStorage().bucket();
     const logoPath = path.join(process.cwd(), "public", "logo-big.png");
     const logoBytes = fs.readFileSync(logoPath);
-    console.log("Logo bytes read successfully");
+
     let match = null;
 
     if (tickets.length > 0) {
@@ -39,10 +38,11 @@ export async function generateAndSendTicketPDF(
         const date = new Date(milliseconds);
 
         const dayName = date.toLocaleDateString("fr-FR", { weekday: "long" });
-        const time = date.toLocaleTimeString("fr-FR", {
+        let time = date.toTimeString("fr-FR", {
           hour: "2-digit",
           minute: "2-digit",
         });
+        time = time.substring(0, 5); // Extracting only the time part (HH:MM)
         const formattedDateShort = date.toLocaleDateString("fr-FR", {
           month: "short",
           day: "2-digit",
