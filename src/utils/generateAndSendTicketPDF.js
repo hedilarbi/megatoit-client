@@ -38,25 +38,23 @@ export async function generateAndSendTicketPDF(
         const date = new Date(milliseconds);
 
         const dayName = date.toLocaleDateString("fr-FR", { weekday: "long" });
-        let time = date.toTimeString("fr-FR", {
+        const str = new Intl.DateTimeFormat("fr-FR", {
+          timeZone: "Etc/GMT-1", // ← freeze at UTC
+          day: "numeric",
+          month: "long",
+          year: "numeric",
           hour: "2-digit",
           minute: "2-digit",
-        });
-        time = time.substring(0, 5); // Extracting only the time part (HH:MM)
-        const formattedDateShort = date.toLocaleDateString("fr-FR", {
-          month: "short",
-          day: "2-digit",
-          year: "numeric",
-        });
+          hour12: false,
+        }).format(date);
 
         return {
           dayName,
-          date: formattedDateShort,
-          time,
+          date: str,
         };
       };
 
-      const { dayName, date, time } = formatDate(match.date);
+      const { dayName, date } = formatDate(match.date);
       for (const ticket of tickets) {
         console.log(`Generating PDF for ticket: ${ticket.TicketCode}`);
         const pdfDoc = await PDFDocument.create();
@@ -189,7 +187,7 @@ export async function generateAndSendTicketPDF(
           font: fontRegular,
         });
         cursorY -= 20;
-        page.drawText(`${(dayName, date)} | ${time}`, {
+        page.drawText(`${dayName} | ${date}`, {
           x: 20,
           y: cursorY,
           size: infoSize,

@@ -49,21 +49,19 @@ const MatchContent = ({ id }) => {
     const date = new Date(milliseconds);
 
     const dayName = date.toLocaleDateString("fr-FR", { weekday: "long" });
-    let time = date.toTimeString("fr-FR", {
+    const str = new Intl.DateTimeFormat("fr-FR", {
+      timeZone: "Etc/GMT-1", // ← freeze at UTC
+      day: "numeric",
+      month: "long",
+      year: "numeric",
       hour: "2-digit",
       minute: "2-digit",
-    });
-    time = time.substring(0, 5); // Extracting only the time part (HH:MM)
-    const formattedDateShort = date.toLocaleDateString("fr-FR", {
-      month: "short",
-      day: "2-digit",
-      year: "numeric",
-    });
+      hour12: false,
+    }).format(date);
 
     return {
       dayName,
-      date: formattedDateShort,
-      time,
+      date: str,
     };
   };
 
@@ -101,7 +99,7 @@ const MatchContent = ({ id }) => {
         )}
         {!loading && match ? (
           (() => {
-            const { dayName, date, time } = formatDate(match.date);
+            const { dayName, date } = formatDate(match.date);
             return (
               <div className="py-16 md:px-24 px-4 w-full ">
                 {match.availableSeats <= 0 && (
@@ -143,9 +141,7 @@ const MatchContent = ({ id }) => {
 
                     <p className=" text-[#585858] md:text-lg text-base font-lato">
                       <span className="capitalize">{dayName},</span>{" "}
-                      <span className="capitalize"> {date}</span>{" "}
-                      <span> à </span>
-                      <span>{time}</span>
+                      <span className="capitalize"> {date}</span>
                     </p>
                   </div>
                   <div className="flex items-center mt-4">

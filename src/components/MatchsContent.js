@@ -39,22 +39,19 @@ const MatchsContent = () => {
     const date = new Date(milliseconds);
 
     const dayName = date.toLocaleDateString("fr-FR", { weekday: "long" });
-    let time = date.toTimeString("fr-FR", {
+    const str = new Intl.DateTimeFormat("fr-FR", {
+      timeZone: "Etc/GMT-1", // ← freeze at UTC
+      day: "numeric",
+      month: "long",
+      year: "numeric",
       hour: "2-digit",
       minute: "2-digit",
-    });
-    time = time.substring(0, 5); // Extracting only the time part (HH:MM)
-
-    const formattedDateShort = date.toLocaleDateString("fr-FR", {
-      month: "short",
-      day: "2-digit",
-      year: "numeric",
-    });
+      hour12: false,
+    }).format(date);
 
     return {
       dayName,
-      date: formattedDateShort,
-      time,
+      date: str,
     };
   };
 
@@ -76,7 +73,7 @@ const MatchsContent = () => {
         <div>
           <div className="my-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {matchs.map((match) => {
-              const { dayName, date, time } = formatDate(match.date);
+              const { dayName, date } = formatDate(match.date);
               return (
                 <div
                   key={match.id}
@@ -84,7 +81,7 @@ const MatchsContent = () => {
                 >
                   <div className="bg-black py-4 rounded-t-md">
                     <p className="font-lato text-center text-white font-semibold ">
-                      {dayName}, {date} à {time}
+                      {dayName}, {date}
                     </p>
                   </div>
                   <div className="px-4 mt-6">

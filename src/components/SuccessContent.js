@@ -26,11 +26,10 @@ const SuccessContent = ({ paymentIntentId }) => {
       if (response.success) {
         setOrder(response.data);
         if (response.data.match) {
-          const { dayName, time, date } = formatDate(response.data.match.date);
+          const { dayName, time } = formatDate(response.data.match.date);
           setDate({
             dayName,
             time,
-            date,
           });
         }
       }
@@ -47,21 +46,19 @@ const SuccessContent = ({ paymentIntentId }) => {
     const date = new Date(milliseconds);
 
     const dayName = date.toLocaleDateString("fr-FR", { weekday: "long" });
-    let time = date.toTimeString("fr-FR", {
+    const str = new Intl.DateTimeFormat("fr-FR", {
+      timeZone: "Etc/GMT-1", // ← freeze at UTC
+      day: "numeric",
+      month: "long",
+      year: "numeric",
       hour: "2-digit",
       minute: "2-digit",
-    });
-    time = time.substring(0, 5); // Extracting only the time part (HH:MM)
-    const formattedDateShort = date.toLocaleDateString("fr-FR", {
-      month: "short",
-      day: "2-digit",
-      year: "numeric",
-    });
+      hour12: false,
+    }).format(date);
 
     return {
       dayName,
-      date: formattedDateShort,
-      time,
+      date: str,
     };
   };
 
@@ -128,9 +125,7 @@ const SuccessContent = ({ paymentIntentId }) => {
                   <p className="font-lato text-base text-[#414A5A]">Date</p>
                   <p>
                     <span className="capitalize">{date.dayName},</span>{" "}
-                    <span className="capitalize"> {date.date}</span>{" "}
-                    <span> à </span>
-                    <span>{date.time}</span>
+                    <span className="capitalize"> {date.date}</span>
                   </p>
                 </div>
               )}

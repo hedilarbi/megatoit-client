@@ -53,6 +53,30 @@ const OrderComponent = ({ id }) => {
     };
   };
 
+  const formatFixDate = (timestamp) => {
+    const milliseconds =
+      timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000;
+
+    const date = new Date(milliseconds);
+
+    const str = new Intl.DateTimeFormat("fr-FR", {
+      timeZone: "Etc/GMT-1", // ← freeze at UTC
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }).format(date);
+
+    const dayName = date.toLocaleDateString("fr-FR", { weekday: "long" });
+
+    return {
+      dayName,
+      date: str,
+    };
+  };
+
   if (loading) {
     return (
       <div className="h-screen w-screen flex justify-center items-center">
@@ -93,9 +117,8 @@ const OrderComponent = ({ id }) => {
             </p>
             <p className="text-base text-gray-600 mt-1 md:text-lg">
               <span className="font-semibold">Date: </span>
-              {formatDate(order.match.date).dayName},{" "}
-              {formatDate(order.match.date).date} à{" "}
-              {formatDate(order.match.date).time}
+              {formatFixDate(order.match.date).dayName},{" "}
+              {formatFixDate(order.match.date).date}
             </p>
             <p className="text-base text-gray-600 mt-1 md:text-lg">
               <span className="font-semibold">Stade: </span>
