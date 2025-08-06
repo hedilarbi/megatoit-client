@@ -19,7 +19,7 @@ const HomeBanner = () => {
             className=" border border-white hover:border-black text-black hover:text-white px-10 text-lg py-1 rounded-md bg-white hover:bg-black  transition-colors   "
           >
             <span className="font-bebas-neue text-center">
-              Acheter des tickets
+              Acheter des billets
             </span>
           </Link>
           <Link
@@ -27,7 +27,7 @@ const HomeBanner = () => {
             className=" border border-white text-white hover:text-black px-10 text-lg py-1 rounded-md bg-black hover:bg-white  transition-colors  "
           >
             <span className="font-bebas-neue text-center">
-              Abonnement saison
+              Abonnement de saison
             </span>
           </Link>
         </div>

@@ -129,7 +129,7 @@ const MatchsContent = () => {
                     href={`/matchs/${match.id}`}
                     className="block text-center bg-black text-white font-bebas-neue py-2 rounded-md mx-4 hover:bg-gray-800 transition-colors duration-300 mt-8 mb-6"
                   >
-                    Réserver vos tickets
+                    Réserver vos billets
                   </Link>
                 </div>
               );

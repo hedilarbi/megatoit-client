@@ -38,7 +38,7 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
         if (matchResponse.success) {
           setMatch(matchResponse.data);
           if (matchResponse.data.availableSeats < quantity) {
-            setError("Nombre de tickets séléctionné est indisponible");
+            setError("Nombre de billets séléctionné est indisponible");
           }
           const { dayName, date } = formatDate(matchResponse.data.date);
           setDate({ dayName, date });
@@ -196,7 +196,7 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
             </h2>
             <div className="border border-gray-300 rounded-md p-4 mt-4 bg-white flex justify-between">
               <p className="font-lato text-gray-600 font-semibold">
-                {quantity} x tickets Megatoit vs {match.opponent.name}
+                {quantity} x billet(s) Megatoit vs {match.opponent.name}
               </p>
               <p className="font-lato text-gray-800 font-semibold">
                 ${match.price.toFixed(2)} x {quantity} = $

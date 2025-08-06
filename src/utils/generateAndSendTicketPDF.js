@@ -26,7 +26,6 @@ export async function generateAndSendTicketPDF(
     let match = null;
 
     if (tickets.length > 0) {
-      console.log("Tickets found, generating PDFs for tickets...");
       match = await getMatchById(tickets[0].matchId);
 
       const attachments = [];
@@ -53,7 +52,6 @@ export async function generateAndSendTicketPDF(
       const { dayName, date } = formatDate(match.date);
 
       for (const ticket of tickets) {
-        console.log(`Generating PDF for ticket: ${ticket.TicketCode}`);
         // … dans votre boucle for (const ticket of tickets) { …
 
         // 1) création du document et de la page
@@ -115,7 +113,7 @@ export async function generateAndSendTicketPDF(
         });
 
         // 7) Title tout en haut
-        const title = `Ticket N ${ticketCode}`;
+        const title = `Billet N ${ticketCode}`;
         const titleSize = 28;
         const titleWidth = fontBold.widthOfTextAtSize(title, titleSize);
         page.drawText(title, {
@@ -264,7 +262,7 @@ export async function generateAndSendTicketPDF(
         from: `"Billeterie Megatoit" <${process.env.EMAIL_USER}>`,
         to: user.email,
         subject: `🎟 ${
-          tickets.length > 1 ? "Vos tickets" : "Votre ticket"
+          tickets.length > 1 ? "Vos billets" : "Votre billet"
         } pour le match Megatoit vs ${match.opponent.name}`,
         html: `
           <div style="text-align:center">
@@ -276,7 +274,7 @@ export async function generateAndSendTicketPDF(
           <p style="text-align:center;font-size:16px">
             Votre commande <strong>№${order.code}</strong> est confirmée.
             Vous trouverez en pièce jointe ${
-              tickets.length > 1 ? "vos tickets" : "votre ticket"
+              tickets.length > 1 ? "vos billets" : "votre billet"
             }.
           </p>
         `,
@@ -294,37 +292,110 @@ export async function generateAndSendTicketPDF(
     // Subscription PDF (unchanged except logo size/position)
     if (subscription) {
       const abonnement = await getAbonementById(subscription.abonnementId);
+
       const pdfDoc = await PDFDocument.create();
-      const page = pdfDoc.addPage([500, 300]);
-      const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-      const black = rgb(0, 0, 0);
-      const logoImage = await pdfDoc.embedPng(
-        fs.readFileSync(path.join(process.cwd(), "public", "logo-big.png"))
-      );
+      // page plus large pour passer le QR à droite
+      const page = pdfDoc.addPage([800, 300]);
+      const { width, height } = page.getSize();
 
-      page.drawImage(logoImage, {
-        x: 30,
-        y: page.getHeight() - 130,
-        width: 150,
-        height: 100,
-      });
+      // 2) fonts
 
+      const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+
+      // 3) données
+
+      const ticketCode = subscription.code;
+
+      // 4) embeds
+      const logoBytes = fs.readFileSync(logoPath);
+      const team1LogoImage = await pdfDoc.embedPng(logoBytes);
       const qrImage = await pdfDoc.embedPng(subscription.qrCodeImage);
-      page.drawImage(qrImage, {
-        x: page.getWidth() - 130,
-        y: page.getHeight() - 130,
-        width: 100,
-        height: 100,
-      });
 
       const titleWithSeason = `${abonnement.data.title} (${abonnement.data.season})`;
+
+      // 5) régions et dimensions
+      const margin = 20;
+      const qrSize = 200;
+      const separatorX = width - qrSize - margin - 30; // x de la ligne de séparation verticale
+      const leftWidth = separatorX - 2 * margin; // largeur dispo à gauche du QR
+
+      const borderWidth = 20; // épaisseur de la bordure
+
+      page.drawRectangle({
+        x: borderWidth / 2,
+        y: borderWidth / 2,
+        width: width - borderWidth,
+        height: height - borderWidth,
+        color: rgb(1, 1, 1),
+        borderColor: rgb(0, 0, 0),
+        borderWidth,
+      });
+
+      // 6) Draw QR + séparation
+      page.drawLine({
+        start: { x: separatorX, y: margin },
+        end: { x: separatorX, y: height - margin },
+        thickness: 2,
+        color: rgb(0, 0, 0),
+      });
+      page.drawImage(qrImage, {
+        x: separatorX + margin,
+        y: height - qrSize - margin - 30,
+        width: qrSize,
+        height: qrSize,
+      });
+
+      // 7) Title tout en haut
+      const title = `Abonnement N ${ticketCode}`;
+      const titleSize = 28;
+      const titleWidth = fontBold.widthOfTextAtSize(title, titleSize);
+      page.drawText(title, {
+        x: (leftWidth - titleWidth) / 2 + margin,
+        y: height - 60,
+        size: titleSize,
+        font: fontBold,
+        color: rgb(0, 0, 0),
+      });
+
+      // 8) Ligne horizontale supérieure
+      page.drawLine({
+        start: { x: margin + 20, y: height - 80 },
+        end: { x: separatorX - margin, y: height - 80 },
+        thickness: 1,
+        color: rgb(0, 0, 0),
+      });
+
+      //i want i the center of the pdf add the logo of megatoit
+      const logoH = 120; // hauteur du logo
+      const logoDims = team1LogoImage.scale(logoH / team1LogoImage.height);
+      const logoX = (leftWidth - logoDims.width) / 2 + margin;
+      const logoY = height - 160;
+      page.drawImage(team1LogoImage, {
+        x: logoX,
+        y: logoY - logoDims.height / 2 + titleSize / 2,
+        width: logoDims.width,
+        height: logoDims.height,
+      });
+
+      // 11) Ligne horizontale inférieure
+
+      page.drawLine({
+        start: { x: margin + 20, y: 70 },
+        end: { x: separatorX - margin, y: 70 },
+        thickness: 1,
+        color: rgb(0, 0, 0),
+      });
+
+      // 12) Date en bas
+
+      const dateSize = 18;
+      const dateW = fontBold.widthOfTextAtSize(titleWithSeason, dateSize);
+      const dateY = 40;
       page.drawText(titleWithSeason, {
-        x:
-          page.getWidth() / 2 - font.widthOfTextAtSize(titleWithSeason, 24) / 2,
-        y: page.getHeight() - 200,
-        size: 24,
-        font,
-        color: black,
+        x: (leftWidth - dateW) / 2 + margin,
+        y: dateY,
+        size: dateSize,
+        font: fontBold,
       });
 
       const pdfBytes = await pdfDoc.save();

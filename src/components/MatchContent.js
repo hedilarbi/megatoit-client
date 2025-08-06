@@ -165,7 +165,7 @@ const MatchContent = ({ id }) => {
                 </div>
                 <div className="mt-8 border-[#949494] border p-8 bg-white rounded-md">
                   <h2 className="md:text-2xl text-lg font-bold text-gray-800 mb-4 font-lato">
-                    Selectionner le nombre de tickets
+                    Selectionner le nombre de billets
                   </h2>
                   <div className="border border-[#949494] p-6 rounded-md mt-4">
                     <div className="flex justify-between flex-col md:flex-row gap-4 items-start ">
@@ -174,7 +174,7 @@ const MatchContent = ({ id }) => {
                           Megatoit vs {match.opponent.name}
                         </h3>
                         <p className="text-[#2E2E2E] font-lato text-lg mt-2 font-semibold">
-                          ${match.price.toFixed(2)} par ticket
+                          ${match.price.toFixed(2)} par billet
                         </p>
                       </div>
                       <div className="flex items-center gap-5 mx-auto md:mx-0 ">
@@ -221,14 +221,14 @@ const MatchContent = ({ id }) => {
                         className="bg-black text-white font-bebas-neue py-2 px-4 rounded-md hover:bg-gray-800 transition-colors w-full text-lg cursor-pointer"
                         onClick={handleTicketReservation}
                       >
-                        Réserver vos tickets
+                        Réserver vos billets
                       </button>
                     ) : (
                       <button
                         className="bg-black text-white font-bebas-neue py-2 px-4 rounded-md hover:bg-gray-800 transition-colors w-full text-lg cursor-pointer"
                         onClick={() => setShowAuthRequiredModal(true)}
                       >
-                        Réserver vos tickets
+                        Réserver vos billets
                       </button>
                     )}
                   </div>

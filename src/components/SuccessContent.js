@@ -178,7 +178,7 @@ const SuccessContent = ({ paymentIntentId }) => {
               className="bg-black flex text-white rounded-md justify-center items-center gap-4 py-2 font-bebas-neue px-5"
             >
               <BsFillTicketPerforatedFill />
-              <span>voir mes tickets</span>
+              <span>voir mes billets</span>
             </Link>
             <Link
               href={"/"}
