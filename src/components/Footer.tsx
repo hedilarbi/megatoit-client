@@ -51,7 +51,7 @@ const Footer = () => {
           <h3 className="font-bebas-neue text-black text-2xl  mb-4">Support</h3>
           <ul className="font-lato text-black">
             <li className="mb-2">
-              <Link href="/" className="hover:underline">
+              <Link href="/contact" className="hover:underline">
                 Contactez-nous
               </Link>
             </li>
