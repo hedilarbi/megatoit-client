@@ -39,7 +39,7 @@ export async function GET(request) {
   if (!page) {
     return new NextResponse("Page introuvable ou pas admin", { status: 404 });
   }
-  const pageToken = page.access_token;
+  //const pageToken = page.access_token;
 
   // 4) Sauvegardez `pageToken` en base ou secret manager
   //    Ex. : await savePageToken(pageToken);
