@@ -31,15 +31,15 @@ export async function generateAndSendTicketPDF(
 
       const attachments = [];
       const downloadLinks = [];
+
       const formatDate = (timestamp) => {
-        const milliseconds =
-          timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000;
-
-        const date = new Date(milliseconds);
-
-        const dayName = date.toLocaleDateString("fr-FR", { weekday: "long" });
+        const ms = timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000;
+        const date = new Date(ms);
+        const dayName = date.toLocaleDateString("fr-FR", {
+          weekday: "long",
+        });
         const str = new Intl.DateTimeFormat("fr-FR", {
-          timeZone: "Etc/GMT-1", // ← freeze at UTC
+          timeZone: "Etc/GMT-1",
           day: "numeric",
           month: "long",
           year: "numeric",
@@ -47,188 +47,203 @@ export async function generateAndSendTicketPDF(
           minute: "2-digit",
           hour12: false,
         }).format(date);
-
-        return {
-          dayName,
-          date: str,
-        };
+        return { dayName, date: str };
       };
 
       const { dayName, date } = formatDate(match.date);
+
       for (const ticket of tickets) {
         console.log(`Generating PDF for ticket: ${ticket.TicketCode}`);
+        // … dans votre boucle for (const ticket of tickets) { …
+
+        // 1) création du document et de la page
         const pdfDoc = await PDFDocument.create();
-        const page = pdfDoc.addPage([600, 250]);
+        // page plus large pour passer le QR à droite
+        const page = pdfDoc.addPage([800, 300]);
         const { width, height } = page.getSize();
+
+        // 2) fonts
         const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
         const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-        const team1Name = "Megatoit"; // ex. 'ÉQUIPE A'
-        const team2Name = match.opponent.name; // ex. 'ÉQUIPE B'
-        const headerSize = 24;
-        const spacing = 8; // écart entre éléments
+
+        // 3) données
+        const team1Name = "Megatoit";
+        const team2Name = match.opponent.name;
+
+        const placeText = match.place;
+        const ticketCode = ticket.TicketCode;
+
+        // 4) embeds
+        const logoBytes = fs.readFileSync(logoPath);
         const team1LogoImage = await pdfDoc.embedPng(logoBytes);
-        const team2LogoResponse = await fetch(match.opponent.imageUrl);
-        const team2LogoBuffer = await team2LogoResponse.arrayBuffer();
+        const team2LogoBuffer = await (
+          await fetch(match.opponent.imageUrl)
+        ).arrayBuffer();
         const team2LogoImage = await pdfDoc.embedPng(team2LogoBuffer);
+        const qrImage = await pdfDoc.embedPng(ticket.qrCodeImage);
 
-        // 1. Dimensions logos (hauteur = headerSize, on calcule largeur conservant ratio)
-        const logoDesiredHeight = headerSize;
-        const team1Dims = team1LogoImage.scale(
-          logoDesiredHeight / team1LogoImage.height
-        );
-        const team2Dims = team2LogoImage.scale(
-          logoDesiredHeight / team2LogoImage.height
-        );
+        // 5) régions et dimensions
+        const margin = 20;
+        const qrSize = 200;
+        const separatorX = width - qrSize - margin - 30; // x de la ligne de séparation verticale
+        const leftWidth = separatorX - 2 * margin; // largeur dispo à gauche du QR
 
-        // 2. Largeurs textes
-        const team1TextWidth = fontBold.widthOfTextAtSize(
-          team1Name,
-          headerSize
-        );
-        const team2TextWidth = fontBold.widthOfTextAtSize(
-          team2Name,
-          headerSize
-        );
-        const vsText = " vs ";
-        const vsWidth = fontBold.widthOfTextAtSize(vsText, headerSize);
+        const borderWidth = 20; // épaisseur de la bordure
 
-        // 3. Largeur totale de l’en‑tête
-        const totalWidth =
-          team1Dims.width +
-          spacing +
-          team1TextWidth +
-          spacing +
-          vsWidth +
-          spacing +
-          team2TextWidth +
-          spacing +
-          team2Dims.width;
-
-        // 4. Point de départ X pour centrer
-        const startX = (width - totalWidth) / 2;
-        const yPos = height - 40; // hauteur où on veut dessiner le header
-
-        // 5. Dessin du logo 1
-        page.drawImage(team1LogoImage, {
-          x: startX,
-          y: yPos - team1Dims.height / 2 + headerSize / 2,
-          width: team1Dims.width,
-          height: team1Dims.height,
-        });
-
-        // 6. Dessin du texte « ÉQUIPE A »
-        let cursorX = startX + team1Dims.width + spacing;
-        page.drawText(team1Name, {
-          x: cursorX,
-          y: yPos,
-          size: headerSize,
-          font: fontBold,
-          color: rgb(0, 0, 0),
-        });
-
-        // 7. Texte « vs »
-        cursorX += team1TextWidth + spacing;
-        page.drawText(vsText, {
-          x: cursorX,
-          y: yPos,
-          size: headerSize,
-          font: fontBold,
-          color: rgb(0, 0, 0),
-        });
-
-        // 8. Texte « ÉQUIPE B »
-        cursorX += vsWidth + spacing;
-        page.drawText(team2Name, {
-          x: cursorX,
-          y: yPos,
-          size: headerSize,
-          font: fontBold,
-          color: rgb(0, 0, 0),
-        });
-
-        // 9. Logo 2
-        cursorX += team2TextWidth + spacing;
-        page.drawImage(team2LogoImage, {
-          x: cursorX,
-          y: yPos - team2Dims.height / 2 + headerSize / 2,
-          width: team2Dims.width,
-          height: team2Dims.height,
-        });
-
-        // 2. Bordure extérieure
-        const borderWidth = 2;
         page.drawRectangle({
           x: borderWidth / 2,
           y: borderWidth / 2,
           width: width - borderWidth,
           height: height - borderWidth,
+          color: rgb(1, 1, 1),
           borderColor: rgb(0, 0, 0),
           borderWidth,
-          color: rgb(1, 1, 1), // fond blanc
         });
 
-        // 3. Fonts
-
-        // 5. Ligne de séparation
+        // 6) Draw QR + séparation
         page.drawLine({
-          start: { x: 20, y: height - 60 },
-          end: { x: width - 20, y: height - 60 },
-          thickness: 1,
+          start: { x: separatorX, y: margin },
+          end: { x: separatorX, y: height - margin },
+          thickness: 2,
           color: rgb(0, 0, 0),
         });
-
-        // 6. Infos du ticket
-        let cursorY = height - 90;
-        const infoSize = 14;
-        page.drawText(`Ticket #${ticket.TicketCode}`, {
-          x: 20,
-          y: cursorY,
-          size: infoSize,
-          font: fontRegular,
-        });
-        cursorY -= 20;
-        page.drawText(`${dayName} | ${date}`, {
-          x: 20,
-          y: cursorY,
-          size: infoSize,
-          font: fontBold,
-        });
-        cursorY -= 20;
-        page.drawText(match.place, {
-          x: 20,
-          y: cursorY,
-          size: infoSize,
-          font: fontRegular,
-        });
-
-        const qrSize = 100;
-        const qrImage = await pdfDoc.embedPng(ticket.qrCodeImage);
         page.drawImage(qrImage, {
-          x: width - qrSize - 20,
-          y: 20,
+          x: separatorX + margin,
+          y: height - qrSize - margin - 30,
           width: qrSize,
           height: qrSize,
         });
 
+        // 7) Title tout en haut
+        const title = `Ticket N ${ticketCode}`;
+        const titleSize = 28;
+        const titleWidth = fontBold.widthOfTextAtSize(title, titleSize);
+        page.drawText(title, {
+          x: (leftWidth - titleWidth) / 2 + margin,
+          y: height - 60,
+          size: titleSize,
+          font: fontBold,
+          color: rgb(0, 0, 0),
+        });
+
+        // 8) Ligne horizontale supérieure
+        page.drawLine({
+          start: { x: margin + 20, y: height - 80 },
+          end: { x: separatorX - margin, y: height - 80 },
+          thickness: 1,
+          color: rgb(0, 0, 0),
+        });
+
+        // 9) Header logos + « VS »
+        const logoH = 70; // hauteur des logos
+        const spacing = 8;
+        const headerSize = 24;
+        const team1Dims = team1LogoImage.scale(logoH / team1LogoImage.height);
+        const team2Dims = team2LogoImage.scale(logoH / team2LogoImage.height);
+        const vsText = " VS ";
+        const team1W = fontBold.widthOfTextAtSize(team1Name, headerSize);
+        const team2W = fontBold.widthOfTextAtSize(team2Name, headerSize);
+        const vsW = fontBold.widthOfTextAtSize(vsText, headerSize);
+        const totalHeader =
+          team1Dims.width +
+          spacing +
+          team1W +
+          spacing +
+          vsW +
+          spacing +
+          team2W +
+          spacing +
+          team2Dims.width;
+        const startX = (leftWidth - totalHeader) / 2 + margin;
+        const headerY = height - 160;
+
+        // logo 1
+        page.drawImage(team1LogoImage, {
+          x: startX,
+          y: headerY - team1Dims.height / 2 + headerSize / 2,
+          width: team1Dims.width,
+          height: team1Dims.height,
+        });
+        // texte « Megatoit »
+        let cursorX = startX + team1Dims.width + spacing;
+        page.drawText(team1Name, {
+          x: cursorX,
+          y: headerY,
+          size: headerSize,
+          font: fontBold,
+        });
+        // texte « VS »
+        cursorX += team1W + spacing;
+        page.drawText(vsText, {
+          x: cursorX,
+          y: headerY,
+          size: headerSize,
+          font: fontBold,
+        });
+        // texte « Opponent »
+        cursorX += vsW + spacing;
+        page.drawText(team2Name, {
+          x: cursorX,
+          y: headerY,
+          size: headerSize,
+          font: fontBold,
+        });
+        // logo 2
+        cursorX += team2W + spacing;
+        page.drawImage(team2LogoImage, {
+          x: cursorX,
+          y: headerY - team2Dims.height / 2 + headerSize / 2,
+          width: team2Dims.width,
+          height: team2Dims.height,
+        });
+
+        // 10) Texte du lieu
+        const placeSize = 16;
+        const placeW = fontRegular.widthOfTextAtSize(placeText, placeSize);
+        const placeY = headerY - logoH + 30; // 20px sous le header
+        page.drawText(placeText, {
+          x: (leftWidth - placeW) / 2 + margin,
+          y: placeY,
+          size: placeSize,
+          font: fontRegular,
+        });
+
+        // 11) Ligne horizontale inférieure
+
+        page.drawLine({
+          start: { x: margin + 20, y: 70 },
+          end: { x: separatorX - margin, y: 70 },
+          thickness: 1,
+          color: rgb(0, 0, 0),
+        });
+
+        // 12) Date en bas
+        const dateText = `${dayName.toUpperCase()}, ${date.toUpperCase()}`;
+        const dateSize = 18;
+        const dateW = fontBold.widthOfTextAtSize(dateText, dateSize);
+        const dateY = 40;
+        page.drawText(dateText, {
+          x: (leftWidth - dateW) / 2 + margin,
+          y: dateY,
+          size: dateSize,
+          font: fontBold,
+        });
+
+        // … ensuite sauvegarde, upload et envoi email comme avant …
+
+        // Save & upload
         const pdfBytes = await pdfDoc.save();
         const fileName = `tickets/${ticket.TicketCode}.pdf`;
-
         const file = bucket.file(fileName);
         await file.save(pdfBytes, {
           metadata: { contentType: "application/pdf" },
         });
-        console.log(`Ticket PDF saved for ${ticket.TicketCode} at ${fileName}`);
-
-        await file.makePublic(); // Optional: you can use signed URLs instead
+        await file.makePublic();
         const downloadURL = file.publicUrl();
-        console.log(
-          `Download URL for ticket ${ticket.TicketCode}:`,
-          downloadURL
-        );
         downloadLinks.push(downloadURL);
         await updateTicketDownLoadUrl(ticket.TicketCode, downloadURL);
 
-        // Prepare attachment
+        // Add to email attachments
         attachments.push({
           filename: `ticket-${ticket.TicketCode}.pdf`,
           content: pdfBytes,
@@ -236,7 +251,7 @@ export async function generateAndSendTicketPDF(
         });
       }
 
-      // Setup nodemailer transporter
+      // Send email with tickets
       const transporter = nodemailer.createTransport({
         service: "gmail",
         auth: {
@@ -245,7 +260,6 @@ export async function generateAndSendTicketPDF(
         },
       });
 
-      // Send email with embedded logo and all ticket PDFs
       await transporter.sendMail({
         from: `"Billeterie Megatoit" <${process.env.EMAIL_USER}>`,
         to: user.email,
@@ -253,54 +267,51 @@ export async function generateAndSendTicketPDF(
           tickets.length > 1 ? "Vos tickets" : "Votre ticket"
         } pour le match Megatoit vs ${match.opponent.name}`,
         html: `
-        <div style="text-align: center;">
-            <img src="cid:logo" alt="Logo" style="width: 150px; height: auto;" />
-        </div>
-     
-        <p style="text-align: center; font-weight: bold; font-size: 22px;">
+          <div style="text-align:center">
+            <img src="cid:logo" alt="Logo" style="width:150px;height:auto" />
+          </div>
+          <p style="text-align:center;font-weight:bold;font-size:22px">
             Commande confirmée !
-        </p>
-
-        <p style="text-align: center; font-size: 16px;">
-            Nous avons le plaisir de vous confirmer votre commande <strong>N°${
-              order.code
-            }</strong>.
-            Vous trouverez en pièces-jointes ${
-              tickets.length > 1 ? "l'ensemble de vos tickets" : "votre ticket"
-            } .
-        </p>
-    `,
+          </p>
+          <p style="text-align:center;font-size:16px">
+            Votre commande <strong>№${order.code}</strong> est confirmée.
+            Vous trouverez en pièce jointe ${
+              tickets.length > 1 ? "vos tickets" : "votre ticket"
+            }.
+          </p>
+        `,
         attachments: [
           ...attachments,
           {
             filename: "logo-big.png",
             content: logoBytes,
-            cid: "logo", // Referenced in img src="cid:logo"
+            cid: "logo",
           },
         ],
       });
     }
+
+    // Subscription PDF (unchanged except logo size/position)
     if (subscription) {
       const abonnement = await getAbonementById(subscription.abonnementId);
-
       const pdfDoc = await PDFDocument.create();
       const page = pdfDoc.addPage([500, 300]);
-
       const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
       const black = rgb(0, 0, 0);
-
-      const logoImage = await pdfDoc.embedPng(logoBytes);
+      const logoImage = await pdfDoc.embedPng(
+        fs.readFileSync(path.join(process.cwd(), "public", "logo-big.png"))
+      );
 
       page.drawImage(logoImage, {
         x: 30,
-        y: page.getHeight() - 130, // Adjusted for better positioning
+        y: page.getHeight() - 130,
         width: 150,
         height: 100,
       });
 
       const qrImage = await pdfDoc.embedPng(subscription.qrCodeImage);
       page.drawImage(qrImage, {
-        x: page.getWidth() - 130, // Adjusted for better positioning
+        x: page.getWidth() - 130,
         y: page.getHeight() - 130,
         width: 100,
         height: 100,
@@ -309,24 +320,23 @@ export async function generateAndSendTicketPDF(
       const titleWithSeason = `${abonnement.data.title} (${abonnement.data.season})`;
       page.drawText(titleWithSeason, {
         x:
-          page.getWidth() / 2 - font.widthOfTextAtSize(titleWithSeason, 24) / 2, // Center the text horizontally
-        y: page.getHeight() - 200, // Adjusted for better positioning
-        size: 24, // Big font size
+          page.getWidth() / 2 - font.widthOfTextAtSize(titleWithSeason, 24) / 2,
+        y: page.getHeight() - 200,
+        size: 24,
         font,
         color: black,
-        opacity: 1,
       });
+
       const pdfBytes = await pdfDoc.save();
       const fileName = `abonnements/${subscription.code}.pdf`;
-
       const file = bucket.file(fileName);
       await file.save(pdfBytes, {
         metadata: { contentType: "application/pdf" },
       });
-
       await file.makePublic();
       const downloadURL = file.publicUrl();
       await updateSubscriptionDownloadUrl(subscription.code, downloadURL);
+
       const transporter = nodemailer.createTransport({
         service: "gmail",
         auth: {
@@ -335,25 +345,22 @@ export async function generateAndSendTicketPDF(
         },
       });
 
-      // Send email with embedded logo and all ticket PDFs
       await transporter.sendMail({
         from: `"Billeterie Megatoit" <${process.env.EMAIL_USER}>`,
         to: user.email,
         subject: `🎟 Votre abonnement Megatoit pour la saison ${abonnement.data.season}`,
         html: `
-        <div style="text-align: center;">
-            <img src="cid:logo" alt="Logo" style="width: 150px; height: auto;" />
-        </div>
-     
-        <p style="text-align: center; font-weight: bold; font-size: 22px;">
+          <div style="text-align:center">
+            <img src="cid:logo" alt="Logo" style="width:150px;height:auto" />
+          </div>
+          <p style="text-align:center;font-weight:bold;font-size:22px">
             Commande confirmée !
-        </p>
-
-        <p style="text-align: center; font-size: 16px;">
-            Nous avons le plaisir de vous confirmer votre commande <strong>N°${order.code}</strong>.
-            Vous trouverez en pièces-jointes votre abonnement.
-        </p>
-    `,
+          </p>
+          <p style="text-align:center;font-size:16px">
+            Votre commande <strong>№${order.code}</strong> est confirmée.
+            Vous trouverez en pièce jointe votre abonnement.
+          </p>
+        `,
         attachments: [
           {
             filename: `abonnement-${subscription.code}.pdf`,
@@ -363,10 +370,10 @@ export async function generateAndSendTicketPDF(
           {
             filename: "logo-big.png",
             content: logoBytes,
-            cid: "logo", // Referenced in img src="cid:logo"
+            cid: "logo",
           },
         ],
-      }); // Optional: you can use signed URLs instead
+      });
     }
 
     return { success: true };

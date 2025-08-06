@@ -2,7 +2,7 @@ import AbonnementSection from "@/components/AbonnementSection";
 import CallToActionBanner from "@/components/CallToActionBanner";
 import HomeBanner from "@/components/HomeBanner";
 import MatchsList from "@/components/MatchsList";
-
+import Commenditaires from "@/components/Commenditaires";
 export const metadata = {
   title: "Accueil",
   description:
@@ -23,6 +23,7 @@ export default function Home() {
       <MatchsList />
       <AbonnementSection />
       <CallToActionBanner />
+      <Commenditaires />
     </div>
   );
 }

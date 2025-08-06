@@ -26,10 +26,10 @@ const SuccessContent = ({ paymentIntentId }) => {
       if (response.success) {
         setOrder(response.data);
         if (response.data.match) {
-          const { dayName, time } = formatDate(response.data.match.date);
+          const { dayName, date } = formatDate(response.data.match.date);
           setDate({
             dayName,
-            time,
+            date,
           });
         }
       }

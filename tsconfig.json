@@ -57,7 +57,12 @@
     "src/app/(protected)/checkout/page.jsx",
     "src/app/api/webhook/route.js",
     "src/app/api/payment-status/route.js",
-    "src/app/api/create-payment-intent/route.js"
+    "src/app/api/create-payment-intent/route.js",
+    "src/app/(protected)/layout.js",
+    "src/components/CallToActionBanner.js",
+    "src/components/AbonnementSection.js",
+    "src/components/HomeBanner.js",
+    "src/app/(protected)/page.js"
   ],
   "exclude": ["node_modules"]
 }
