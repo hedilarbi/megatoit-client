@@ -3,6 +3,7 @@ import CallToActionBanner from "@/components/CallToActionBanner";
 import HomeBanner from "@/components/HomeBanner";
 import MatchsList from "@/components/MatchsList";
 import Commenditaires from "@/components/Commenditaires";
+import FacebookFeed from "@/components/FacebookFeed";
 export const metadata = {
   title: "Accueil",
   description:
@@ -24,6 +25,7 @@ export default function Home() {
       <AbonnementSection />
       <CallToActionBanner />
       <Commenditaires />
+      <FacebookFeed />
     </div>
   );
 }
