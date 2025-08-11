@@ -17,6 +17,7 @@ const FacebookFeed = () => {
           "Content-Type": "application/json",
         },
       });
+      console.log("Fetched Facebook feed data:", data);
       setPosts(data.data || []);
     } catch (err) {
       console.error("Error fetching Facebook posts:", err);
