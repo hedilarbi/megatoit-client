@@ -11,9 +11,10 @@ export async function GET() {
         },
       }
     );
+
     return Response.json(data);
   } catch (error) {
-    console.error("Error fetching Facebook feed:", error);
+    console.error("Error fetching Facebook feed:", error.message);
     return Response.json({ error: error.message }, { status: 500 });
   }
 }
