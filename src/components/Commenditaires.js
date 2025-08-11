@@ -66,7 +66,11 @@ const Commenditaires = () => {
                   alt={`Logo ${i + 1}`}
                   width={160}
                   height={160}
-                  style={{ objectFit: "contain" }}
+                  style={{
+                    objectFit: "contain",
+                    width: "auto",
+                    height: "auto",
+                  }}
                 />
               </div>
             ))}

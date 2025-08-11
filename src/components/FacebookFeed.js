@@ -60,7 +60,8 @@ const FacebookFeed = () => {
                   <Image
                     src={post.full_picture}
                     alt="Post image"
-                    fill
+                    width={600}
+                    height={400}
                     className="object-cover object-center transform group-hover:scale-105 transition-transform duration-300"
                   />
                 </div>
