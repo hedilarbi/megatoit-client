@@ -46,10 +46,7 @@ const Commenditaires = () => {
   const shift = (currentIndex * 100) / visibleSlides;
 
   return (
-    <div className="mt-20">
-      <h2 className="text-center md:text-4xl text-3xl font-bebas-neue  mb-6">
-        Nos Commenditaires
-      </h2>
+    <div className=" mb-10">
       <div className="carousel-container">
         <button className="nav left" onClick={prevSlide}>
           <FaChevronLeft />
@@ -84,7 +81,7 @@ const Commenditaires = () => {
           .carousel-container {
             position: relative;
             width: 100%;
-            max-width: 1200px;
+            max-width: 1300px;
             margin: auto;
             display: flex;
             align-items: center;

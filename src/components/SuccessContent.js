@@ -201,7 +201,7 @@ const SuccessContent = ({ paymentIntentId }) => {
         <div className="flex justify-center items-center gap-10 mt-8 ">
           <div className="flex gap-2 items-center text-[#0CA5E9]">
             <IoMail size={20} />
-            <p className="font-lato font-semibold">Support@megatoit.com</p>
+            <p className="font-lato font-semibold">support@megatoit.com</p>
           </div>
           <div className="flex gap-2 items-center text-[#0CA5E9]">
             <FaPhoneAlt size={20} />

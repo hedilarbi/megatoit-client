@@ -52,7 +52,7 @@
     "src/components/SuccessContent.js",
     "src/app/(protected)/commande-reussi/page.js",
     "src/components/MatchsContent.js",
-    "src/app/(protected)/matchs/[Id]/page.js",
+    "src/app/(protected)/calendrier/[Id]/page.jse.js",
     "src/components/CheckoutContent.jsx",
     "src/app/(protected)/checkout/page.jsx",
     "src/app/api/webhook/route.js",

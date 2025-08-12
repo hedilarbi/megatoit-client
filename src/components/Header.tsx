@@ -36,7 +36,7 @@ const Header = () => {
       </div>
 
       {/* Links for desktop */}
-      <div className="hidden md:flex flex-grow justify-center gap-8  font-lato">
+      <div className="hidden md:flex flex-grow justify-center gap-8  font-bebas-neue text-lg">
         <Link
           href="/"
           className={`text-black hover:underline  ${
@@ -46,20 +46,36 @@ const Header = () => {
           Accueil
         </Link>
         <Link
-          href="/matchs"
+          href="/calendrier"
           className={`text-black hover:underline ${
-            pathname === "/matchs" && "underline"
+            pathname === "/calendrier" && "underline"
           } `}
         >
-          Matchs
+          Calendrier
         </Link>
         <Link
-          href="/abonnements"
+          href="/abonnement-saison"
           className={`text-black hover:underline ${
-            pathname === "/abonnements" && "underline"
+            pathname === "/abonnement-saison" && "underline"
           } `}
         >
-          Abonnements
+          Abonnement saison
+        </Link>
+        <Link
+          href="/partenaires"
+          className={`text-black hover:underline ${
+            pathname === "/partenaires" && "underline"
+          } `}
+        >
+          Nos partenaires
+        </Link>
+        <Link
+          href="/notre-mission"
+          className={`text-black hover:underline ${
+            pathname === "/notre-mission" && "underline"
+          } `}
+        >
+          Notre mission
         </Link>
         <Link
           href="/contact"
@@ -68,14 +84,6 @@ const Header = () => {
           } `}
         >
           Contact
-        </Link>
-        <Link
-          href="/a-propos"
-          className={`text-black hover:underline ${
-            pathname === "/a-propos" && "underline"
-          } `}
-        >
-          À propos
         </Link>
       </div>
 

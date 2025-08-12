@@ -64,7 +64,7 @@ const MatchsList = () => {
   return (
     <section className="md:px-8 px-4 w-full py-12">
       <h2 className="font-bebas-neue md:text-4xl text-2xl text-center">
-        Prochains matchs
+        Prochains 3 matchs à venir
       </h2>
       <p className="font-lato text-[#7F7F7F] text-center md:text-lg text-base mt-2">
         Ne manquez pas l&apos;action – Réservez vos places dès maintenant !
@@ -94,15 +94,27 @@ const MatchsList = () => {
                     </p>
                   </div>
                   <div className="px-4 mt-6">
-                    <div className="flex justify-between items-center ">
-                      <div className="flex items-center gap-2">
+                    <div
+                      className={`flex justify-between items-center ${
+                        match.type !== "Domicile" ? "flex-row-reverse" : ""
+                      }`}
+                    >
+                      <div
+                        className={`flex items-center gap-2 ${
+                          match.type !== "Domicile" ? "flex-row-reverse" : ""
+                        }`}
+                      >
                         <Image src={Logo} alt="Logo" className="h-12 w-12 " />
                         <h3 className="font-bebas-neue text-xl text-black">
                           Megatoit
                         </h3>
                       </div>
                       <p className="font-bebas-neue text-xl text-black">VS</p>
-                      <div className="flex items-center gap-2">
+                      <div
+                        className={`flex items-center gap-2 ${
+                          match.type !== "Domicile" ? "flex-row-reverse" : ""
+                        }`}
+                      >
                         <h3 className="font-bebas-neue text-xl text-black">
                           {match.opponent.name}
                         </h3>
@@ -123,33 +135,39 @@ const MatchsList = () => {
                       {match.place}
                     </p>
                     <p className="font-lato text-black rounded-md bg-[#D9D9D9] px-4 py-1 md:text-base text-sm">
-                      Domicile
+                      {match.type}
                     </p>
                   </div>
                   <div className="mt-6 flex justify-between items-center px-4">
-                    <p className="font-bebas-neue text-black text-xl">
-                      $ {match.price.toFixed(2)}
-                    </p>
-                    <p className="font-lato text-black  text-base">
-                      places disponibles: {match.availableSeats}
-                    </p>
+                    {match.type === "Domicile" && (
+                      <p className="font-bebas-neue text-black text-xl">
+                        $ {match.price.toFixed(2)}
+                      </p>
+                    )}
+                    {match.category !== "Ligue" && (
+                      <p className="font-lato text-gray-600 text-sm md:text-base">
+                        {match.category}
+                      </p>
+                    )}
                   </div>
-                  <Link
-                    href={`/matchs/${match.id}`}
-                    className="block text-center bg-black text-white font-bebas-neue py-2 rounded-md mx-4 hover:bg-gray-800 transition-colors duration-300 mt-8 mb-6"
-                  >
-                    Réserver vos billets
-                  </Link>
+                  {match.type === "Domicile" && (
+                    <Link
+                      href={`/calendrier/${match.id}`}
+                      className="block text-center bg-black text-white font-bebas-neue py-2 rounded-md mx-4 hover:bg-gray-800 transition-colors duration-300 mt-8 mb-6"
+                    >
+                      Réserver vos billets
+                    </Link>
+                  )}
                 </div>
               );
             })}
           </div>
           <div className="flex justify-center mt-8">
             <Link
-              href={"/matchs"}
+              href={"/calendrier"}
               className=" text-center font-bebas-neue text-xl py-3 px-12 text-black border-black  border rounded-md "
             >
-              <span>Voir tous les matchs</span>
+              <span>Voir le calendrier complet</span>
             </Link>
           </div>
         </div>

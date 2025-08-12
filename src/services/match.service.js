@@ -34,6 +34,26 @@ export const getAllMatches = async () => {
   }
 };
 
+export const getAllMatchsList = async () => {
+  try {
+    const matchsCollection = collection(db, "matchs");
+
+    const q = query(matchsCollection);
+    const matchsSnapshot = await getDocs(q);
+    const matchs = matchsSnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+    return { success: true, data: matchs };
+  } catch (error) {
+    console.error("Erreur lors de la récupération des matchs :", error);
+    return {
+      success: false,
+      error: "Une erreur s'est produite lors de la récupération des matchs",
+    };
+  }
+};
+
 export const getMatchByUid = async (uid) => {
   try {
     const matchDoc = await getDoc(doc(db, "matchs", uid));

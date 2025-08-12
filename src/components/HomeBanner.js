@@ -7,7 +7,7 @@ const HomeBanner = () => {
     <section className={styles.heroBanner}>
       <div>
         <h1 className="font-bebas-neue md:text-5xl text-3xl text-white text-center">
-          Billeterie officielle <br /> megatoit hockey
+          Billeterie en ligne
         </h1>
         <p className="text-white text-center  font-lato md:text-lg text-base mt-4 font-semibold w-[80%] mx-auto">
           Plongez dans l’intensité du hockey professionnel. Obtenez vos billets
@@ -15,19 +15,19 @@ const HomeBanner = () => {
         </p>
         <div className="flex flex-col md:flex-row  md:gap-8 gap-4 md:justify-center items-center  mt-8">
           <Link
-            href="/matchs"
+            href="/calendrier"
             className=" border border-white hover:border-black text-black hover:text-white px-10 text-lg py-1 rounded-md bg-white hover:bg-black  transition-colors   "
           >
             <span className="font-bebas-neue text-center">
-              Acheter des billets
+              Billets de match
             </span>
           </Link>
           <Link
-            href="/abonnements"
+            href="/abonnement-saison"
             className=" border border-white text-white hover:text-black px-10 text-lg py-1 rounded-md bg-black hover:bg-white  transition-colors  "
           >
             <span className="font-bebas-neue text-center">
-              Abonnement de saison
+              Abonnement de saison 2025.26
             </span>
           </Link>
         </div>

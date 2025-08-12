@@ -4,7 +4,7 @@ import React from "react";
 import Team from "@/assets/team.png"; // Adjust the path as necessary
 import { FaHandRock, FaUsers } from "react-icons/fa";
 import { GiTrophyCup } from "react-icons/gi";
-import Avatar from "@/assets/avatar-3.jpg"; // Adjust the path as necessary
+
 import Link from "next/link";
 import { BsFillTicketPerforatedFill } from "react-icons/bs";
 import { IoDiamond } from "react-icons/io5";
@@ -15,20 +15,17 @@ const page = () => {
       <div className="mt-14 flex md:flex-row flex-col items-center justify-between gap-4 w-full md:w-[95%] mx-auto px-4">
         <div className="md:w-1/2 w-full">
           <h2 className="font-bebas-neue md:text-5xl text-3xl text-black ">
-            notre histoire
+            Mission de l’équipe – Le Mégatoit de Trois-Rivières
           </h2>
           <p className="mt-4 text-gray-700 font-lato text-lg font-semibold">
-            Fondée en 1995, l&apos;équipe Megatoit est née de la passion de
-            jeunes hockeyeurs déterminés à repousser les limites du sport.
-            Depuis nos débuts modestes dans une petite patinoire locale, nous
-            avons gravi les échelons pour devenir l&apos;une des équipes les
-            plus respectées de la ligue.
-          </p>
-          <p className="mt-4 text-gray-700 font-lato text-lg font-semibold">
-            Notre nom &quot;Megatoit&quot; symbolise la force, la détermination
-            et l&apos;unité. Comme un toit solide qui protège, notre équipe
-            forme un bouclier impénétrable sur la glace, défendant nos couleurs
-            avec fierté et honneur.
+            Offrir un hockey compétitif, robuste, spectaculaire et passionnant
+            au sein de la LHSAAAQ, en représentant fièrement la ville de
+            Trois-Rivières et ses partisans. Soutenus par nos précieux
+            partenaires et commanditaires, nous créons un environnement où
+            l’excellence sportive et le respect se traduisent autant sur la
+            glace que dans la communauté. Ensemble, faisons rayonner notre
+            équipe et notre région, tout en offrant une vitrine dynamique à ceux
+            qui croient en notre succès. Bonne saison 2025 à tous!
           </p>
         </div>
         <div>
@@ -87,13 +84,13 @@ const page = () => {
         </div>
       </div>
       <div className="mt-14   py-8 px-6  w-full md:w-[95%] mx-auto">
-        <h2 className="font-bebas-neue md:text-5xl text-3xl text-center ">
+        {/* <h2 className="font-bebas-neue md:text-5xl text-3xl text-center ">
           Notre Équipe
-        </h2>
-        <p className="font-semibold font-lato text-lg mt-4 text-center">
+        </h2> */}
+        {/* <p className="font-semibold font-lato text-lg mt-4 text-center">
           Rencontrez les personnes qui font battre le cœur de Megatoit
-        </p>
-        <div className="mt-10 flex md:flex-row flex-col md:px-20 justify-center items-center gap-8">
+        </p> */}
+        {/* <div className="mt-10 flex md:flex-row flex-col md:px-20 justify-center items-center gap-8">
           <div className="flex-1 flex flex-col items-center bg-[#f3f4f6] px-4 py-8 rounded-md">
             <div className="bg-white flex w-30 h-30 rounded-full justify-center items-center">
               <Image
@@ -157,7 +154,7 @@ const page = () => {
               notre équipe avec passion et expertise.
             </p>
           </div>
-        </div>
+        </div> */}
         <div className="mt-14 bg-black text-white py-8 px-6  w-full md:w-[95%] mx-auto">
           <h2 className="font-bebas-neue md:text-5xl text-3xl text-center ">
             Rejoignez l&apos;Aventure Megatoit
@@ -168,11 +165,11 @@ const page = () => {
           </p>
           <div className="mt-10 flex md:flex-row flex-col md:px-20 justify-center items-center gap-8">
             <Link
-              href={"/matchs"}
+              href={"/calendrier"}
               className="bg-black border border-white rounded-md  flex justify-center items-center text-white font-bebas-neue text-xl px-6 py-2  transition-colors gap-3"
             >
               <BsFillTicketPerforatedFill />
-              <span>Acheter des tickets</span>
+              <span>Acheter des billets</span>
             </Link>
             <Link
               href={"/abonnements"}

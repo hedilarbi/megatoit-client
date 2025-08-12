@@ -1,5 +1,5 @@
 "use client";
-import { getAllMatches } from "@/services/match.service";
+import { getAllMatchsList } from "@/services/match.service";
 
 import React, { useEffect, useState } from "react";
 import Spinner from "./spinner/Spinner";
@@ -9,17 +9,18 @@ import { MdPinDrop } from "react-icons/md";
 import Link from "next/link";
 const MatchsContent = () => {
   const [matchs, setMatchs] = useState([]);
+  const [matchsList, setMatchsList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  const [type, setType] = useState("Tous");
   const fetchMatchs = async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await getAllMatches();
+      const response = await getAllMatchsList();
 
       if (response.success) {
-        setMatchs(response.data);
+        setMatchsList(response.data);
       } else {
         setError(response.error);
         console.error("Error fetching matchs:", response.error);
@@ -59,8 +60,17 @@ const MatchsContent = () => {
     fetchMatchs();
   }, []);
 
+  useEffect(() => {
+    if (type === "Tous") {
+      setMatchs(matchsList);
+    } else {
+      const filteredMatchs = matchsList.filter((match) => match.type === type);
+      setMatchs(filteredMatchs);
+    }
+  }, [type, matchsList]);
+
   return (
-    <section className="w-[95%] mx-auto bg-[#E7E7E7] p-4">
+    <section className="w-[95%] mx-auto bg-[#E7E7E7] ">
       {loading ? (
         <div className="flex justify-center items-center h-64">
           <Spinner />
@@ -71,7 +81,32 @@ const MatchsContent = () => {
         </div>
       ) : (
         <div>
-          <div className="my-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="bg-white flex items-center px-4 py-4 border border-black font-bebas-neue text-lg">
+            <button
+              onClick={() => setType("Tous")}
+              className={`cursor-pointer ${type === "Tous" ? "underline" : ""}`}
+            >
+              Tous les matchs
+            </button>
+
+            <button
+              className={`ml-4 cursor-pointer ${
+                type === "Domicile" ? "underline" : ""
+              }`}
+              onClick={() => setType("Domicile")}
+            >
+              Matchs à domicile
+            </button>
+            <button
+              className={`ml-4 cursor-pointer ${
+                type === "Éxtérieur" ? "underline" : ""
+              }`}
+              onClick={() => setType("Éxtérieur")}
+            >
+              Matchs à l&apos;extérieur
+            </button>
+          </div>
+          <div className="my-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4 pb-4">
             {matchs.map((match) => {
               const { dayName, date } = formatDate(match.date);
               return (
@@ -85,15 +120,27 @@ const MatchsContent = () => {
                     </p>
                   </div>
                   <div className="px-4 mt-6">
-                    <div className="flex justify-between items-center ">
-                      <div className="flex items-center gap-2">
+                    <div
+                      className={`flex justify-between items-center ${
+                        match.type !== "Domicile" ? "flex-row-reverse" : ""
+                      }`}
+                    >
+                      <div
+                        className={`flex items-center gap-2 ${
+                          match.type !== "Domicile" ? "flex-row-reverse" : ""
+                        }`}
+                      >
                         <Image src={Logo} alt="Logo" className="h-12 w-12 " />
                         <h3 className="font-bebas-neue text-xl text-black">
                           Megatoit
                         </h3>
                       </div>
                       <p className="font-bebas-neue text-xl text-black">VS</p>
-                      <div className="flex items-center gap-2">
+                      <div
+                        className={`flex items-center gap-2 ${
+                          match.type !== "Domicile" ? "flex-row-reverse" : ""
+                        }`}
+                      >
                         <h3 className="font-bebas-neue text-xl text-black">
                           {match.opponent.name}
                         </h3>
@@ -114,23 +161,29 @@ const MatchsContent = () => {
                       {match.place}
                     </p>
                     <p className="font-lato text-black rounded-md bg-[#D9D9D9] px-4 py-1 md:text-base text-sm">
-                      Domicile
+                      {match.type}
                     </p>
                   </div>
                   <div className="mt-6 flex justify-between items-center px-4">
-                    <p className="font-bebas-neue text-black text-xl">
-                      $ {match.price.toFixed(2)}
-                    </p>
-                    <p className="font-lato text-black  text-base">
-                      places disponibles: {match.availableSeats}
-                    </p>
+                    {match.type === "Domicile" && (
+                      <p className="font-bebas-neue text-black text-xl">
+                        $ {match.price.toFixed(2)}
+                      </p>
+                    )}
+                    {match.category !== "Ligue" && (
+                      <p className="font-lato text-gray-600 text-sm md:text-base">
+                        {match.category}
+                      </p>
+                    )}
                   </div>
-                  <Link
-                    href={`/matchs/${match.id}`}
-                    className="block text-center bg-black text-white font-bebas-neue py-2 rounded-md mx-4 hover:bg-gray-800 transition-colors duration-300 mt-8 mb-6"
-                  >
-                    Réserver vos billets
-                  </Link>
+                  {match.type === "Domicile" && (
+                    <Link
+                      href={`/calendrier/${match.id}`}
+                      className="block text-center bg-black text-white font-bebas-neue py-2 rounded-md mx-4 hover:bg-gray-800 transition-colors duration-300 mt-8 mb-6"
+                    >
+                      Réserver vos billets
+                    </Link>
+                  )}
                 </div>
               );
             })}

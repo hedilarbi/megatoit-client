@@ -31,22 +31,22 @@ const SideBar = ({
           Accueil
         </Link>
         <Link
-          href="/matchs"
+          href="/calendrier"
           className={`text-black hover:underline ${
-            pathname === "/matchs" && "underline"
+            pathname === "/calendrier" && "underline"
           } `}
           onClick={toggleSidebar}
         >
-          Matchs
+          Calendrier
         </Link>
         <Link
-          href="/abonnements"
+          href="/abonnement-saison"
           className={`text-black hover:underline ${
-            pathname === "/abonnements" && "underline"
+            pathname === "/abonnement-saison" && "underline"
           } `}
           onClick={toggleSidebar}
         >
-          Abonnements
+          Abonnement saison
         </Link>
         <Link
           href="/contact"
@@ -58,13 +58,13 @@ const SideBar = ({
           Contact
         </Link>
         <Link
-          href="/a-propos"
+          href="/notre-mission"
           className={`text-black hover:underline ${
-            pathname === "/a-propos" && "underline"
+            pathname === "/notre-mission" && "underline"
           } `}
           onClick={toggleSidebar}
         >
-          À propos
+          Notre mission
         </Link>
       </div>
 

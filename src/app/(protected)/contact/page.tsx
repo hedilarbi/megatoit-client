@@ -24,7 +24,7 @@ const page = () => {
               Email
             </h3>
             <p className="text-center font-lato mt-3 font-semibold">
-              contact@megatoit.com
+              support@megatoit.com
             </p>
           </div>
           <div className="flex-1 flex w-full flex-col items-center bg-[#f3f4f6] px-4 py-8 rounded-md">

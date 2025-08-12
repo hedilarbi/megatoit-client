@@ -6,7 +6,7 @@ const AbonnementSection = () => {
   return (
     <section className={styles.AbonnementSection}>
       <h2 className="font-bebas-neue md:text-4xl text-3xl text-center text-white">
-        Abonement de season
+        Abonement de season 2025.26
       </h2>
       <p className="font-lato  text-center md:text-lg text-base mt-2 text-white">
         Ne ratez pas l’intensité – Procurez-vous votre pass season dès

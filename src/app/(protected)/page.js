@@ -22,9 +22,9 @@ export default function Home() {
     <div className="pb-20">
       <HomeBanner />
       <MatchsList />
+      <Commenditaires />
       <AbonnementSection />
       <CallToActionBanner />
-      <Commenditaires />
       <FacebookFeed />
     </div>
   );
