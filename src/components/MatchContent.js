@@ -221,14 +221,14 @@ const MatchContent = ({ id }) => {
                         className="bg-black text-white font-bebas-neue py-2 px-4 rounded-md hover:bg-gray-800 transition-colors w-full text-lg cursor-pointer"
                         onClick={handleTicketReservation}
                       >
-                        Réserver vos billets
+                        Achetez vos billets
                       </button>
                     ) : (
                       <button
                         className="bg-black text-white font-bebas-neue py-2 px-4 rounded-md hover:bg-gray-800 transition-colors w-full text-lg cursor-pointer"
                         onClick={() => setShowAuthRequiredModal(true)}
                       >
-                        Réserver vos billets
+                        Achetez vos billets
                       </button>
                     )}
                   </div>

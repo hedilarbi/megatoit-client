@@ -6,7 +6,7 @@ import { FaFacebook } from "react-icons/fa";
 const Footer = () => {
   return (
     <div>
-      <div className="grid grid-cols-2 md:grid-cols-6 gap-8 bg-white text-black py-14 px-4 md:px-16 items-center">
+      <div className="grid grid-cols-3 md:grid-cols-6 gap-8 bg-black text-white py-14 px-4 md:px-16 items-center">
         <Image
           src="/commenditaires/GroupeCTR.png"
           alt="Groupe CTR"
@@ -43,7 +43,7 @@ const Footer = () => {
           height={200}
         />
         <Image
-          src="/commenditaires/GroupeCTR.png"
+          src="/commenditaires/SPHERE.png"
           alt="Groupe CTR"
           className=""
           width={200}
@@ -60,10 +60,6 @@ const Footer = () => {
               width={48}
               height={48}
             />
-            <p className="font-lato text-black ">
-              Équipe professionnelle de hockey qui électrise la glace depuis
-              1995.
-            </p>
           </div>
           <div>
             <h3 className="font-bebas-neue text-black text-2xl  mb-4">

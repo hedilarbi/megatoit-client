@@ -59,7 +59,7 @@ const AbonnementContent = () => {
                 className="font-bebas-neue rounded-md bg-black text-white py-1 px-6 text-xl text-center cursor-pointer"
                 onClick={() => handleBuy(abonnement.id)}
               >
-                Acheter l&apos;abonnement
+                Achetez l&apos;abonnement
               </button>
             </div>
           ))}

@@ -64,11 +64,8 @@ const MatchsList = () => {
   return (
     <section className="md:px-8 px-4 w-full py-12">
       <h2 className="font-bebas-neue md:text-4xl text-2xl text-center">
-        Prochains 3 matchs à venir
+        MATCH À VENIR
       </h2>
-      <p className="font-lato text-[#7F7F7F] text-center md:text-lg text-base mt-2">
-        Ne manquez pas l&apos;action – Réservez vos places dès maintenant !
-      </p>
 
       {loading ? (
         <div className="flex justify-center items-center h-64">
@@ -89,7 +86,7 @@ const MatchsList = () => {
                   className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
                 >
                   <div className="bg-black py-4 rounded-t-md">
-                    <p className="font-lato text-center text-white font-semibold ">
+                    <p className="font-lato text-center text-white font-semibold capitalize ">
                       {dayName}, {date}
                     </p>
                   </div>
@@ -155,7 +152,7 @@ const MatchsList = () => {
                       href={`/calendrier/${match.id}`}
                       className="block text-center bg-black text-white font-bebas-neue py-2 rounded-md mx-4 hover:bg-gray-800 transition-colors duration-300 mt-8 mb-6"
                     >
-                      Réserver vos billets
+                      Achetez vos billets
                     </Link>
                   )}
                 </div>

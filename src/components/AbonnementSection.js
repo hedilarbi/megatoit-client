@@ -6,20 +6,10 @@ const AbonnementSection = () => {
   return (
     <section className={styles.AbonnementSection}>
       <h2 className="font-bebas-neue md:text-4xl text-3xl text-center text-white">
-        Abonement de season 2025.26
+        Abonement de season 2025-26
       </h2>
-      <p className="font-lato  text-center md:text-lg text-base mt-2 text-white">
-        Ne ratez pas l’intensité – Procurez-vous votre pass season dès
-        aujourd’hui !
-      </p>
-      <div className="bg-[#101827] border-2 border-white mt-8 mx-auto md:w-1/3 w-full rounded-md py-6 px-8 ">
-        <h3 className="text-center font-bebas-neue text-2xl text-white">
-          Billet de saison
-        </h3>
-        <p className="text-center text-white text-lg mt-2 font-lato">
-          Pour les fans ultimes
-        </p>
 
+      <div className="bg-[#101827] border-2 border-white mt-8 mx-auto md:w-1/3 w-full rounded-md py-6 px-8 ">
         <h4 className="text-white text-2xl mt-10 font-semibold ">
           $160 / Saison
         </h4>
@@ -29,7 +19,7 @@ const AbonnementSection = () => {
           13 matchs de saison régulière
         </p>
         <p className="font-lato text-white text-lg mt-4">
-          <FaCheck className="inline text-white mr-2" />1 match de hors-concours
+          <FaCheck className="inline text-white mr-2" />1 match présaison
         </p>
         <p className="font-lato text-white text-lg mt-4">
           <FaCheck className="inline text-white mr-2" />1 consomation gratuite

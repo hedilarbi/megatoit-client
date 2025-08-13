@@ -104,7 +104,7 @@ const InscriptionPage = () => {
             Inscription
           </h1>
           <p className="mt-2 font-lato text-base md:text-xl">
-            Créer un compte pour réserver vos tickets
+            Créer un compte pour acheter vos tickets
           </p>
           {error && <p className="text-red-500 mb-4">{error}</p>}
           <form onSubmit={handleSubmit}>

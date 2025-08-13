@@ -2,7 +2,7 @@
   background-image: url("/HeroBanner.png");
   background-size: cover;
   background-position: center;
-  height: calc(90vh - 150px);
+  height: 50vh;
   width: 100%;
   position: relative;
   display: flex;
