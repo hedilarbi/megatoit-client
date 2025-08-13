@@ -122,12 +122,12 @@ const MatchsContent = () => {
                   <div className="px-4 mt-6">
                     <div
                       className={`flex justify-between items-center ${
-                        match.type !== "Domicile" ? "flex-row-reverse" : ""
+                        match.type === "Domicile" ? "flex-row-reverse" : ""
                       }`}
                     >
                       <div
                         className={`flex items-center gap-2 ${
-                          match.type !== "Domicile" ? "flex-row-reverse" : ""
+                          match.type === "Domicile" ? "flex-row-reverse" : ""
                         }`}
                       >
                         <Image src={Logo} alt="Logo" className="h-12 w-12 " />
@@ -138,7 +138,7 @@ const MatchsContent = () => {
                       <p className="font-bebas-neue text-xl text-black">VS</p>
                       <div
                         className={`flex items-center gap-2 ${
-                          match.type !== "Domicile" ? "flex-row-reverse" : ""
+                          match.type === "Domicile" ? "flex-row-reverse" : ""
                         }`}
                       >
                         <h3 className="font-bebas-neue text-xl text-black">

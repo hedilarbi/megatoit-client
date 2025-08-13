@@ -169,14 +169,14 @@ const page = () => {
               className="bg-black border border-white rounded-md  flex justify-center items-center text-white font-bebas-neue text-xl px-6 py-2  transition-colors gap-3"
             >
               <BsFillTicketPerforatedFill />
-              <span>Acheter des billets</span>
+              <span>Achetez des billets</span>
             </Link>
             <Link
               href={"/abonnements"}
               className="bg-white border border-black rounded-md  flex justify-center items-center text-black font-bebas-neue text-xl px-6 py-2  transition-colors gap-3"
             >
               <IoDiamond />
-              <span>Acheter un abonnement</span>
+              <span>Achetez un abonnement</span>
             </Link>
           </div>
         </div>

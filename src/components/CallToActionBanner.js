@@ -16,7 +16,7 @@ const CallToActionBanner = () => {
           href={"/calendrier"}
           className="mt-8  text-center bg-white text-black text-xl px-6 py-2 rounded-md hover:bg-gray-200 transition-colors"
         >
-          <span className="font-bebas-neue">Acheter des billets</span>
+          <span className="font-bebas-neue">Achetez des billets</span>
         </Link>
       </div>
     </section>

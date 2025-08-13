@@ -4,7 +4,7 @@ import { auth } from "@/lib/firebase";
 import { signOut } from "firebase/auth";
 import Link from "next/link";
 import React from "react";
-import Logo from "@/assets/logo-small.png"; // Adjust the path as necessary
+import Logo from "@/assets/logo.png"; // Adjust the path as necessary
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { RiMenu3Fill } from "react-icons/ri";
@@ -59,7 +59,7 @@ const Header = () => {
             pathname === "/abonnement-saison" && "underline"
           } `}
         >
-          Abonnement saison
+          Abonnement de saison
         </Link>
         <Link
           href="/partenaires"

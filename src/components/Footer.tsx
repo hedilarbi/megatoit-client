@@ -1,66 +1,16 @@
 import Image from "next/image";
 import React from "react";
-import Logo from "@/assets/logo-small.png"; // Adjust the path as necessary
+import Logo from "@/assets/logo.png"; // Adjust the path as necessary
 import Link from "next/link";
 import { FaFacebook } from "react-icons/fa";
 const Footer = () => {
   return (
     <div>
-      <div className="grid grid-cols-3 md:grid-cols-6 gap-8 bg-black text-white py-14 px-4 md:px-16 items-center">
-        <Image
-          src="/commenditaires/GroupeCTR.png"
-          alt="Groupe CTR"
-          className=""
-          width={200}
-          height={200}
-        />
-        <Image
-          src="/commenditaires/immo3r.jpg"
-          alt="Groupe CTR"
-          className=""
-          width={200}
-          height={200}
-        />
-        <Image
-          src="/commenditaires/MaisonDebauche.png"
-          alt="Groupe CTR"
-          className=""
-          width={200}
-          height={200}
-        />
-        <Image
-          src="/commenditaires/HE.png"
-          alt="Groupe CTR"
-          className=""
-          width={200}
-          height={200}
-        />
-        <Image
-          src="/commenditaires/Mega-toit.png"
-          alt="Groupe CTR"
-          className=""
-          width={200}
-          height={200}
-        />
-        <Image
-          src="/commenditaires/SPHERE.png"
-          alt="Groupe CTR"
-          className=""
-          width={200}
-          height={200}
-        />
-      </div>
       <div className="bg-[#D7D7D7]  md:py-8 md:px-20 px-10 py-8   ">
         <div className="md:flex justify-between flex flex-col md:flex-row gap-8">
-          <div>
-            <Image
-              src={Logo}
-              alt="Logo"
-              className="h-20 w-auto mb-4"
-              width={48}
-              height={48}
-            />
-          </div>
+          <Link href="/">
+            <Image src={Logo} alt="Logo" className="h-20 w-auto mb-4" />
+          </Link>
           <div>
             <h3 className="font-bebas-neue text-black text-2xl  mb-4">
               Liens utiles
@@ -119,13 +69,7 @@ const Footer = () => {
               Suivez-nous
             </h3>
             <div className="flex gap-4">
-              <Link href="https://www.facebook.com/">
-                <FaFacebook size={24} color="black" />
-              </Link>
-              <Link href="https://www.facebook.com/">
-                <FaFacebook size={24} color="black" />
-              </Link>
-              <Link href="https://www.facebook.com/">
+              <Link href="https://www.facebook.com/profile.php?id=61574831637274&locale=fr_FR">
                 <FaFacebook size={24} color="black" />
               </Link>
             </div>

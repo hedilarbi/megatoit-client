@@ -4,3 +4,15 @@
   --font-lato: var(--font-lato);
   --font-bebas-neue: var(--bebas-neue-font);
 }
+
+@layer utilities {
+  /* Hide scrollbar for Chrome, Safari, Opera */
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+  /* Hide scrollbar for Firefox & old Edge */
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}

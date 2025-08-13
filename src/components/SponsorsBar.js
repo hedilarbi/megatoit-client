@@ -1,0 +1,82 @@
+"use client";
+import Image from "next/image";
+import { useEffect, useRef } from "react";
+
+const LOGOS = [
+  { src: "/commenditaires/GroupeCTR.png", alt: "Groupe CTR" },
+  { src: "/commenditaires/immo3r.jpg", alt: "Immo3R" },
+  { src: "/commenditaires/MaisonDebauche.png", alt: "Maison Debauche" },
+  { src: "/commenditaires/HE.png", alt: "HE" },
+  { src: "/commenditaires/Mega-toit.png", alt: "Mega Toit" },
+  { src: "/commenditaires/SPHERE.png", alt: "Sphere" },
+];
+
+export default function SponsorsBar() {
+  const boxRef = useRef(null);
+  useEffect(() => {
+    const box = boxRef.current;
+    if (box) {
+      box.scrollLeft = 0; // Reset scroll position
+      const scrollWidth = box.scrollWidth - box.clientWidth;
+      let scrollAmount = 0;
+      let direction = 1; // 1 for right, -1 for left
+      const scrollStep = 1; // Adjust this value for speed
+      const scrollInterval = setInterval(() => {
+        if (direction === 1) {
+          if (scrollAmount < scrollWidth) {
+            box.scrollLeft += scrollStep;
+            scrollAmount += scrollStep;
+          } else {
+            direction = -1;
+          }
+        } else {
+          if (scrollAmount > 0) {
+            box.scrollLeft -= scrollStep;
+            scrollAmount -= scrollStep;
+          } else {
+            direction = 1;
+          }
+        }
+      }, 20); // Adjust this value for speed
+      return () => clearInterval(scrollInterval); // Cleanup on unmount
+    }
+  }, []);
+  return (
+    <div className="fixed bottom-0 inset-x-0 z-30 bg-black text-white py-2">
+      {/* Mobile: auto ping-pong with pauses */}
+      <div
+        className="md:hidden  overflow-x-auto scrollbar-none  px-4"
+        ref={boxRef}
+      >
+        <div className=" flex gap-3  ">
+          {LOGOS.map((logo) => (
+            <Image
+              key={logo.src}
+              src={logo.src}
+              alt={logo.alt}
+              className="h-14 w-auto"
+              width={56}
+              height={56}
+              priority
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Desktop: 6 logos fixed */}
+      <div className="hidden md:flex justify-between items-center px-10 py-4">
+        {LOGOS.map((logo) => (
+          <Image
+            key={logo.src}
+            src={logo.src}
+            alt={logo.alt}
+            className="h-14 w-auto"
+            width={56}
+            height={56}
+            priority
+          />
+        ))}
+      </div>
+    </div>
+  );
+}

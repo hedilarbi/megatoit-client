@@ -7,7 +7,7 @@ const HomeBanner = () => {
     <section className={styles.heroBanner}>
       <div>
         <h1 className="font-bebas-neue md:text-5xl text-3xl text-white text-center">
-          Billeterie en ligne
+          BILLETTERIE en ligne
         </h1>
 
         <div className="flex flex-col md:flex-row  md:gap-8 gap-4 md:justify-center items-center  mt-8">

@@ -259,7 +259,7 @@ export async function generateAndSendTicketPDF(
       });
 
       await transporter.sendMail({
-        from: `"Billeterie Megatoit" <${process.env.EMAIL_USER}>`,
+        from: `"Billetterie Megatoit" <${process.env.EMAIL_USER}>`,
         to: user.email,
         subject: `🎟 ${
           tickets.length > 1 ? "Vos billets" : "Votre billet"
@@ -417,7 +417,7 @@ export async function generateAndSendTicketPDF(
       });
 
       await transporter.sendMail({
-        from: `"Billeterie Megatoit" <${process.env.EMAIL_USER}>`,
+        from: `"Billetterie Megatoit" <${process.env.EMAIL_USER}>`,
         to: user.email,
         subject: `🎟 Votre abonnement Megatoit pour la saison ${abonnement.data.season}`,
         html: `
