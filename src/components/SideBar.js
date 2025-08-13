@@ -90,7 +90,7 @@ const SideBar = ({
             Profil
           </Link>
           <button onClick={handleLogout} className={`text-black text-left`}>
-            Déconnexion
+            Se déconnecter
           </button>
         </div>
       ) : (
@@ -102,7 +102,7 @@ const SideBar = ({
             } `}
             onClick={toggleSidebar}
           >
-            Connexion
+            Se connecter
           </Link>
           <Link
             href="/inscription"
@@ -111,7 +111,7 @@ const SideBar = ({
             } `}
             onClick={toggleSidebar}
           >
-            Inscription
+            S&apos;inscrire
           </Link>
         </div>
       )}

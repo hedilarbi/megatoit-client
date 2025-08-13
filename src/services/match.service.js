@@ -38,7 +38,7 @@ export const getAllMatchsList = async () => {
   try {
     const matchsCollection = collection(db, "matchs");
 
-    const q = query(matchsCollection);
+    const q = query(matchsCollection, orderBy("date", "asc"));
     const matchsSnapshot = await getDocs(q);
     const matchs = matchsSnapshot.docs.map((doc) => ({
       id: doc.id,

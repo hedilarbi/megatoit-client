@@ -5,6 +5,7 @@ import {
   createUserWithEmailAndPassword,
   signInWithPopup,
   GoogleAuthProvider,
+  sendEmailVerification,
 } from "firebase/auth";
 import { createUserDocument } from "@/services/user.service";
 import { auth } from "@/lib/firebase";
@@ -20,6 +21,7 @@ const InscriptionPage = () => {
     password: "",
     userName: "",
     phone: "",
+    dateOfBirth: "",
   });
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -33,7 +35,7 @@ const InscriptionPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const { email, password, userName, phone } = formData;
+    const { email, password, userName, phone, dateOfBirth } = formData;
 
     try {
       if (password !== confirmPassword) {
@@ -47,17 +49,18 @@ const InscriptionPage = () => {
         email,
         password
       );
-      //const user = userCredential.user;
-
-      // Send verification email
-      // await sendEmailVerification(user);
       await createUserDocument(userCredential.user.uid, {
         email,
         userName,
         phone,
         type: "client", // Default type, can be changed later
+        dateOfBirth,
         createdAt: new Date(),
       });
+      const user = userCredential.user;
+
+      // Send verification email
+      await sendEmailVerification(user);
 
       router.push("/"); // Redirect to home or another page
     } catch (err) {
@@ -98,22 +101,22 @@ const InscriptionPage = () => {
       <div className="hidden  w-1/2 md:flex justify-center items-center bg-white shadow-2xl h-screen ">
         <Image src={Logo} alt="Logo" className="h-48 w-auto" />
       </div>
-      <div className="flex items-center p-8 rounded   flex-1">
+      <div className=" px-8 py-4 rounded   flex-1 overflow-y-auto h-screen">
         <div className="w-full">
-          <h1 className="md:text-4xl text-3xl font-bold mb-4 font-bebas-neue text-center md:text-left">
-            Inscription
+          <h1 className="md:text-3xl text-2xl font-bold mb-3 font-bebas-neue text-center md:text-left mt-4">
+            S&apos;inscrire
           </h1>
-          <p className="mt-2 font-lato text-base md:text-xl">
-            Créer un compte pour acheter vos tickets
+          <p className="mt-2 font-lato text-sm md:text-base">
+            Créer un compte pour acheter vos billets
           </p>
-          {error && <p className="text-red-500 mb-4">{error}</p>}
+          {error && <p className="text-red-500 mb-3">{error}</p>}
           <form onSubmit={handleSubmit}>
-            <div className="mb-4 mt-4">
+            <div className="mb-3 mt-3">
               <label
                 htmlFor="userName"
                 className="block text-base font-medium text-gray-700"
               >
-                Nom et prénom
+                Prénom et Nom
               </label>
               <input
                 type="text"
@@ -126,12 +129,12 @@ const InscriptionPage = () => {
               />
             </div>
 
-            <div className="mb-4">
+            <div className="mb-3">
               <label
                 htmlFor="email"
                 className="block text-base font-medium text-gray-700"
               >
-                Email
+                Courriel
               </label>
               <input
                 type="email"
@@ -143,7 +146,24 @@ const InscriptionPage = () => {
                 required
               />
             </div>
-            <div className="mb-4">
+            <div className="mb-3">
+              <label
+                htmlFor="dateOfBirth"
+                className="block text-base font-medium text-gray-700"
+              >
+                Date de naissance
+              </label>
+              <input
+                type="date"
+                id="dateOfBirth"
+                name="dateOfBirth"
+                value={formData.dateOfBirth}
+                onChange={handleInputChange}
+                className="mt-1 block w-full border-[#B4B4B4] bg-white rounded-md shadow-sm p-3"
+                required
+              />
+            </div>
+            <div className="mb-3">
               <label
                 htmlFor="password"
                 className="block text-base font-medium text-gray-700"
@@ -160,7 +180,7 @@ const InscriptionPage = () => {
                 required
               />
             </div>
-            <div className="mb-4">
+            <div className="mb-3">
               <label
                 htmlFor="password"
                 className="block text-base font-medium text-gray-700"
@@ -178,7 +198,9 @@ const InscriptionPage = () => {
               />
             </div>
             <button
-              type="submit"
+              onClick={(e) => {
+                handleSubmit(e);
+              }}
               className="w-full bg-black text-white py-2 px-4 rounded font-bebas-neue text-2xl cursor-pointer"
             >
               S&apos;inscrire

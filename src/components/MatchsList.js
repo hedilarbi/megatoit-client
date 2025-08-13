@@ -91,6 +91,11 @@ const MatchsList = () => {
                     </p>
                   </div>
                   <div className="px-4 mt-6">
+                    <div className="flex mb-4 justify-center">
+                      <p className="font-lato text-black rounded-md bg-[#D9D9D9] px-4 py-1 md:text-base text-sm ">
+                        {match.type}
+                      </p>
+                    </div>
                     <div
                       className={`flex justify-between items-center ${
                         match.type === "Domicile" ? "flex-row-reverse" : ""
@@ -126,13 +131,10 @@ const MatchsList = () => {
                     </div>
                   </div>
 
-                  <div className="mt-6 flex justify-between items-center px-4">
+                  <div className="mt-6 flex  items-center px-4">
                     <p className="font-lato text-gray-600 text-sm md:text-base">
                       <MdPinDrop className="inline mr-1" size={24} />
                       {match.place}
-                    </p>
-                    <p className="font-lato text-black rounded-md bg-[#D9D9D9] px-4 py-1 md:text-base text-sm">
-                      {match.type}
                     </p>
                   </div>
                   <div className="mt-6 flex justify-between items-center px-4">

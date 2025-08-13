@@ -70,13 +70,13 @@ export default function ConnexionPage() {
       <div className="flex items-center p-8 rounded   flex-1">
         <div className="w-full">
           <h1 className="md:text-4xl text-3xl font-bold mb-4 font-bebas-neue text-center md:text-left">
-            Connexion
+            Se connecter
           </h1>
           <p className="mt-2 font-lato text-base md:text-xl">
             Accédez à votre compte pour acheter vos billets
           </p>
           {error && <p className="text-red-500 mb-4">{error}</p>}
-          <form onSubmit={handleEmailSignIn}>
+          <div>
             <div className="mb-4 mt-4">
               <label
                 htmlFor="email"
@@ -119,12 +119,12 @@ export default function ConnexionPage() {
             </div>
             {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
             <button
-              type="submit"
+              onClick={(e) => handleEmailSignIn(e)}
               className="w-full bg-black text-white py-2 px-4 rounded font-bebas-neue text-2xl cursor-pointer"
             >
               Se connecter
             </button>
-          </form>
+          </div>
           <div className="flex items-center justify-between mt-4">
             <hr className="flex-grow border-t border-gray-300" />
             <span className="mx-2 text-gray-500 text-xl uppercase">ou</span>

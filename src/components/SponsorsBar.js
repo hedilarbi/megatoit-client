@@ -20,8 +20,10 @@ export default function SponsorsBar() {
       const scrollWidth = box.scrollWidth - box.clientWidth;
       let scrollAmount = 0;
       let direction = 1; // 1 for right, -1 for left
-      const scrollStep = 1; // Adjust this value for speed
-      const scrollInterval = setInterval(() => {
+      const scrollStep = 1; // Smaller step for smoother scroll
+      let animationFrame;
+
+      const animateScroll = () => {
         if (direction === 1) {
           if (scrollAmount < scrollWidth) {
             box.scrollLeft += scrollStep;
@@ -37,12 +39,16 @@ export default function SponsorsBar() {
             direction = 1;
           }
         }
-      }, 20); // Adjust this value for speed
-      return () => clearInterval(scrollInterval); // Cleanup on unmount
+        animationFrame = requestAnimationFrame(animateScroll);
+      };
+
+      animationFrame = requestAnimationFrame(animateScroll);
+
+      return () => cancelAnimationFrame(animationFrame); // Cleanup on unmount
     }
   }, []);
   return (
-    <div className="fixed bottom-0 inset-x-0 z-30 bg-black text-white py-2">
+    <div className="fixed bottom-0 inset-x-0 z-30 bg-white text-white py-2 shadow-md">
       {/* Mobile: auto ping-pong with pauses */}
       <div
         className="md:hidden  overflow-x-auto scrollbar-none  px-4"

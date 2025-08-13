@@ -45,7 +45,7 @@ const AbonnementContent = () => {
             >
               <div>
                 <h3 className="font-bebas-neue text-2xl ">
-                  {abonnement.title} ( {abonnement.season})
+                  {abonnement.title} ({abonnement.season})
                 </h3>
                 <p className="text-gray-600 font-bebas-neue text-lg mt-2">
                   {abonnement.description}

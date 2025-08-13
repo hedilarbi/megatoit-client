@@ -96,7 +96,7 @@ const Header = () => {
               className="   text-center px-10 bg-black border border-black hover:text-black hover:bg-white text-white rounded-md cursor-pointer"
             >
               <span className="font-bebas-neue  text-center   ">
-                Déconnexion
+                se déconnecter
               </span>
             </button>
             <Link
@@ -114,14 +114,14 @@ const Header = () => {
               href="/connexion"
               className=" border border-black text-black hover:text-white px-10  rounded-md bg-white hover:bg-black  transition-colors  "
             >
-              <span className="font-bebas-neue text-center">Connexion</span>
+              <span className="font-bebas-neue text-center">Se connecter</span>
             </Link>
             <Link
               href="/inscription"
               className="   text-center px-10 bg-black border border-black hover:text-black hover:bg-white text-white rounded-md  "
             >
               <span className="font-bebas-neue  text-center   ">
-                Inscription
+                s&apos;inscrire
               </span>
             </Link>
           </div>
