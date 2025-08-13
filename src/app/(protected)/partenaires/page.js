@@ -1,6 +1,6 @@
 import Image from "next/image";
 import React from "react";
-
+import styles from "@/styles/MatchsBanner.module.css";
 const page = () => {
   const logos = [
     "antidote.jpeg",
@@ -17,19 +17,28 @@ const page = () => {
     "SPHERE.png",
   ];
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
-      {logos.map((logo) => (
-        <div key={logo} className="flex justify-center">
-          <Image
-            src={`/commenditaires/${logo}`}
-            alt={logo}
-            className="h-14 w-auto"
-            width={56}
-            height={56}
-            priority
-          />
+    <div className="pb-20">
+      <section className={styles.banner}>
+        <div>
+          <h1 className="font-bebas-neue md:text-6xl text-3xl text-white text-center">
+            NOS PARTENAIRES
+          </h1>
         </div>
-      ))}
+      </section>
+      <div className="grid grid-cols-2 md:grid-cols-3  gap-14 p-4 mt-10">
+        {logos.map((logo) => (
+          <div key={logo} className="flex justify-center">
+            <Image
+              src={`/commenditaires/${logo}`}
+              alt={logo}
+              className=" w-auto"
+              width={100}
+              height={100}
+              priority
+            />
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

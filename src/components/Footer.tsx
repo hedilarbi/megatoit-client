@@ -6,7 +6,7 @@ import { FaFacebook } from "react-icons/fa";
 const Footer = () => {
   return (
     <div>
-      <div className="bg-[#D7D7D7]  md:py-8 md:px-20 px-10 py-8   ">
+      <div className="bg-[#D7D7D7]  md:px-20 px-10 pt-8 pb-20 md:pb-30  ">
         <div className="md:flex justify-between flex flex-col md:flex-row gap-8">
           <Link href="/">
             <Image src={Logo} alt="Logo" className="h-20 w-auto mb-4" />
@@ -69,7 +69,11 @@ const Footer = () => {
               Suivez-nous
             </h3>
             <div className="flex gap-4">
-              <Link href="https://www.facebook.com/profile.php?id=61574831637274&locale=fr_FR">
+              <Link
+                href="https://www.facebook.com/profile.php?id=61574831637274&locale=fr_FR"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <FaFacebook size={24} color="black" />
               </Link>
             </div>

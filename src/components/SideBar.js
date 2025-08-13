@@ -13,14 +13,14 @@ const SideBar = ({
     <div
       className={`${
         showSidebar ? "" : "translate-x-[100%]"
-      }  w-[70%] bg-white fixed top-0 right-0 border-l border-gray-200 shadow-md h-screen p-4 z-50 transition-width duration-300 ease-in-out`}
+      }  w-[70%] bg-white fixed top-0 right-0 border-l border-gray-200 shadow-md h-screen p-4 z-50 transition-width duration-300 ease-in-out font-bebas-neue text-lg`}
     >
       <div className="flex justify-end mb-4">
         <button className="text-black " onClick={toggleSidebar}>
           <MdClose size={28} />
         </button>
       </div>
-      <div className="  flex flex-col justify-center gap-8  font-lato mt-8 border-b pb-8 border-black">
+      <div className="  flex flex-col justify-center gap-4   mt-8 border-b pb-8 border-black">
         <Link
           href="/"
           onClick={toggleSidebar}
@@ -49,14 +49,15 @@ const SideBar = ({
           Abonnement de saison
         </Link>
         <Link
-          href="/contact"
+          href="/partenaires"
           className={`text-black hover:underline ${
-            pathname === "/contact" && "underline"
+            pathname === "/partenaires" && "underline"
           } `}
           onClick={toggleSidebar}
         >
-          Contact
+          Nos partenaires
         </Link>
+
         <Link
           href="/notre-mission"
           className={`text-black hover:underline ${
@@ -65,6 +66,15 @@ const SideBar = ({
           onClick={toggleSidebar}
         >
           Notre mission
+        </Link>
+        <Link
+          href="/contact"
+          className={`text-black hover:underline ${
+            pathname === "/contact" && "underline"
+          } `}
+          onClick={toggleSidebar}
+        >
+          Contact
         </Link>
       </div>
 
@@ -105,14 +115,12 @@ const SideBar = ({
           </Link>
         </div>
       )}
-      <div className="flex items-center justify-center mt-8 gap-4">
-        <Link href="https://www.facebook.com/">
-          <FaFacebook size={24} color="black" />
-        </Link>
-        <Link href="https://www.facebook.com/">
-          <FaFacebook size={24} color="black" />
-        </Link>
-        <Link href="https://www.facebook.com/">
+      <div className="flex items-center justify-center mt-4 gap-4 ">
+        <Link
+          href="https://www.facebook.com/profile.php?id=61574831637274&locale=fr_FR"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           <FaFacebook size={24} color="black" />
         </Link>
       </div>
