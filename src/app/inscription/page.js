@@ -224,7 +224,7 @@ const InscriptionPage = () => {
           </div>
           <div className="text-center mt-4">
             <p className="text-gray-500">
-              Vous avez déja un compte ?{" "}
+              Vous avez déjà un compte ?{" "}
               <Link
                 href="/connexion"
                 className="text-black font-semibold hover:underline"
