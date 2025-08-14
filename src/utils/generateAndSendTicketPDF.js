@@ -249,13 +249,17 @@ export async function generateAndSendTicketPDF(
         });
       }
 
-      // Send email with tickets
+      const port = Number(process.env.SMTP_PORT) || 465;
+      const secure = port === 465;
       const transporter = nodemailer.createTransport({
-        service: "gmail",
+        host: process.env.SMTP_HOST,
+        port,
         auth: {
           user: process.env.EMAIL_USER,
           pass: process.env.EMAIL_PASS,
         },
+        requireTLS: !secure, // impose STARTTLS si port 587
+        tls: { minVersion: "TLSv1.2" }, // bonne pratique
       });
 
       await transporter.sendMail({
@@ -407,13 +411,17 @@ export async function generateAndSendTicketPDF(
       await file.makePublic();
       const downloadURL = file.publicUrl();
       await updateSubscriptionDownloadUrl(subscription.code, downloadURL);
-
+      const port = Number(process.env.SMTP_PORT) || 465;
+      const secure = port === 465;
       const transporter = nodemailer.createTransport({
-        service: "gmail",
+        host: process.env.SMTP_HOST,
+        port,
         auth: {
           user: process.env.EMAIL_USER,
           pass: process.env.EMAIL_PASS,
         },
+        requireTLS: !secure, // impose STARTTLS si port 587
+        tls: { minVersion: "TLSv1.2" }, // bonne pratique
       });
 
       await transporter.sendMail({
