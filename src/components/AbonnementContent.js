@@ -3,11 +3,14 @@ import { getAllAbonements } from "@/services/abonement.service";
 import React, { useEffect, useState } from "react";
 import Spinner from "./spinner/Spinner";
 import { useRouter } from "next/navigation";
+import AuthRequiredModal from "./AuthRequiredModal";
+import { useAuth } from "@/context/AuthContext";
 
 const AbonnementContent = () => {
+  const { user } = useAuth();
   const [abonnements, setAbonnements] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-
+  const [showAuthRequiredModal, setShowAuthRequiredModal] = useState(false);
   const router = useRouter();
 
   const fetchAbonnements = async () => {
@@ -27,10 +30,17 @@ const AbonnementContent = () => {
     fetchAbonnements();
   }, []);
   const handleBuy = (id) => {
+    if (!user) {
+      setShowAuthRequiredModal(true);
+      return;
+    }
     router.push(`/checkout?abonnementId=${id}`);
   };
   return (
     <div className="mt-10">
+      {showAuthRequiredModal && (
+        <AuthRequiredModal setShowModal={setShowAuthRequiredModal} />
+      )}
       <h2 className="font-bebas-neue text-3xl text-center">Nos abonnements</h2>
       {isLoading ? (
         <div className="h-screen w-screen flex justify-center items-center">

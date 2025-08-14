@@ -99,7 +99,7 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
   };
 
   useEffect(() => {
-    if (!user && !loading) {
+    if (!user) {
       router.push("/");
       return;
     }
@@ -410,7 +410,7 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
             </h2>
             <PaymentForm
               amount={total.toFixed(2)}
-              userId={user.uid}
+              userId={user?.uid}
               quantity={quantity}
               matchId={match ? matchId : ""}
               abonnementId={abonnementId}
