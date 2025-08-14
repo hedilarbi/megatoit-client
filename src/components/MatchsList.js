@@ -86,7 +86,7 @@ const MatchsList = () => {
                   className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
                 >
                   <div className="bg-black py-4 rounded-t-md">
-                    <p className="font-lato text-center text-white font-semibold ">
+                    <p className="font-lato text-center text-white font-semibold capitalize">
                       {dayName}, {date}
                     </p>
                   </div>

@@ -10,7 +10,7 @@ import Spinner from "./spinner/Spinner";
 import Image from "next/image";
 import Logo from "@/assets/logo-small.png"; // Adjust the path as necessary
 import { IoMdPin } from "react-icons/io";
-import { FaCalendarAlt } from "react-icons/fa";
+import { FaCalendarAlt, FaCheck } from "react-icons/fa";
 import { getUserDocument } from "@/services/user.service";
 import { getAbonementById } from "@/services/abonement.service";
 const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
@@ -295,6 +295,19 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
             <h1 className="flex  md:text-2xl text-lg uppercase justify-center md:justify-start font-bold text-gray-800 items-center font-bebas-neue">
               {abonnement.title}
             </h1>
+            <div className="bg-white p-4 rounded-md mt-4">
+              <p className="font-lato text-black text-base  uppercase">
+                <FaCheck className="inline text-black mr-2" />
+                13 matchs de saison régulière
+              </p>
+              <p className="font-lato text-black text-base mt-2 uppercase">
+                <FaCheck className="inline text-black mr-2" />1 match présaison
+              </p>
+              <p className="font-lato text-black text-base mt-2 uppercase">
+                <FaCheck className="inline text-black mr-2" />1 consomation
+                gratuite par match
+              </p>
+            </div>
             <div className="mt-8">
               <div className="flex items-center ">
                 <FaCalendarAlt
@@ -304,7 +317,7 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
                 />
 
                 <p className=" text-[#585858] md:text-lg text-base font-lato uppercase">
-                  saison ({abonnement.season})
+                  saison {abonnement.season}
                 </p>
               </div>
             </div>
