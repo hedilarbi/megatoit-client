@@ -19,7 +19,7 @@ const AuthRequiredModal = ({ setShowModal }) => {
           Connexion requise
         </h2>
         <p className="mb-6 text-center text-gray-600">
-          Pour acheter un ticket, vous devez être connecté.
+          Pour pouvoir faire des achats, vous devez être connecté.
         </p>
 
         {/* Buttons */}
@@ -28,7 +28,7 @@ const AuthRequiredModal = ({ setShowModal }) => {
             onClick={() => router.push("/connexion")}
             className="px-4 py-2 text-white bg-black rounded-md font-bebas-neue text-xl cursor-pointer"
           >
-            Connexion
+            Se connecter
           </button>
           <button
             onClick={() => router.push("/inscription")}

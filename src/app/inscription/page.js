@@ -14,6 +14,7 @@ import Image from "next/image";
 import { FaGoogle } from "react-icons/fa6";
 import Spinner from "@/components/spinner/Spinner";
 import Link from "next/link";
+import Header from "@/components/Header";
 
 const InscriptionPage = () => {
   const [formData, setFormData] = useState({
@@ -80,6 +81,7 @@ const InscriptionPage = () => {
       setIsLoading(true);
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
+      console.log("Google Sign-In successful:", user);
       await createUserDocument(user.uid, {
         email: user.email || "",
         userName: user.displayName || "",
@@ -96,7 +98,8 @@ const InscriptionPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center md:justify-start justify-center  bg-[#F7F7F7] ">
+    <div className="min-h-screen flex items-center md:justify-start justify-center  bg-[#F7F7F7] md:mt-20 mt-20 ">
+      <Header />
       {isLoading && (
         <div className="fixed top-0 left-0 h-screen w-screen bg-black/40 flex justify-center items-center z-50">
           <Spinner />

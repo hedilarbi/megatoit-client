@@ -6,6 +6,8 @@ import Image from "next/image";
 import React, { useEffect } from "react";
 import Logo from "@/assets/logo-small.png"; // Adjust the path as necessary
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+
 const Profil = () => {
   const { user } = useAuth();
   const [userData, setUserData] = React.useState(null);
@@ -16,6 +18,7 @@ const Profil = () => {
   const [abonnementCount, setAbonnementCount] = React.useState(0);
   const [filterType, setFilterType] = React.useState("tickets");
   const [content, setContent] = React.useState([]);
+  const router = useRouter();
 
   const fetchUserData = async () => {
     try {
@@ -91,9 +94,12 @@ const Profil = () => {
       setContent(abonnements);
     }
   };
+
   useEffect(() => {
     if (user) {
       fetchUserData();
+    } else {
+      router.push("/connexion");
     }
   }, [user]);
 

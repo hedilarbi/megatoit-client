@@ -13,6 +13,7 @@ import Image from "next/image";
 import Logo from "@/assets/logo-big.png"; // Adjust the path as necessary
 import { FaGoogle } from "react-icons/fa";
 import Link from "next/link";
+import Header from "@/components/Header";
 export default function ConnexionPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -40,6 +41,8 @@ export default function ConnexionPage() {
         setError("Mot de passe incorrect.");
       } else if (err.code === "auth/invalid-credential") {
         setError("Identifiants invalides.");
+      } else if (err.code === "auth/invalid-email") {
+        setError("Email invalide.");
       } else {
         setError("Une erreur s'est produite. Veuillez réessayer.");
       }
@@ -71,7 +74,8 @@ export default function ConnexionPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center md:justify-start justify-center  bg-[#F7F7F7] font-lato ">
+    <div className="min-h-screen flex items-center md:justify-start justify-center  bg-[#F7F7F7] font-lato mt-20">
+      <Header />
       {isLoading && (
         <div className="fixed top-0 left-0 h-screen w-screen bg-black/40 flex justify-center items-center z-50">
           <Spinner />

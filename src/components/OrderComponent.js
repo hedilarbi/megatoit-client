@@ -4,10 +4,14 @@ import React, { useEffect } from "react";
 import Spinner from "./spinner/Spinner";
 import Image from "next/image";
 import Logo from "@/assets/logo-small.png"; // Adjust the path as necessary
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
+
 const OrderComponent = ({ id }) => {
+  const { user } = useAuth();
   const [order, setOrder] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
-
+  const router = useRouter();
   const fetchOrder = async () => {
     setLoading(true);
 
@@ -26,8 +30,12 @@ const OrderComponent = ({ id }) => {
   };
 
   useEffect(() => {
-    fetchOrder();
-  }, [id]);
+    if (user) {
+      fetchOrder();
+    } else {
+      router.push("/connexion");
+    }
+  }, [id, user]);
   const formatDate = (timestamp) => {
     const milliseconds =
       timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000;
@@ -115,8 +123,8 @@ const OrderComponent = ({ id }) => {
               <span className="font-semibold">Match: </span>
               Mégatoit vs {order.match.opponent.name}
             </p>
-            <p className="text-base text-gray-600 mt-1 md:text-lg">
-              <span className="font-semibold">Date: </span>
+            <p className="text-base text-gray-600 mt-1 md:text-lg capitalize">
+              <span className="font-semibold capitalize">Date: </span>
               {formatFixDate(order.match.date).dayName},{" "}
               {formatFixDate(order.match.date).date}
             </p>
@@ -163,15 +171,17 @@ const OrderComponent = ({ id }) => {
             Abonnement
           </h3>
           <p className="text-base text-gray-600 mt-1 md:text-lg">
-            <span className="font-semibold">Titre: </span>
+            <span className="font-semibold capitalize">Titre: </span>
             {order.abonnement.title}
           </p>
           <p className="text-base text-gray-600 mt-1 md:text-lg">
-            <span className="font-semibold">Saison: </span>
+            <span className="font-semibold capitalize">Saison: </span>
             {order.abonnement.season}
           </p>
           <p className="text-base text-gray-600 mt-1 md:text-lg">
-            <span className="font-semibold">Date d&apos;achat: </span>
+            <span className="font-semibold capitalize">
+              Date d&apos;achat:{" "}
+            </span>
             {formatDate(order.createdAt).dayName},{" "}
             {formatDate(order.createdAt).date} à{" "}
             {formatDate(order.createdAt).time}
