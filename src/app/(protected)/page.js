@@ -7,12 +7,12 @@ import FacebookFeed from "@/components/FacebookFeed";
 export const metadata = {
   title: "Accueil",
   description:
-    "Bienvenue sur la page d'accueil de notre application de billetterie de Megatoit Hockey. Découvrez les derniers matchs, abonnez-vous pour la saison et restez informé des événements à venir.",
-  keywords: "billetterie, hockey, LE MEGATOIT, abonnements, matchs",
+    "Bienvenue sur la page d'accueil de notre application de billetterie de Le Mégatoit Hockey. Découvrez les derniers matchs, abonnez-vous pour la saison et restez informé des événements à venir.",
+  keywords: "billetterie, hockey, LE MÉGATOIT, abonnements, matchs",
   openGraph: {
-    title: "Accueil - LE MEGATOIT HOCKEY",
+    title: "Accueil - LE MÉGATOIT HOCKEY",
     description:
-      "Découvrez les derniers matchs et abonnements de LE MEGATOIT HOCKEY.",
+      "Découvrez les derniers matchs et abonnements de LE MÉGATOIT HOCKEY.",
     url: "https://lemegatoit.com",
   },
 };

@@ -5,7 +5,7 @@ const CallToActionBanner = () => {
   return (
     <section className={styles.ctaBanner}>
       <h2 className="font-bebas-neue md:text-4xl text-2xl text-center text-white">
-        Prêt à vivre l&apos;expérience Avec Megatoit hockey?
+        Prêt à vivre l&apos;expérience Avec Le Mégatoit hockey?
       </h2>
       <p className="font-lato  text-center md:text-lg text-base mt-2 text-white">
         Rejoignez des milliers de fans pour encourager notre équipe cette saison

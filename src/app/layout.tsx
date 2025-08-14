@@ -17,8 +17,8 @@ const bebasNeue = Bebas_Neue({
 });
 
 export const metadata: Metadata = {
-  title: "LE MEGATOIT HOCKEY",
-  description: "Réservez vos billets pour les matchs de Megatoit Hockey",
+  title: "LE MÉGATOIT HOCKEY",
+  description: "Réservez vos billets pour les matchs de Le Mégatoit Hockey",
 };
 
 export default function RootLayout({

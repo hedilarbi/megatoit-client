@@ -42,6 +42,10 @@ const InscriptionPage = () => {
         setError("Les mots de passe ne correspondent pas.");
         return;
       }
+      if (!email || !password || !userName || !phone || !dateOfBirth) {
+        setError("Veuillez remplir tous les champs.");
+        return;
+      }
       setError(""); // Reset error message
       setIsLoading(true);
       const userCredential = await createUserWithEmailAndPassword(

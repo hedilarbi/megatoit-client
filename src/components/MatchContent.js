@@ -115,7 +115,7 @@ const MatchContent = ({ id }) => {
                     height={64}
                     className="md:h-16 h-12 md:w-16 w-12"
                   />
-                  <span className="ml-4">Megatoit</span>
+                  <span className="ml-4">Mégatoit</span>
                   <span className="mx-4 font-bold ">VS</span>
                   <span className="mr-4">{match.opponent.name}</span>
                   <Image
@@ -157,7 +157,7 @@ const MatchContent = ({ id }) => {
                   </div>
                   <div className="md:w-1/2 w-full bg-[#D9D9D9] p-3 rounded-md mt-4">
                     <p className="text-black md:text-lg text-base font-lato">
-                      Ne manquez pas ce match explosif entre Megatoit et{" "}
+                      Ne manquez pas ce match explosif entre Le Mégatoit et{" "}
                       {match.opponent.name} ! Vivez l&apos;intensité du hockey
                       professionnel en direct au {match.place} !
                     </p>
@@ -171,7 +171,7 @@ const MatchContent = ({ id }) => {
                     <div className="flex justify-between flex-col md:flex-row gap-4 items-start ">
                       <div>
                         <h3 className="font-bebas-neue text-2xl">
-                          Megatoit vs {match.opponent.name}
+                          Mégatoit vs {match.opponent.name}
                         </h3>
                         <p className="text-[#2E2E2E] font-lato text-lg mt-2 font-semibold">
                           ${match.price.toFixed(2)} par billet

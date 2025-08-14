@@ -25,11 +25,24 @@ export default function ConnexionPage() {
     try {
       setError(""); // Reset error message
       setIsLoading(true);
+      if (!email || !password) {
+        setError("Veuillez remplir tous les champs.");
+        return;
+      }
       await signInWithEmailAndPassword(auth, email, password);
 
       router.back();
     } catch (err) {
-      setError(err.message);
+      console.error("Error signing in:", err.code);
+      if (err.code === "auth/user-not-found") {
+        setError("Aucun compte trouvé avec cet email.");
+      } else if (err.code === "auth/wrong-password") {
+        setError("Mot de passe incorrect.");
+      } else if (err.code === "auth/invalid-credential") {
+        setError("Identifiants invalides.");
+      } else {
+        setError("Une erreur s'est produite. Veuillez réessayer.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -75,7 +88,7 @@ export default function ConnexionPage() {
           <p className="mt-2 font-lato text-base md:text-xl">
             Accédez à votre compte pour acheter vos billets
           </p>
-          {error && <p className="text-red-500 mb-4">{error}</p>}
+
           <div>
             <div className="mb-4 mt-4">
               <label

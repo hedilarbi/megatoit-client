@@ -93,7 +93,7 @@ const OrderComponent = ({ id }) => {
             <div className="flex justify-between items-center ">
               <div className="flex items-center gap-2">
                 <Image src={Logo} alt="Logo" className="h-16 w-20 " />
-                <h3 className="font-bebas-neue text-xl text-black">Megatoit</h3>
+                <h3 className="font-bebas-neue text-xl text-black">Mégatoit</h3>
               </div>
               <p className="font-bebas-neue text-xl text-black mx-3">VS</p>
               <div className="flex items-center gap-2">
@@ -113,7 +113,7 @@ const OrderComponent = ({ id }) => {
           <div className="mt-6 px-4 md:px-8">
             <p className="text-base text-gray-600 mt-1 md:text-lg">
               <span className="font-semibold">Match: </span>
-              Megatoit vs {order.match.opponent.name}
+              Mégatoit vs {order.match.opponent.name}
             </p>
             <p className="text-base text-gray-600 mt-1 md:text-lg">
               <span className="font-semibold">Date: </span>

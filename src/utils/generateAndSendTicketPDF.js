@@ -65,7 +65,7 @@ export async function generateAndSendTicketPDF(
         const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
         // 3) données
-        const team1Name = "Megatoit";
+        const team1Name = "Mégatoit";
         const team2Name = match.opponent.name;
 
         const placeText = match.place;
@@ -263,11 +263,11 @@ export async function generateAndSendTicketPDF(
       });
 
       await transporter.sendMail({
-        from: `"Billetterie Megatoit" <${process.env.EMAIL_USER}>`,
+        from: `"Billetterie Mégatoit" <${process.env.EMAIL_USER}>`,
         to: user.email,
         subject: `🎟 ${
           tickets.length > 1 ? "Vos billets" : "Votre billet"
-        } pour le match Megatoit vs ${match.opponent.name}`,
+        } pour le match Mégatoit vs ${match.opponent.name}`,
         html: `
           <div style="text-align:center">
             <img src="cid:logo" alt="Logo" style="width:150px;height:auto" />
@@ -425,9 +425,9 @@ export async function generateAndSendTicketPDF(
       });
 
       await transporter.sendMail({
-        from: `"Billetterie Megatoit" <${process.env.EMAIL_USER}>`,
+        from: `"Billetterie Mégatoit" <${process.env.EMAIL_USER}>`,
         to: user.email,
-        subject: `🎟 Votre abonnement Megatoit pour la saison ${abonnement.data.season}`,
+        subject: `🎟 Votre abonnement Mégatoit pour la saison ${abonnement.data.season}`,
         html: `
           <div style="text-align:center">
             <img src="cid:logo" alt="Logo" style="width:150px;height:auto" />

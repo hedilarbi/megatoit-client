@@ -107,7 +107,7 @@ const SuccessContent = ({ paymentIntentId }) => {
                 <div className="flex justify-between items-center pb-4 border-b border-gray-300">
                   <p className="font-lato text-base text-[#414A5A]">Match</p>
                   <p>
-                    Megatoit vs{" "}
+                    Mégatoit vs{" "}
                     {order.match?.opponent?.name || "Adversaire inconnu"}
                   </p>
                 </div>

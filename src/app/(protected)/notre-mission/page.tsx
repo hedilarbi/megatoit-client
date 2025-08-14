@@ -65,7 +65,7 @@ const page = () => {
               Esprit d&apos;Équipe
             </h3>
             <p className="text-center font-lato mt-3 font-semibold">
-              La force de Megatoit réside dans l&apos;unité. Ensemble, nous
+              La force de Mégatoit réside dans l&apos;unité. Ensemble, nous
               sommes plus forts que la somme de nos parties.
             </p>
           </div>

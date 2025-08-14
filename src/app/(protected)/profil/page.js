@@ -162,7 +162,7 @@ const Profil = () => {
                               className="h-12 w-12 "
                             />
                             <h3 className="font-bebas-neue text-xl text-black">
-                              Megatoit
+                              Mégatoit
                             </h3>
                           </div>
                           <p className="font-bebas-neue text-xl text-black mx-3">

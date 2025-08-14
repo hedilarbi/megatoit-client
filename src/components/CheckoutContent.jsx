@@ -157,7 +157,7 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
                 height={64}
                 className="md:h-16 h-12 md:w-16 w-12"
               />
-              <span className="ml-4">Megatoit</span>
+              <span className="ml-4">Mégatoit</span>
               <span className="mx-4 font-bold ">VS</span>
               <span className="mr-4">{match.opponent.name}</span>
               <Image
@@ -196,7 +196,7 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
             </h2>
             <div className="border border-gray-300 rounded-md p-4 mt-4 bg-white flex justify-between">
               <p className="font-lato text-gray-600 font-semibold">
-                {quantity} x billet(s) Megatoit vs {match.opponent.name}
+                {quantity} x billet(s) Mégatoit vs {match.opponent.name}
               </p>
               <p className="font-lato text-gray-800 font-semibold">
                 ${match.price.toFixed(2)} x {quantity} = $
@@ -215,7 +215,7 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
                     htmlFor="fullName"
                     className="text-gray-700 font-semibold mb-2"
                   >
-                    Nom et Prénom
+                    Prénom et Nom
                   </label>
                   <input
                     type="text"

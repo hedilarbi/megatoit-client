@@ -32,7 +32,7 @@ const CommandeEnCours = ({ paymentIntent }) => {
         }
         if (data.success === false && attempts >= 4) {
           clearInterval(interval);
-          router.replace(`/commande-echouee?payment_intent=${paymentIntent}`);
+          router.replace(`/commande-echoue?payment_intent=${paymentIntent}`);
         }
       } catch (error) {
         console.error("Error fetching payment status:", error);

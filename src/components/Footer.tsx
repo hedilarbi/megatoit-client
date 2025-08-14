@@ -60,7 +60,8 @@ const Footer = () => {
         </div>
         <div className="mt-8 border-t pt-4">
           <p className="font-lato text-black text-center">
-            © {new Date().getFullYear()} Megatoit Hockey. Tous droits réservés.
+            © {new Date().getFullYear()} Le Mégatoit Hockey. Tous droits
+            réservés.
           </p>
         </div>
       </div>
