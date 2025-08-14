@@ -166,7 +166,7 @@ const MatchsContent = () => {
                       {match.type}
                     </p>
                     {match.category !== "Ligue" && (
-                      <p className="font-lato text-black rounded-md bg-[#D9D9D9] px-4 py-1 md:text-base text-sm mb-6">
+                      <p className="font-lato text-black rounded-md bg-[#D9D9D9] px-4 py-1 md:text-base text-sm ">
                         {match.category}
                       </p>
                     )}
