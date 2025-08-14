@@ -95,7 +95,7 @@ export default function ConnexionPage() {
                 htmlFor="email"
                 className="block text-base font-medium text-gray-700"
               >
-                Email
+                Courriel
               </label>
               <input
                 type="email"

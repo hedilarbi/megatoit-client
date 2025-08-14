@@ -157,9 +157,9 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
                 height={64}
                 className="md:h-16 h-12 md:w-16 w-12"
               />
-              <span className="ml-4">Mégatoit</span>
+              <span className="ml-4 uppercase">Mégatoit</span>
               <span className="mx-4 font-bold ">VS</span>
-              <span className="mr-4">{match.opponent.name}</span>
+              <span className="mr-4 uppercase">{match.opponent.name}</span>
               <Image
                 src={match.opponent.imageUrl}
                 alt="logo"
@@ -177,14 +177,14 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
                 />
 
                 <p className=" text-[#585858] md:text-lg text-base font-lato">
-                  <span className="capitalize">{date.dayName},</span>{" "}
-                  <span className="capitalize"> {date.date}</span>
+                  <span className="uppercase">{date.dayName},</span>{" "}
+                  <span className="uppercase"> {date.date}</span>
                 </p>
               </div>
               <div className="flex items-center mt-4">
                 <IoMdPin className="inline mr-2" color="#585858" size={20} />
 
-                <p className=" text-[#585858] text-capitalize md:text-lg text-base font-lato">
+                <p className=" text-[#585858] text-capitalize md:text-lg text-base font-lato uppercase">
                   {match.place}
                 </p>
               </div>
@@ -195,7 +195,7 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
               Résumé de la commande
             </h2>
             <div className="border border-gray-300 rounded-md p-4 mt-4 bg-white flex justify-between">
-              <p className="font-lato text-gray-600 font-semibold">
+              <p className="font-lato text-gray-600 font-semibold uppercase">
                 {quantity} x billet(s) Mégatoit vs {match.opponent.name}
               </p>
               <p className="font-lato text-gray-800 font-semibold">
@@ -215,7 +215,7 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
                     htmlFor="fullName"
                     className="text-gray-700 font-semibold mb-2"
                   >
-                    Prénom et Nom
+                    PRÉNOM ET NOM
                   </label>
                   <input
                     type="text"
@@ -232,7 +232,7 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
                     htmlFor="email"
                     className="text-gray-700 font-semibold mb-2"
                   >
-                    Email
+                    COURRIEL
                   </label>
                   <input
                     type="email"
@@ -248,12 +248,12 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
             </div>
           </div>
           <div className="py-10 border-b border-black">
-            <h2 className="f md:text-2xl text-lg font-bold text-gray-800 font-bebas-neue">
+            <h2 className="f md:text-2xl text-lg font-bold text-gray-800 font-bebas-neue uppercase">
               Récapitulatif
             </h2>
             <div className="border border-gray-300 rounded-md p-4 mt-4 bg-white ">
               <div className="flex justify-between w-full font-lato text-base">
-                <p className="font-semibold">Sous-total</p>
+                <p className="font-semibold uppercase">Sous-total</p>
                 <p>${(match.price * quantity).toFixed(2)}</p>
               </div>
               {taxes.map((tax, index) => (
@@ -268,7 +268,7 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
                 </div>
               ))}
               <div className="flex justify-between w-full font-lato text-base mt-4">
-                <p className="font-semibold">Total</p>
+                <p className="font-semibold uppercase">Total</p>
                 <p className="text-lg font-bold">${total.toFixed(2)}</p>
               </div>
             </div>
@@ -292,7 +292,7 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
       {abonnement && (
         <div>
           <div className="border-b border-black pb-10">
-            <h1 className="flex  md:text-2xl text-lg justify-center md:justify-start font-bold text-gray-800 items-center font-bebas-neue">
+            <h1 className="flex  md:text-2xl text-lg uppercase justify-center md:justify-start font-bold text-gray-800 items-center font-bebas-neue">
               {abonnement.title}
             </h1>
             <div className="mt-8">
@@ -303,7 +303,7 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
                   size={20}
                 />
 
-                <p className=" text-[#585858] md:text-lg text-base font-lato">
+                <p className=" text-[#585858] md:text-lg text-base font-lato uppercase">
                   saison ({abonnement.season})
                 </p>
               </div>
@@ -314,7 +314,7 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
               Résumé de la commande
             </h2>
             <div className="border border-gray-300 rounded-md p-4 mt-4 bg-white flex justify-between">
-              <p className="font-lato text-gray-600 font-semibold">
+              <p className="font-lato text-gray-600 font-semibold uppercase">
                 1 x Abonnement saison {abonnement.season}
               </p>
               <p className="font-lato text-gray-800 font-semibold">
@@ -331,9 +331,9 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
                 <div className="flex flex-col">
                   <label
                     htmlFor="fullName"
-                    className="text-gray-700 font-semibold mb-2"
+                    className="text-gray-700 font-semibold mb-2 uppercase"
                   >
-                    Nom et Prénom
+                    Prénom et Nom
                   </label>
                   <input
                     type="text"
@@ -348,9 +348,9 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
                 <div className="flex flex-col">
                   <label
                     htmlFor="email"
-                    className="text-gray-700 font-semibold mb-2"
+                    className="text-gray-700 font-semibold mb-2 uppercase"
                   >
-                    Email
+                    Courriel
                   </label>
                   <input
                     type="email"
@@ -371,7 +371,7 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
             </h2>
             <div className="border border-gray-300 rounded-md p-4 mt-4 bg-white ">
               <div className="flex justify-between w-full font-lato text-base">
-                <p className="font-semibold">Sous-total</p>
+                <p className="font-semibold uppercase">Sous-total</p>
                 <p>${abonnement.price.toFixed(2)}</p>
               </div>
               {taxes.map((tax, index) => (
@@ -386,7 +386,7 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
                 </div>
               ))}
               <div className="flex justify-between w-full font-lato text-base mt-4">
-                <p className="font-semibold">Total</p>
+                <p className="font-semibold uppercase">Total</p>
                 <p className="text-lg font-bold">${total.toFixed(2)}</p>
               </div>
             </div>
