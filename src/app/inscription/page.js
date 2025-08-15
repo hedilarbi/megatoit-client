@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   createUserWithEmailAndPassword,
@@ -15,8 +15,10 @@ import { FaGoogle } from "react-icons/fa6";
 import Spinner from "@/components/spinner/Spinner";
 import Link from "next/link";
 import Header from "@/components/Header";
+import { useAuth } from "@/context/AuthContext";
 
 const InscriptionPage = () => {
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -43,7 +45,7 @@ const InscriptionPage = () => {
         setError("Les mots de passe ne correspondent pas.");
         return;
       }
-      if (!email || !password || !userName || !phone || !dateOfBirth) {
+      if (!email || !password || !userName || !dateOfBirth) {
         setError("Veuillez remplir tous les champs.");
         return;
       }
@@ -67,7 +69,7 @@ const InscriptionPage = () => {
       // Send verification email
       await sendEmailVerification(user);
 
-      router.push("/"); // Redirect to home or another page
+      router.replace("/"); // Redirect to home or another page
     } catch (err) {
       setError(err.message);
     } finally {
@@ -96,6 +98,11 @@ const InscriptionPage = () => {
       setIsLoading(false);
     }
   };
+  useEffect(() => {
+    if (user) {
+      router.replace("/"); // Redirect to home if already logged in
+    }
+  }, [user, router]);
 
   return (
     <div className="min-h-screen flex items-center md:justify-start justify-center  bg-[#F7F7F7] md:mt-20 mt-20 ">

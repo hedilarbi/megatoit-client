@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   signInWithEmailAndPassword,
@@ -14,7 +14,9 @@ import Logo from "@/assets/logo-big.png"; // Adjust the path as necessary
 import { FaGoogle } from "react-icons/fa";
 import Link from "next/link";
 import Header from "@/components/Header";
+import { useAuth } from "@/context/AuthContext";
 export default function ConnexionPage() {
+  const { user } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -32,7 +34,7 @@ export default function ConnexionPage() {
       }
       await signInWithEmailAndPassword(auth, email, password);
 
-      router.back();
+      router.replace("/");
     } catch (err) {
       console.error("Error signing in:", err.code);
       if (err.code === "auth/user-not-found") {
@@ -72,6 +74,12 @@ export default function ConnexionPage() {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (user) {
+      router.replace("/"); // Redirect to home if already logged in
+    }
+  }, [user, router]);
 
   return (
     <div className="min-h-screen flex items-center md:justify-start justify-center  bg-[#F7F7F7] font-lato mt-20">

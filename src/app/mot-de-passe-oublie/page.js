@@ -4,6 +4,7 @@
 import { useState } from "react";
 import { sendPasswordResetEmail } from "firebase/auth";
 import { auth } from "@/lib/firebase";
+import Link from "next/link";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -60,6 +61,12 @@ export default function ForgotPasswordPage() {
           {loading ? "Envoi en cours…" : "Envoyer le lien de réinitialisation"}
         </button>
       </form>
+      <Link
+        href="/connexion"
+        className="block mt-4 text-center text-blue-600 hover:underline"
+      >
+        Retour à la connexion
+      </Link>
     </div>
   );
 }
