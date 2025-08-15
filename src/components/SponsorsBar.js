@@ -3,12 +3,12 @@ import Image from "next/image";
 import { useEffect, useRef } from "react";
 
 const LOGOS = [
-  { src: "/commenditaires/GroupeCTR.png", alt: "Groupe CTR" },
+  { src: "/commenditaires/GroupeCTR.jpg", alt: "Groupe CTR" },
   { src: "/commenditaires/immo3r.jpg", alt: "Immo3R" },
-  { src: "/commenditaires/MaisonDebauche.png", alt: "Maison Debauche" },
-  { src: "/commenditaires/HE.png", alt: "HE" },
-  { src: "/commenditaires/Mega-toit.png", alt: "Mega Toit" },
-  { src: "/commenditaires/SPHERE.png", alt: "Sphere" },
+  { src: "/commenditaires/MaisonDebauche.jpg", alt: "Maison Debauche" },
+  { src: "/commenditaires/HE.jpg", alt: "HE" },
+  { src: "/commenditaires/MegaToit.jpg", alt: "Mega Toit" },
+  { src: "/commenditaires/SphereExtermination.jpg", alt: "Sphere" },
 ];
 
 export default function SponsorsBar() {
@@ -48,21 +48,21 @@ export default function SponsorsBar() {
     }
   }, []);
   return (
-    <div className="fixed bottom-0 inset-x-0 z-30 bg-white text-white py-2 shadow-md">
+    <div className="fixed bottom-0 inset-x-0 z-30 bg-white text-white py-4 shadow-md">
       {/* Mobile: auto ping-pong with pauses */}
       <div
         className="md:hidden  overflow-x-auto scrollbar-none  px-4"
         ref={boxRef}
       >
-        <div className=" flex gap-3  ">
+        <div className=" flex gap-3  items-center ">
           {LOGOS.map((logo) => (
             <Image
               key={logo.src}
               src={logo.src}
               alt={logo.alt}
-              className="h-14 w-auto"
-              width={56}
-              height={56}
+              className="w-auto h-14"
+              width={200}
+              height={100}
               priority
             />
           ))}
@@ -77,8 +77,8 @@ export default function SponsorsBar() {
             src={logo.src}
             alt={logo.alt}
             className="h-14 w-auto"
-            width={56}
-            height={56}
+            width={200}
+            height={100}
             priority
           />
         ))}

@@ -3,18 +3,18 @@ import React from "react";
 import styles from "@/styles/MatchsBanner.module.css";
 const page = () => {
   const logos = [
-    "antidote.jpeg",
-    "Atelier-QG.png",
-    "Courteau.png",
-    "Groupe-chantier-lesage.png",
-    "GroupeCTR.png",
-    "HE.png",
-    "Mega-toit.png",
-    "PP_gradient_fondblanc.png",
+    "Antidote.jpg",
+    "AtelierQG.jpg",
+    "Courteau.jpg",
+    "GroupeChartierLesage.jpg",
+    "GroupeCTR.jpg",
+    "HE.jpg",
     "immo3r.jpg",
-    "MaisonDebauche.png",
-    "Sévignyepoxy.png",
-    "SPHERE.png",
+    "MegaToit.jpg",
+    "PowerPlay.jpg",
+    "MaisonDebauche.jpg",
+    "SevignyEpoxy.jpg",
+    "SphereExtermination.jpg",
   ];
   return (
     <div className="pb-20">
@@ -25,15 +25,15 @@ const page = () => {
           </h1>
         </div>
       </section>
-      <div className="grid grid-cols-2 md:grid-cols-3  gap-14 p-4 mt-10">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-14 px-14 mt-10 items-center justify-between ">
         {logos.map((logo) => (
-          <div key={logo} className="flex justify-center">
+          <div key={logo} className="flex justify-center items-center">
             <Image
               src={`/commenditaires/${logo}`}
               alt={logo}
-              className=" w-auto"
-              width={100}
-              height={100}
+              className="w-auto h-auto  object-contain"
+              width={180}
+              height={50}
               priority
             />
           </div>
