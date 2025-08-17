@@ -92,6 +92,7 @@ const CheckoutForm = ({
         if (isMounted) {
           if (data.error) {
             console.error("Error creating payment intent:", data.error);
+            console.error(data);
             setError(data.error);
           } else {
             console.log("Payment intent created:", data);
