@@ -92,7 +92,7 @@ const SuccessContent = ({ paymentIntentId }) => {
             {order.match
               ? "Vos billets ont été envoyés"
               : "Votre abonnement a été envoyé"}{" "}
-            à votre adresse email.
+            à votre adresse courriel.
           </h2>
           <p className="font-lato text-base text-center">
             Vérifiez votre boîte de réception et vos spams si nécessaire.
@@ -149,18 +149,18 @@ const SuccessContent = ({ paymentIntentId }) => {
           </div>
           <div className="bg-[#ececec] rounded-md p-6 mt-10">
             <h4 className="font-lato font-semibold text-lg">
-              Prochaine étapes
+              Prochaines étapes
             </h4>
             <div className="flex mb-3 mt-4">
               <IoMdMail className="text-[#0CA5E9] text-2xl mr-2" />
               <p className="font-lato text-[#414A5A]">
-                Vérifier votre email pour récupérer vos billets électronique
+                Vérifier votre courriel pour récupérer vos billets électroniques
               </p>
             </div>
             <div className="flex mb-3">
               <IoPrintSharp className="text-[#0CA5E9] text-2xl mr-2" />
               <p className="font-lato text-[#414A5A]">
-                Imprimez vos billets ou présentez-les sur votre smartphone le
+                Imprimez vos billets ou présentez-les sur votre téléphone le
                 jour du match
               </p>
             </div>

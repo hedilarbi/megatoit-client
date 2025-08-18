@@ -126,7 +126,7 @@ const Profil = () => {
               <div className="text-sm mt-2 flex gap-3 flex-wrap justify-center">
                 <p>membre depuis {formatDate(userData.createdAt).date}</p>
                 <p>|</p>
-                <p> {ticketsCount} tickets achetés</p>
+                <p> {ticketsCount} billets achetés</p>
                 <p>|</p>
                 <p> {abonnementCount} abonnements achetés</p>
               </div>
@@ -134,15 +134,19 @@ const Profil = () => {
           </div>
 
           <div className="">
-            <div className="flex bg-white p-6 rounded-md shadow-md  gap-4">
+            <div className="flex bg-white p-6 rounded-md font-bebas-neue text-xl shadow-md  gap-4">
               <button
-                className={`${filterType === "tickets" && "underline"}`}
+                className={`${
+                  filterType === "tickets" && "underline"
+                } cursor-pointer`}
                 onClick={() => handleFilterChange("tickets")}
               >
-                Tickets
+                Billets
               </button>
               <button
-                className={`${filterType === "abonnements" && "underline"}`}
+                className={`${
+                  filterType === "abonnements" && "underline"
+                } cursor-pointer`}
                 onClick={() => handleFilterChange("abonnements")}
               >
                 Abonnements
