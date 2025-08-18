@@ -19,7 +19,6 @@ const OrderComponent = ({ id }) => {
       const response = await getOrderById(id); // Assuming getOrderById is defined elsewhere
 
       if (response.success) {
-        console.log("Order fetched successfully:", response.data);
         setOrder(response.data);
       }
     } catch (err) {
@@ -133,7 +132,7 @@ const OrderComponent = ({ id }) => {
               {order.match.place}
             </p>
             <p className="text-base text-gray-600 mt-1 md:text-lg">
-              <span className="font-semibold">Nombre de tickets: </span>
+              <span className="font-semibold">Nombre de billets: </span>
 
               {order.tickets.length}
             </p>
@@ -142,7 +141,7 @@ const OrderComponent = ({ id }) => {
               {(order.amount / 100).toFixed(2)}
             </p>
             <p className=" text-black font-semibold mt-4 text-lg md:text-xl">
-              Tickets :
+              Billets :
             </p>
 
             {order.tickets.map((ticket, index) => (
@@ -151,14 +150,14 @@ const OrderComponent = ({ id }) => {
                 className="mt-2 border border-black rounded-md shadow-md p-3 flex justify-between items-center"
               >
                 <p className="text-base text-gray-600 font-semibold">
-                  Ticket N° {ticket.TicketCode}
+                  Billet N° {ticket.TicketCode}
                 </p>
                 <a
                   href={ticket.downloadUrl}
                   className="text-white bg-black rounded-md px-4 py-1 font-bebas-neue hover:underline"
                   target="_blank"
                 >
-                  Voir le ticket
+                  Voir le billet
                 </a>
               </div>
             ))}

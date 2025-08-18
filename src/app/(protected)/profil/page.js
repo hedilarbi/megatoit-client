@@ -155,7 +155,7 @@ const Profil = () => {
             {filterType === "tickets" && (
               <div className="p-3">
                 {content.length === 0 ? (
-                  <p>Aucun ticket trouvé.</p>
+                  <p>Aucun billet trouvé.</p>
                 ) : (
                   content.map((order) => {
                     const matchDate = formatDate(order.match.date);
@@ -204,7 +204,7 @@ const Profil = () => {
                         <div className="flex justify-between items-center mt-2">
                           <p className="text-sm text-gray-600">
                             <span className="font-semibold">
-                              Nombre de tickets:{" "}
+                              Nombre de billets:{" "}
                             </span>
 
                             {order.tickets.length}
@@ -219,7 +219,7 @@ const Profil = () => {
                             href={`/profil/achats/${order.id}`}
                             className="bg-black font-bebas-neue text-white px-4 py-2 rounded-md hover:bg-gray-800 transition-colors duration-300"
                           >
-                            Voir les tickets
+                            Voir les billets
                           </Link>
                         </div>
                       </div>

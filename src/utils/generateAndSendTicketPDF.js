@@ -53,7 +53,7 @@ export async function generateAndSendTicketPDF(
 
       for (const ticket of tickets) {
         // … dans votre boucle for (const ticket of tickets) { …
-
+        const userName = user.userName;
         // 1) création du document et de la page
         const pdfDoc = await PDFDocument.create();
         // page plus large pour passer le QR à droite
@@ -113,13 +113,55 @@ export async function generateAndSendTicketPDF(
         });
 
         // 7) Title tout en haut
+        // 7) Titre à gauche + userName à droite (sur la même ligne)
         const title = `Billet N ${ticketCode}`;
         const titleSize = 28;
-        const titleWidth = fontBold.widthOfTextAtSize(title, titleSize);
+
+        const userText = String(userName || "");
+        let userSize = 24; // taille du userName (gras)
+        const minUserSize = 12; // taille min si ça ne rentre pas
+
+        const titleY = height - 60;
+        const titleLeftX = margin + 20;
+        const gapMin = 40; // espace minimal entre le titre et le userName
+
+        const titleW = fontBold.widthOfTextAtSize(title, titleSize);
+
+        // Limite droite de la colonne gauche (avant la séparation / QR)
+        const rightBound = separatorX - margin;
+
+        // Largeur du userName à la taille initiale
+        let userW = fontBold.widthOfTextAtSize(userText, userSize);
+
+        // Position droite par défaut (aligné à droite)
+        let userX = rightBound - userW;
+
+        // Respecter l’espace minimal entre les deux textes
+        if (userX < titleLeftX + titleW + gapMin) {
+          userX = titleLeftX + titleW + gapMin;
+        }
+
+        // Si ça déborde encore, réduire la taille du userName progressivement
+        while (userX + userW > rightBound && userSize > minUserSize) {
+          userSize -= 1;
+          userW = fontBold.widthOfTextAtSize(userText, userSize);
+          userX = Math.max(titleLeftX + titleW + gapMin, rightBound - userW);
+        }
+
+        // Dessin du titre (gauche)
         page.drawText(title, {
-          x: (leftWidth - titleWidth) / 2 + margin,
-          y: height - 60,
+          x: titleLeftX,
+          y: titleY,
           size: titleSize,
+          font: fontBold,
+          color: rgb(0, 0, 0),
+        });
+
+        // Dessin du userName (droite, en gras)
+        page.drawText(userText, {
+          x: userX,
+          y: titleY,
+          size: userSize,
           font: fontBold,
           color: rgb(0, 0, 0),
         });
@@ -243,7 +285,7 @@ export async function generateAndSendTicketPDF(
 
         // Add to email attachments
         attachments.push({
-          filename: `ticket-${ticket.TicketCode}.pdf`,
+          filename: `billet-${ticket.TicketCode}.pdf`,
           content: pdfBytes,
           contentType: "application/pdf",
         });
@@ -350,16 +392,58 @@ export async function generateAndSendTicketPDF(
       });
 
       // 7) Title tout en haut
-      const title = `Abonnement N ${ticketCode}`;
-      const titleSize = 28;
-      const titleWidth = fontBold.widthOfTextAtSize(title, titleSize);
-      page.drawText(title, {
-        x: (leftWidth - titleWidth) / 2 + margin,
-        y: height - 60,
-        size: titleSize,
-        font: fontBold,
-        color: rgb(0, 0, 0),
-      });
+      // 7) Titre "Abonnement N ..." à gauche + userName en gras à droite
+      {
+        const title = `Abonnement N ${ticketCode}`;
+        const titleSize = 28;
+
+        const userText = String(userName || "");
+        let userSize = 24; // taille du userName (gras)
+        const minUserSize = 12; // taille min si ça ne rentre pas
+
+        const titleY = height - 60;
+        const titleLeftX = margin + 20;
+        const gapMin = 40; // espace minimal entre le titre et le userName
+
+        const titleW = fontBold.widthOfTextAtSize(title, titleSize);
+
+        // Limite droite de la colonne gauche (avant la séparation / QR)
+        const rightBound = separatorX - margin;
+
+        // Largeur/position du userName
+        let userW = fontBold.widthOfTextAtSize(userText, userSize);
+        let userX = rightBound - userW;
+
+        // Respecter l’espace minimal entre les deux textes
+        if (userX < titleLeftX + titleW + gapMin) {
+          userX = titleLeftX + titleW + gapMin;
+        }
+
+        // Si ça déborde encore, réduire la taille du userName
+        while (userX + userW > rightBound && userSize > minUserSize) {
+          userSize -= 1;
+          userW = fontBold.widthOfTextAtSize(userText, userSize);
+          userX = Math.max(titleLeftX + titleW + gapMin, rightBound - userW);
+        }
+
+        // Dessin du titre (gauche)
+        page.drawText(title, {
+          x: titleLeftX,
+          y: titleY,
+          size: titleSize,
+          font: fontBold,
+          color: rgb(0, 0, 0),
+        });
+
+        // Dessin du userName (droite, en gras)
+        page.drawText(userText, {
+          x: userX,
+          y: titleY,
+          size: userSize,
+          font: fontBold,
+          color: rgb(0, 0, 0),
+        });
+      }
 
       // 8) Ligne horizontale supérieure
       page.drawLine({

@@ -88,7 +88,10 @@ export const getAbonementById = async (abonementId) => {
   try {
     const abonementDoc = await getDoc(doc(db, "abonements", abonementId));
     if (abonementDoc.exists()) {
-      return { success: true, data: abonementDoc.data() };
+      return {
+        success: true,
+        data: abonementDoc.data(),
+      };
     } else {
       return { success: false, error: "Abonnement non trouvé" };
     }
