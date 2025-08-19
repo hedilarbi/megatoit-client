@@ -22,7 +22,7 @@ export async function generateAndSendTicketPDF(
     const bucket = getStorage().bucket();
     const logoPath = path.join(process.cwd(), "public", "logo-big.png");
     const logoBytes = fs.readFileSync(logoPath);
-
+    const userName = user.userName.toUpperCase();
     let match = null;
 
     if (tickets.length > 0) {
@@ -53,7 +53,6 @@ export async function generateAndSendTicketPDF(
 
       for (const ticket of tickets) {
         // … dans votre boucle for (const ticket of tickets) { …
-        const userName = user.userName;
         // 1) création du document et de la page
         const pdfDoc = await PDFDocument.create();
         // page plus large pour passer le QR à droite
@@ -114,7 +113,7 @@ export async function generateAndSendTicketPDF(
 
         // 7) Title tout en haut
         // 7) Titre à gauche + userName à droite (sur la même ligne)
-        const title = `Billet N ${ticketCode}`;
+        const title = `BILLET N ${ticketCode}`;
         const titleSize = 28;
 
         const userText = String(userName || "");
@@ -394,7 +393,7 @@ export async function generateAndSendTicketPDF(
       // 7) Title tout en haut
       // 7) Titre "Abonnement N ..." à gauche + userName en gras à droite
       {
-        const title = `Abonnement N ${ticketCode}`;
+        const title = `ABONNEMENT N ${ticketCode}`;
         const titleSize = 28;
 
         const userText = String(userName || "");
