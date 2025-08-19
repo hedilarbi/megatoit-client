@@ -21,7 +21,7 @@ export async function generateAndSendTicketPDF(
   try {
     const bucket = getStorage().bucket();
     const logoPath = path.join(process.cwd(), "public", "logo-big.png");
-    const logoBytes = fs.readFileSync(logoPath);
+
     const userName = user.userName.toUpperCase();
     let match = null;
 
@@ -291,7 +291,7 @@ export async function generateAndSendTicketPDF(
       }
 
       const port = Number(process.env.SMTP_PORT) || 465;
-      const secure = port === 465;
+      const secure = port === 465; // true si port 465, false si 587
       const transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST,
         port,
@@ -299,36 +299,50 @@ export async function generateAndSendTicketPDF(
           user: process.env.EMAIL_USER,
           pass: process.env.EMAIL_PASS,
         },
+        name: "lemegatoit.com",
+        logger: true,
+        debug: true,
+        secure: true,
         requireTLS: !secure, // impose STARTTLS si port 587
         tls: { minVersion: "TLSv1.2" }, // bonne pratique
       });
+      const subjectTickets = `Vos ${
+        tickets.length > 1 ? "billets" : "billet"
+      } - Mégatoit vs ${match.opponent.name}`;
+      const textTickets =
+        `Commande confirmée (№${order.code}).\n` +
+        `${
+          tickets.length > 1 ? "Billets" : "Billet"
+        } en pièce jointe (PDF).\n` +
+        `Émetteur : Billetterie Mégatoit <billets@lemegatoit.com>\n` +
+        `Si vous n'êtes pas à l'origine de cet achat, contactez support@lemegatoit.com.`;
+
+      // ton HTML existant:
+      const htmlTickets = `
+  <div style="text-align:center">
+    <img src="cid:logo-big" alt="Le Mégatoit" style="width:150px;height:auto" />
+  </div>
+  <p style="text-align:center;font-weight:bold;font-size:22px">Commande confirmée !</p>
+  <p style="text-align:center;font-size:16px">
+    Votre commande <strong>№${order.code}</strong> est confirmée.
+    Vous trouverez en pièce jointe ${
+      tickets.length > 1 ? "vos billets" : "votre billet"
+    }.
+  </p>
+`;
 
       await transporter.sendMail({
         from: `"Billetterie Mégatoit" <${process.env.EMAIL_USER}>`,
         to: user.email,
-        subject: `🎟 ${
-          tickets.length > 1 ? "Vos billets" : "Votre billet"
-        } pour le match Mégatoit vs ${match.opponent.name}`,
-        html: `
-          <div style="text-align:center">
-            <img src="cid:logo" alt="Logo" style="width:150px;height:auto" />
-          </div>
-          <p style="text-align:center;font-weight:bold;font-size:22px">
-            Commande confirmée !
-          </p>
-          <p style="text-align:center;font-size:16px">
-            Votre commande <strong>№${order.code}</strong> est confirmée.
-            Vous trouverez en pièce jointe ${
-              tickets.length > 1 ? "vos billets" : "votre billet"
-            }.
-          </p>
-        `,
+        subject: subjectTickets,
+        text: textTickets, // << ajoute la version texte
+        html: htmlTickets,
         attachments: [
           ...attachments,
           {
             filename: "logo-big.png",
-            content: logoBytes,
-            cid: "logo",
+            path: path.join(process.cwd(), "public", "logo-big.png"),
+            cid: "logo-big",
           },
         ],
       });
@@ -392,57 +406,56 @@ export async function generateAndSendTicketPDF(
 
       // 7) Title tout en haut
       // 7) Titre "Abonnement N ..." à gauche + userName en gras à droite
-      {
-        const title = `ABONNEMENT N ${ticketCode}`;
-        const titleSize = 28;
 
-        const userText = String(userName || "");
-        let userSize = 24; // taille du userName (gras)
-        const minUserSize = 12; // taille min si ça ne rentre pas
+      const title = `ABONNEMENT N ${ticketCode}`;
+      const titleSize = 20;
 
-        const titleY = height - 60;
-        const titleLeftX = margin + 20;
-        const gapMin = 40; // espace minimal entre le titre et le userName
+      const userText = String(userName || "");
+      let userSize = 22; // taille du userName (gras)
+      const minUserSize = 12; // taille min si ça ne rentre pas
 
-        const titleW = fontBold.widthOfTextAtSize(title, titleSize);
+      const titleY = height - 60;
+      const titleLeftX = margin + 20;
+      const gapMin = 40; // espace minimal entre le titre et le userName
 
-        // Limite droite de la colonne gauche (avant la séparation / QR)
-        const rightBound = separatorX - margin;
+      const titleW = fontBold.widthOfTextAtSize(title, titleSize);
 
-        // Largeur/position du userName
-        let userW = fontBold.widthOfTextAtSize(userText, userSize);
-        let userX = rightBound - userW;
+      // Limite droite de la colonne gauche (avant la séparation / QR)
+      const rightBound = separatorX - margin;
 
-        // Respecter l’espace minimal entre les deux textes
-        if (userX < titleLeftX + titleW + gapMin) {
-          userX = titleLeftX + titleW + gapMin;
-        }
+      // Largeur/position du userName
+      let userW = fontBold.widthOfTextAtSize(userText, userSize);
+      let userX = rightBound - userW;
 
-        // Si ça déborde encore, réduire la taille du userName
-        while (userX + userW > rightBound && userSize > minUserSize) {
-          userSize -= 1;
-          userW = fontBold.widthOfTextAtSize(userText, userSize);
-          userX = Math.max(titleLeftX + titleW + gapMin, rightBound - userW);
-        }
-
-        // Dessin du titre (gauche)
-        page.drawText(title, {
-          x: titleLeftX,
-          y: titleY,
-          size: titleSize,
-          font: fontBold,
-          color: rgb(0, 0, 0),
-        });
-
-        // Dessin du userName (droite, en gras)
-        page.drawText(userText, {
-          x: userX,
-          y: titleY,
-          size: userSize,
-          font: fontBold,
-          color: rgb(0, 0, 0),
-        });
+      // Respecter l’espace minimal entre les deux textes
+      if (userX < titleLeftX + titleW + gapMin) {
+        userX = titleLeftX + titleW + gapMin;
       }
+
+      // Si ça déborde encore, réduire la taille du userName
+      while (userX + userW > rightBound && userSize > minUserSize) {
+        userSize -= 1;
+        userW = fontBold.widthOfTextAtSize(userText, userSize);
+        userX = Math.max(titleLeftX + titleW + gapMin, rightBound - userW);
+      }
+
+      // Dessin du titre (gauche)
+      page.drawText(title, {
+        x: titleLeftX,
+        y: titleY,
+        size: titleSize,
+        font: fontBold,
+        color: rgb(0, 0, 0),
+      });
+
+      // Dessin du userName (droite, en gras)
+      page.drawText(userText, {
+        x: userX,
+        y: titleY,
+        size: userSize,
+        font: fontBold,
+        color: rgb(0, 0, 0),
+      });
 
       // 8) Ligne horizontale supérieure
       page.drawLine({
@@ -495,7 +508,7 @@ export async function generateAndSendTicketPDF(
       const downloadURL = file.publicUrl();
       await updateSubscriptionDownloadUrl(subscription.code, downloadURL);
       const port = Number(process.env.SMTP_PORT) || 465;
-      const secure = port === 465;
+
       const transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST,
         port,
@@ -503,17 +516,26 @@ export async function generateAndSendTicketPDF(
           user: process.env.EMAIL_USER,
           pass: process.env.EMAIL_PASS,
         },
-        requireTLS: !secure, // impose STARTTLS si port 587
-        tls: { minVersion: "TLSv1.2" }, // bonne pratique
+        requireTLS: 465, // impose STARTTLS si port 587
+        tls: { minVersion: "TLSv1.2" }, // bonne pratique,
+        logger: true,
+        debug: true,
+        secure: true,
+        name: "lemegatoit.com",
       });
+      await transporter.verify();
 
       await transporter.sendMail({
         from: `"Billetterie Mégatoit" <${process.env.EMAIL_USER}>`,
         to: user.email,
         subject: `🎟 Votre abonnement Mégatoit pour la saison ${abonnement.data.season}`,
+        text:
+          `Votre abonnement pour la saison ${abonnement.data.season} est prêt !\n\n` +
+          `Téléchargez-le en pièce jointe.\n\n` +
+          `Émetteur : Billetterie Mégatoit <${process.env.EMAIL_USER}>`,
         html: `
           <div style="text-align:center">
-            <img src="cid:logo" alt="Logo" style="width:150px;height:auto" />
+            <img src="cid:logo-big" alt="Le Mégatoit" style="width:150px;height:auto" />
           </div>
           <p style="text-align:center;font-weight:bold;font-size:22px">
             Commande confirmée !
@@ -532,7 +554,7 @@ export async function generateAndSendTicketPDF(
           {
             filename: "logo-big.png",
             content: logoBytes,
-            cid: "logo",
+            cid: "logo-big",
           },
         ],
       });
