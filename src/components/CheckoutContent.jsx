@@ -1,6 +1,6 @@
 "use client";
 import { useAuth } from "@/context/AuthContext";
-import { getMatchByTitle, getMatchByUid } from "@/services/match.service";
+import { getMatchByUid } from "@/services/match.service";
 import { getAllTaxes } from "@/services/taxes.service";
 
 import { useRouter } from "next/navigation";
@@ -45,6 +45,8 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
         }
         if (userResponse) {
           setUserData(userResponse);
+        } else {
+          setError("Utilisateur non trouvé");
         }
         if (taxesResponse.success && taxesResponse.data && matchResponse.data) {
           const TaxesList = taxesResponse.data.map((tax) => ({
@@ -109,7 +111,7 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
     if (((matchId && quantity) || abonnementId) && user) {
       fetchData();
     }
-  }, [matchId, user, abonnementId]);
+  }, [matchId, user, abonnementId, error]);
   const formatDate = (timestamp) => {
     const milliseconds =
       timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000;
@@ -139,13 +141,22 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
       </div>
     );
   }
+
+  if (error) {
+    return (
+      <div className="h-screen flex justify-center items-center">
+        <p className="text-red-500">{error}</p>
+        <button
+          onClick={() => setError(null)}
+          className="ml-4 px-4 py-2 bg-blue-500 text-white rounded"
+        >
+          Réessayer
+        </button>
+      </div>
+    );
+  }
   return (
     <div className="pt-16 md:px-24 px-4 w-full">
-      {error && (
-        <p className="text-center font-lato text-xl text-red-400 font-semibold my-4">
-          {error}
-        </p>
-      )}
       {match && (
         <div>
           <div className="border-b border-black pb-10">

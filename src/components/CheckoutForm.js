@@ -47,6 +47,11 @@ const CheckoutForm = ({
           }
         }
       }
+      if (!userId) {
+        setError("Vous devez être connecté pour effectuer un paiement");
+        setLoading(false);
+        return;
+      }
 
       const { error } = await stripe.confirmPayment({
         elements,

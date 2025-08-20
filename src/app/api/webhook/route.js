@@ -41,6 +41,14 @@ export async function POST(request) {
       const ticketPrice = paymentIntent.metadata?.ticketPrice;
       const abonnementId = paymentIntent.metadata?.abonnementId;
       const abonnementPrice = paymentIntent.metadata?.abonnementPrice;
+
+      const userRef = admin.firestore().collection("users").doc(userId);
+      const userDoc = await userRef.get();
+      if (!userDoc.exists) {
+        console.error("User not found:", userId);
+        return new Response("User not found", { status: 404 });
+      }
+
       let response = null;
       if (matchId && quantity && ticketPrice) {
         response = await createTicketAndOrder({
