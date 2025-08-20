@@ -300,8 +300,7 @@ export async function generateAndSendTicketPDF(
           pass: process.env.EMAIL_PASS,
         },
         name: "lemegatoit.com",
-        logger: true,
-        debug: true,
+
         secure: true,
         requireTLS: !secure, // impose STARTTLS si port 587
         tls: { minVersion: "TLSv1.2" }, // bonne pratique
@@ -358,7 +357,7 @@ export async function generateAndSendTicketPDF(
       const { width, height } = page.getSize();
 
       // 2) fonts
-
+      const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
       const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
       // 3) données
@@ -466,15 +465,25 @@ export async function generateAndSendTicketPDF(
       });
 
       //i want i the center of the pdf add the logo of megatoit
-      const logoH = 120; // hauteur du logo
+      const logoH = 110; // hauteur du logo
       const logoDims = team1LogoImage.scale(logoH / team1LogoImage.height);
       const logoX = (leftWidth - logoDims.width) / 2 + margin;
-      const logoY = height - 160;
+      const logoY = height - 155;
       page.drawImage(team1LogoImage, {
         x: logoX,
         y: logoY - logoDims.height / 2 + titleSize / 2,
         width: logoDims.width,
         height: logoDims.height,
+      });
+      const noteSize = 16;
+      const noteText = "Valide pour (1) consommation gratuite par match";
+      const noteW = fontRegular.widthOfTextAtSize(noteText, noteSize);
+      const noteY = logoY - 65;
+      page.drawText(noteText, {
+        x: (leftWidth - noteW) / 2 + margin,
+        y: noteY,
+        size: noteSize,
+        font: fontRegular,
       });
 
       // 11) Ligne horizontale inférieure
@@ -518,8 +527,7 @@ export async function generateAndSendTicketPDF(
         },
         requireTLS: 465, // impose STARTTLS si port 587
         tls: { minVersion: "TLSv1.2" }, // bonne pratique,
-        logger: true,
-        debug: true,
+
         secure: true,
         name: "lemegatoit.com",
       });
