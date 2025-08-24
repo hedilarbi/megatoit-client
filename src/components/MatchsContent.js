@@ -99,11 +99,11 @@ const MatchsContent = () => {
             </button>
             <button
               className={`ml-4 cursor-pointer ${
-                type === "Éxtérieur" ? "underline" : ""
+                type === "À l'étranger" ? "underline" : ""
               }`}
-              onClick={() => setType("Éxtérieur")}
+              onClick={() => setType("À l'étranger")}
             >
-              Matchs à l&apos;extérieur
+              Matchs à l&apos;étranger
             </button>
           </div>
           <div className="my-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4 pb-4">
