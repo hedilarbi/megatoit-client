@@ -1,3 +1,4 @@
+import admin from "@/lib/firebaseAdmin";
 import {
   createTicketAndOrder,
   getUserDocument,
