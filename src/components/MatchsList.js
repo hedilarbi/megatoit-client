@@ -62,7 +62,7 @@ const MatchsList = () => {
   }, []);
 
   return (
-    <section className="md:px-8 px-4 w-full py-12">
+    <section className="md:px-8 px-4 w-full py-12 ">
       <h2 className="font-bebas-neue md:text-4xl text-2xl text-center">
         MATCH À VENIR
       </h2>
