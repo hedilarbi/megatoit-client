@@ -2,7 +2,7 @@ import Image from "next/image";
 import React from "react";
 import Logo from "@/assets/logo.png"; // Adjust the path as necessary
 import Link from "next/link";
-import { FaFacebook, FaPhone, FaTiktok } from "react-icons/fa";
+import { FaFacebook, FaTiktok } from "react-icons/fa";
 import { IoMdMail } from "react-icons/io";
 import { RiInstagramFill } from "react-icons/ri";
 const Footer = () => {
@@ -23,10 +23,10 @@ const Footer = () => {
                 <IoMdMail />
                 <p>support@lemegatoit.com</p>
               </li>
-              <li className="flex items-center gap-2 mb-2">
+              {/* <li className="flex items-center gap-2 mb-2">
                 <FaPhone />
                 <p>+1 1 23 45 67 89</p>
-              </li>
+              </li> */}
             </ul>
           </div>
           <div>

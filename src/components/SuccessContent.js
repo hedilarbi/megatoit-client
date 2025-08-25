@@ -10,7 +10,6 @@ import Link from "next/link";
 import { BsFillTicketPerforatedFill } from "react-icons/bs";
 import { RiHome2Fill } from "react-icons/ri";
 import { IoMail } from "react-icons/io5";
-import { FaPhoneAlt } from "react-icons/fa";
 
 const SuccessContent = ({ paymentIntentId }) => {
   const [order, setOrder] = React.useState(null);
@@ -203,10 +202,10 @@ const SuccessContent = ({ paymentIntentId }) => {
             <IoMail size={20} />
             <p className="font-lato font-semibold">support@lemegatoit.com</p>
           </div>
-          <div className="flex gap-2 items-center text-[#0CA5E9]">
+          {/* <div className="flex gap-2 items-center text-[#0CA5E9]">
             <FaPhoneAlt size={20} />
             <p className="font-lato font-semibold">12 12 12 12 12 12</p>
-          </div>
+          </div> */}
         </div>
       </div>
     </>

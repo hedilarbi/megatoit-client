@@ -1,6 +1,5 @@
 import React from "react";
 
-import { FaPhoneAlt } from "react-icons/fa";
 import { IoMail } from "react-icons/io5";
 import ContactBanner from "@/components/ContactBanner";
 import { IoMdPin } from "react-icons/io";
@@ -27,7 +26,7 @@ const page = () => {
               support@lemegatoit.com
             </p>
           </div>
-          <div className="flex-1 flex w-full flex-col items-center bg-[#f3f4f6] px-4 py-8 rounded-md">
+          {/* <div className="flex-1 flex w-full flex-col items-center bg-[#f3f4f6] px-4 py-8 rounded-md">
             <div className="bg-black flex p-3 rounded-full justify-center items-center">
               <FaPhoneAlt size={28} color="white" />
             </div>
@@ -37,7 +36,7 @@ const page = () => {
             <p className="text-center font-lato mt-3 font-semibold">
               12 12 12 12 12 12
             </p>
-          </div>
+          </div> */}
           <div className="flex-1 flex w-full flex-col items-center bg-[#f3f4f6] px-4 py-8 rounded-md">
             <div className="bg-black flex p-3 rounded-full justify-center items-center">
               <IoMdPin size={28} color="white" />
