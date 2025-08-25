@@ -113,7 +113,7 @@ export async function generateAndSendTicketPDF(
 
         // 7) Title tout en haut
         // 7) Titre à gauche + userName à droite (sur la même ligne)
-        const title = `BILLET Nᵒ ${ticketCode}`;
+        const title = `BILLET N° ${ticketCode}`;
         const titleSize = 28;
 
         const userText = String(userName || "");
@@ -295,21 +295,17 @@ export async function generateAndSendTicketPDF(
       const transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST,
         port,
-        auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASS,
-        },
+        secure, // true for 465, false for 587
+        requireTLS: !secure, // only require STARTTLS on ports like 587
+        auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
+        tls: { minVersion: "TLSv1.2" },
         name: "lemegatoit.com",
-
-        secure: true,
-        requireTLS: !secure, // impose STARTTLS si port 587
-        tls: { minVersion: "TLSv1.2" }, // bonne pratique
       });
       const subjectTickets = `Vos ${
         tickets.length > 1 ? "billets" : "billet"
       } - Mégatoit vs ${match.opponent.name}`;
       const textTickets =
-        `Commande confirmée (Nᵒ${order.code}).\n` +
+        `Commande confirmée (N°${order.code}).\n` +
         `${
           tickets.length > 1 ? "Billets" : "Billet"
         } en pièce jointe (PDF).\n` +
@@ -323,7 +319,7 @@ export async function generateAndSendTicketPDF(
   </div>
   <p style="text-align:center;font-weight:bold;font-size:22px">Commande confirmée !</p>
   <p style="text-align:center;font-size:16px">
-    Votre commande <strong>Nᵒ ${order.code}</strong> est confirmée.
+    Votre commande <strong>N° ${order.code}</strong> est confirmée.
     Vous trouverez en pièce jointe ${
       tickets.length > 1 ? "vos billets" : "votre billet"
     }.
@@ -406,7 +402,7 @@ export async function generateAndSendTicketPDF(
       // 7) Title tout en haut
       // 7) Titre "Abonnement N ..." à gauche + userName en gras à droite
 
-      const title = `ABONNEMENT Nᵒ ${ticketCode}`;
+      const title = `ABONNEMENT N° ${ticketCode}`;
       const titleSize = 20;
 
       const userText = String(userName || "");
@@ -521,14 +517,10 @@ export async function generateAndSendTicketPDF(
       const transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST,
         port,
-        auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASS,
-        },
-        requireTLS: 465, // impose STARTTLS si port 587
-        tls: { minVersion: "TLSv1.2" }, // bonne pratique,
-
-        secure: true,
+        secure, // true for 465, false for 587
+        requireTLS: !secure, // only require STARTTLS on ports like 587
+        auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
+        tls: { minVersion: "TLSv1.2" },
         name: "lemegatoit.com",
       });
       await transporter.verify();
@@ -549,7 +541,7 @@ export async function generateAndSendTicketPDF(
         Commande confirmée !
           </p>
           <p style="text-align:center;font-size:16px">
-        Votre commande <strong>Nᵒ ${order.code}</strong> est confirmée.
+        Votre commande <strong>N° ${order.code}</strong> est confirmée.
         Vous trouverez en pièce jointe votre abonnement.
           </p>
           <p style="background:#f7f7f7;border-radius:8px;padding:16px 20px;margin:24px auto 16px auto;max-width:500px;font-size:15px;color:#333;text-align:center;border:1px solid #e0e0e0;">
