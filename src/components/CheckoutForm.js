@@ -63,6 +63,7 @@ const CheckoutForm = ({
 
       if (error) {
         console.error("Payment confirmation error:", error);
+
         setError(error.message);
         setLoading(false);
         return;
