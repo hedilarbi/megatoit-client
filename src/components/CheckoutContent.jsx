@@ -319,6 +319,18 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
                 gratuite par match
               </p>
             </div>
+
+            <div className="mt-4">
+              <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded-md shadow-sm flex items-start gap-2">
+                <span className="font-bold mr-2">Note:</span>
+                <span>
+                  Ce billet de saison donne droit à l’accès à tous les matchs de
+                  la saison régulière du MégaToit de Trois-Rivières. Il est
+                  unique et incessible. Sa présentation est obligatoire à chaque
+                  entrée au Colisée Jean-Guy Talbot.
+                </span>
+              </div>
+            </div>
             <div className="mt-8">
               <div className="flex items-center ">
                 <FaCalendarAlt

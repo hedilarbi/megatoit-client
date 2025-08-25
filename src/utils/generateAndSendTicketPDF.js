@@ -113,7 +113,7 @@ export async function generateAndSendTicketPDF(
 
         // 7) Title tout en haut
         // 7) Titre à gauche + userName à droite (sur la même ligne)
-        const title = `BILLET N ${ticketCode}`;
+        const title = `BILLET Nᵒ ${ticketCode}`;
         const titleSize = 28;
 
         const userText = String(userName || "");
@@ -309,7 +309,7 @@ export async function generateAndSendTicketPDF(
         tickets.length > 1 ? "billets" : "billet"
       } - Mégatoit vs ${match.opponent.name}`;
       const textTickets =
-        `Commande confirmée (№${order.code}).\n` +
+        `Commande confirmée (Nᵒ${order.code}).\n` +
         `${
           tickets.length > 1 ? "Billets" : "Billet"
         } en pièce jointe (PDF).\n` +
@@ -323,7 +323,7 @@ export async function generateAndSendTicketPDF(
   </div>
   <p style="text-align:center;font-weight:bold;font-size:22px">Commande confirmée !</p>
   <p style="text-align:center;font-size:16px">
-    Votre commande <strong>№${order.code}</strong> est confirmée.
+    Votre commande <strong>Nᵒ ${order.code}</strong> est confirmée.
     Vous trouverez en pièce jointe ${
       tickets.length > 1 ? "vos billets" : "votre billet"
     }.
@@ -406,7 +406,7 @@ export async function generateAndSendTicketPDF(
       // 7) Title tout en haut
       // 7) Titre "Abonnement N ..." à gauche + userName en gras à droite
 
-      const title = `ABONNEMENT N ${ticketCode}`;
+      const title = `ABONNEMENT Nᵒ ${ticketCode}`;
       const titleSize = 20;
 
       const userText = String(userName || "");
@@ -543,14 +543,21 @@ export async function generateAndSendTicketPDF(
           `Émetteur : Billetterie Mégatoit <${process.env.EMAIL_USER}>`,
         html: `
           <div style="text-align:center">
-            <img src="cid:logo-big" alt="Le Mégatoit" style="width:150px;height:auto" />
+        <img src="cid:logo-big" alt="Le Mégatoit" style="width:150px;height:auto" />
           </div>
           <p style="text-align:center;font-weight:bold;font-size:22px">
-            Commande confirmée !
+        Commande confirmée !
           </p>
           <p style="text-align:center;font-size:16px">
-            Votre commande <strong>№${order.code}</strong> est confirmée.
-            Vous trouverez en pièce jointe votre abonnement.
+        Votre commande <strong>Nᵒ ${order.code}</strong> est confirmée.
+        Vous trouverez en pièce jointe votre abonnement.
+          </p>
+          <p style="background:#f7f7f7;border-radius:8px;padding:16px 20px;margin:24px auto 16px auto;max-width:500px;font-size:15px;color:#333;text-align:center;border:1px solid #e0e0e0;">
+        <strong style="color:#1976d2;">Note :</strong>
+        Ce billet de saison donne droit à l’accès à tous les matchs de
+        la saison régulière du MégaToit de Trois-Rivières.<br>
+        Il est <b>unique</b> et <b>incessible</b>.<br>
+        Sa présentation est <u>obligatoire</u> à chaque entrée au Colisée Jean-Guy Talbot.
           </p>
         `,
         attachments: [
