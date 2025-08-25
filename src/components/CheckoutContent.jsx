@@ -322,8 +322,8 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
 
             <div className="mt-4">
               <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded-md shadow-sm flex items-start gap-2">
-                <span className="font-bold mr-2">Note:</span>
-                <span>
+                <span className="font-bold ">Note:</span>
+                <span className="ml-2">
                   Ce billet de saison donne droit à l’accès à tous les matchs de
                   la saison régulière du MégaToit de Trois-Rivières. Il est
                   unique et incessible. Sa présentation est obligatoire à chaque
