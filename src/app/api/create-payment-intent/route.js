@@ -31,7 +31,7 @@ export async function POST(request) {
     let paymentIntent = null;
     if (matchId && quantity && ticketPrice) {
       paymentIntent = await stripe.paymentIntents.create({
-        amount: amount * 100, // Convert to cents
+        amount: amount, // Convert to cents
         currency: currency,
         metadata: {
           userId: userId,
@@ -46,7 +46,7 @@ export async function POST(request) {
     }
     if (abonnementId && abonnementPrice) {
       paymentIntent = await stripe.paymentIntents.create({
-        amount: amount * 100, // Convert to cents
+        amount: amount, // Convert to cents
         currency: currency,
         metadata: {
           userId: userId,
