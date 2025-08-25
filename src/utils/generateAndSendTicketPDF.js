@@ -295,8 +295,8 @@ export async function generateAndSendTicketPDF(
       const transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST,
         port,
-        secure, // true for 465, false for 587
-        requireTLS: !secure, // only require STARTTLS on ports like 587
+        secure: true, // true for 465, false for 587
+        requireTLS: false, // only require STARTTLS on ports like 587
         auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
         tls: { minVersion: "TLSv1.2" },
         name: "lemegatoit.com",
@@ -517,8 +517,8 @@ export async function generateAndSendTicketPDF(
       const transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST,
         port,
-        secure, // true for 465, false for 587
-        requireTLS: !secure, // only require STARTTLS on ports like 587
+        secure: true, // true for 465, false for 587
+        requireTLS: false, // only require STARTTLS on ports like 587
         auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
         tls: { minVersion: "TLSv1.2" },
         name: "lemegatoit.com",
