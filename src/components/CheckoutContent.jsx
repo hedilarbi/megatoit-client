@@ -315,7 +315,7 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
                 <FaCheck className="inline text-black mr-2" />1 match présaison
               </p>
               <p className="font-lato text-black text-base mt-2 uppercase">
-                <FaCheck className="inline text-black mr-2" />1 consomation
+                <FaCheck className="inline text-black mr-2" />1 consommation
                 gratuite par match
               </p>
             </div>

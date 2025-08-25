@@ -22,7 +22,7 @@ const AbonnementSection = () => {
           <FaCheck className="inline text-white mr-2" />1 match présaison
         </p>
         <p className="font-lato text-white text-lg mt-4">
-          <FaCheck className="inline text-white mr-2" />1 consomation gratuite
+          <FaCheck className="inline text-white mr-2" />1 consommation gratuite
           par match
         </p>
         <Link
