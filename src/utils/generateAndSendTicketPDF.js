@@ -291,7 +291,7 @@ export async function generateAndSendTicketPDF(
       }
 
       const port = Number(process.env.SMTP_PORT) || 465;
-      const secure = port === 465; // true si port 465, false si 587
+
       const transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST,
         port,
@@ -301,8 +301,8 @@ export async function generateAndSendTicketPDF(
         tls: { minVersion: "TLSv1.2" },
         name: "lemegatoit.com",
       });
-      const subjectTickets = `Vos ${
-        tickets.length > 1 ? "billets" : "billet"
+      const subjectTickets = ` ${
+        tickets.length > 1 ? "Vos billets" : "Votre billet"
       } - Mégatoit vs ${match.opponent.name}`;
       const textTickets =
         `Commande confirmée (N°${order.code}).\n` +
@@ -528,7 +528,7 @@ export async function generateAndSendTicketPDF(
       await transporter.sendMail({
         from: `"Billetterie Mégatoit" <${process.env.EMAIL_USER}>`,
         to: user.email,
-        subject: `🎟 Votre abonnement Mégatoit pour la saison ${abonnement.data.season}`,
+        subject: `Votre abonnement Mégatoit pour la saison ${abonnement.data.season}`,
         text:
           `Votre abonnement pour la saison ${abonnement.data.season} est prêt !\n\n` +
           `Téléchargez-le en pièce jointe.\n\n` +
