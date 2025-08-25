@@ -68,7 +68,7 @@ const CountDownVendredi = () => {
   return (
     <div className=" flex flex-col items-center gap-2 bg-black text-white   py-10 px-10    shadow-lg">
       <p className="md:text-3xl font-bebas-neue text-lg  text-white text-center">
-        Lancement des ventes des billets de match le vendredi à midi!
+        Vendredi 29 Août dès 12h00 : Ouverture de la billetterie!
       </p>
       <div className="flex items-center gap-2  font-bold tracking-wider md:text-5xl font-bebas-neue text-lg">
         <span>{d}</span>
