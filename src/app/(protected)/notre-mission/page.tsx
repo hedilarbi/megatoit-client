@@ -172,7 +172,7 @@ const page = () => {
               <span>Achetez des billets</span>
             </Link>
             <Link
-              href={"/abonnements"}
+              href={"/abonnement-saison"}
               className="bg-white border border-black rounded-md  flex justify-center items-center text-black font-bebas-neue text-xl px-6 py-2  transition-colors gap-3"
             >
               <IoDiamond />

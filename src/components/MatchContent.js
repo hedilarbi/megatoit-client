@@ -165,7 +165,7 @@ const MatchContent = ({ id }) => {
                 </div>
                 <div className="mt-8 border-[#949494] border p-8 bg-white rounded-md">
                   <h2 className="md:text-2xl text-lg font-bold text-gray-800 mb-4 font-lato">
-                    Selectionner le nombre de billets
+                    Sélectionner le nombre de billets
                   </h2>
                   <div className="border border-[#949494] p-6 rounded-md mt-4">
                     <div className="flex justify-between flex-col md:flex-row gap-4 items-start ">
