@@ -50,7 +50,7 @@ const page = () => {
               <FaHandRock color="black" size={22} />
             </div>
             <h3 className="font-lato font-bold mt-4 text-2xl text-center">
-              Détermination
+              Passion
             </h3>
             <p className="text-center font-lato mt-3 font-semibold">
               Nous ne reculons jamais devant l&apos;adversité. Chaque match est
@@ -62,7 +62,7 @@ const page = () => {
               <FaUsers color="black" size={22} />
             </div>
             <h3 className="font-lato font-bold mt-4 text-2xl text-center">
-              Esprit d&apos;Équipe
+              Engagement
             </h3>
             <p className="text-center font-lato mt-3 font-semibold">
               La force de Mégatoit réside dans l&apos;unité. Ensemble, nous
@@ -74,7 +74,7 @@ const page = () => {
               <GiTrophyCup color="black" size={22} />
             </div>
             <h3 className="font-lato font-bold mt-4 text-2xl text-center">
-              Excellence
+              Désire de vaincre
             </h3>
             <p className="text-center font-lato mt-3 font-semibold">
               Nous visons toujours la perfection dans chaque geste, chaque
@@ -157,7 +157,7 @@ const page = () => {
         </div> */}
         <div className="mt-14 bg-black text-white py-8 px-6  w-full md:w-[95%] mx-auto">
           <h2 className="font-bebas-neue md:text-5xl text-3xl text-center ">
-            Rejoignez l&apos;Aventure Megatoit
+            Rejoignez l&apos;Aventure Mégatoit
           </h2>
           <p className="font-semibold font-lato text-lg mt-4 text-center">
             Venez encourager notre équipe et vivez l&apos;émotion du hockey
