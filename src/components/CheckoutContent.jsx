@@ -15,12 +15,12 @@ import { getUserDocument } from "@/services/user.service";
 import { getAbonementById } from "@/services/abonement.service";
 const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
   const [match, setMatch] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [taxes, setTaxes] = useState([]);
   const [date, setDate] = useState(null);
   const [total, setTotal] = useState(0);
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const [userData, setUserData] = useState(null);
   const [abonnement, setAbonnement] = useState(null);
 
@@ -28,7 +28,7 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
 
   const fetchData = async () => {
     try {
-      setLoading(true);
+      setIsLoading(true);
       if (matchId) {
         const [matchResponse, taxesResponse, userResponse] = await Promise.all([
           getMatchByUid(matchId),
@@ -96,16 +96,16 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
       console.error("Error fetching data:", error);
       setError("An error occurred while fetching data");
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    if (!user) {
+    if (!user && !loading) {
       router.push("/");
       return;
     }
-  }, [user]);
+  }, [user, loading]);
 
   useEffect(() => {
     if (((matchId && quantity) || abonnementId) && user) {
@@ -134,7 +134,7 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
     };
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="h-screen flex justify-center items-center">
         <Spinner />
