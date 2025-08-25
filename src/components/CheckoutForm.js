@@ -83,7 +83,7 @@ const CheckoutForm = ({
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        amount: amount * 100,
+        amount: amount,
         currency: "cad",
         userId,
         quantity,
