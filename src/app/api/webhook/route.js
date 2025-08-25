@@ -57,7 +57,7 @@ export async function POST(request) {
           matchId,
           quantity,
           ticketPrice: parseFloat(ticketPrice),
-          amount: paymentIntent.amount / 100, // Convert from cents to dollars
+          amount: paymentIntent.amount, // Convert from cents to dollars
           paymentIntentId: paymentIntent.id,
         });
       }
@@ -67,7 +67,7 @@ export async function POST(request) {
           abonnementId,
 
           abonnementPrice,
-          amount: paymentIntent.amount / 100, // Convert from cents to dollars
+          amount: paymentIntent.amount, // Convert from cents to dollars
           paymentIntentId: paymentIntent.id,
         });
       }
