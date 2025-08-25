@@ -86,7 +86,7 @@ export const getUserOrders = async (uid) => {
     //   id: doc.id,
     //   ...doc.data(),
     // }));
-    console.log("Orders:", orders);
+
     return orders;
   } catch (error) {
     console.error("Error getting user orders:", error);

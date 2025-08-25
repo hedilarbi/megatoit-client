@@ -83,7 +83,7 @@ const InscriptionPage = () => {
       setIsLoading(true);
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
-      console.log("Google Sign-In successful:", user);
+
       await createUserDocument(user.uid, {
         email: user.email || "",
         userName: user.displayName || "",

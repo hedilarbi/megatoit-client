@@ -9,9 +9,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 const Profil = () => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const [userData, setUserData] = React.useState(null);
-  const [loading, setLoading] = React.useState(true);
+  const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState(null);
   const [orders, setOrders] = React.useState([]);
   const [ticketsCount, setTicketsCount] = React.useState(0);
@@ -56,10 +56,11 @@ const Profil = () => {
       );
       setError("Impossible de charger les données utilisateur.");
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
   const formatDate = (timestamp) => {
+    if (!timestamp) return { dayName: "", date: "", time: "" };
     const milliseconds =
       timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000;
 
@@ -96,14 +97,15 @@ const Profil = () => {
   };
 
   useEffect(() => {
-    if (user) {
+    if (user && !loading) {
       fetchUserData();
-    } else {
-      router.push("/connexion");
     }
-  }, [user]);
+    if (!user && !loading) {
+      router.replace("/connexion");
+    }
+  }, [user, loading]);
 
-  if (loading) {
+  if (isLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F7F7F7] font-lato">
         <Spinner />
@@ -158,7 +160,7 @@ const Profil = () => {
                   <p>Aucun billet trouvé.</p>
                 ) : (
                   content.map((order) => {
-                    const matchDate = formatDate(order.match.date);
+                    const matchDate = formatDate(order?.match?.date);
                     return (
                       <div
                         key={order.id}
@@ -180,10 +182,10 @@ const Profil = () => {
                           </p>
                           <div className="flex items-center gap-2">
                             <h3 className="font-bebas-neue text-xl text-black">
-                              {order.match.opponent.name}
+                              {order?.match?.opponent?.name}
                             </h3>
                             <Image
-                              src={order.match.opponent.imageUrl}
+                              src={order?.match?.opponent?.imageUrl}
                               alt="Logo"
                               className="h-12 w-12 "
                               width={48}
@@ -194,12 +196,12 @@ const Profil = () => {
 
                         <p className="text-sm text-gray-600 mt-2">
                           <span className="font-semibold">Date du match: </span>
-                          {matchDate.dayName}, {matchDate.date} à{" "}
-                          {matchDate.time}
+                          {matchDate?.dayName}, {matchDate?.date} à{" "}
+                          {matchDate?.time}
                         </p>
                         <p className="text-sm text-gray-600 mt-1">
                           <span className="font-semibold">Stade: </span>
-                          {order.match.place}
+                          {order?.match?.place}
                         </p>
                         <div className="flex justify-between items-center mt-2">
                           <p className="text-sm text-gray-600">
@@ -207,11 +209,11 @@ const Profil = () => {
                               Nombre de billets:{" "}
                             </span>
 
-                            {order.tickets.length}
+                            {order?.tickets?.length}
                           </p>
                           <p className="text-sm text-gray-600">
                             <span className="font-semibold">Total payé: </span>$
-                            {(order.amount / 100).toFixed(2)}
+                            {(order?.amount / 100).toFixed(2)}
                           </p>
                         </div>
                         <div className="mt-4 flex justify-center">
