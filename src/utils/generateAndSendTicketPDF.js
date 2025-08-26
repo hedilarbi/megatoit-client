@@ -56,7 +56,7 @@ export async function generateAndSendTicketPDF(
         // 1) création du document et de la page
         const pdfDoc = await PDFDocument.create();
         // page plus large pour passer le QR à droite
-        const page = pdfDoc.addPage([800, 300]);
+        const page = pdfDoc.addPage([800, 320]);
         const { width, height } = page.getSize();
 
         // 2) fonts
@@ -172,6 +172,19 @@ export async function generateAndSendTicketPDF(
           thickness: 1,
           color: rgb(0, 0, 0),
         });
+        const ADMINSSION_NOTE = "ADMISSION GÉNÉRALE";
+        const ADMINSSION_NOTE_SIZE = 20;
+        const ADMINSSION_NOTE_W = fontBold.widthOfTextAtSize(
+          ADMINSSION_NOTE,
+          ADMINSSION_NOTE_SIZE
+        );
+        const ADMINSSION_NOTE_Y = height - 80 - 35; // 20px sous le header
+        page.drawText(ADMINSSION_NOTE, {
+          x: (leftWidth - ADMINSSION_NOTE_W) / 2 + margin,
+          y: ADMINSSION_NOTE_Y,
+          size: ADMINSSION_NOTE_SIZE,
+          font: fontBold,
+        });
 
         // 9) Header logos + « VS »
         const logoH = 70; // hauteur des logos
@@ -199,7 +212,7 @@ export async function generateAndSendTicketPDF(
         // logo 1
         page.drawImage(team1LogoImage, {
           x: startX,
-          y: headerY - team1Dims.height / 2 + headerSize / 2,
+          y: headerY - team1Dims.height / 2 + headerSize / 2 - 20,
           width: team1Dims.width,
           height: team1Dims.height,
         });
@@ -207,7 +220,7 @@ export async function generateAndSendTicketPDF(
         let cursorX = startX + team1Dims.width + spacing;
         page.drawText(team1Name, {
           x: cursorX,
-          y: headerY,
+          y: headerY - 20,
           size: headerSize,
           font: fontBold,
         });
@@ -215,7 +228,7 @@ export async function generateAndSendTicketPDF(
         cursorX += team1W + spacing;
         page.drawText(vsText, {
           x: cursorX,
-          y: headerY,
+          y: headerY - 20,
           size: headerSize,
           font: fontBold,
         });
@@ -223,7 +236,7 @@ export async function generateAndSendTicketPDF(
         cursorX += vsW + spacing;
         page.drawText(team2Name, {
           x: cursorX,
-          y: headerY,
+          y: headerY - 20,
           size: headerSize,
           font: fontBold,
         });
@@ -231,7 +244,7 @@ export async function generateAndSendTicketPDF(
         cursorX += team2W + spacing;
         page.drawImage(team2LogoImage, {
           x: cursorX,
-          y: headerY - team2Dims.height / 2 + headerSize / 2,
+          y: headerY - team2Dims.height / 2 + headerSize / 2 - 20,
           width: team2Dims.width,
           height: team2Dims.height,
         });
@@ -239,7 +252,7 @@ export async function generateAndSendTicketPDF(
         // 10) Texte du lieu
         const placeSize = 16;
         const placeW = fontRegular.widthOfTextAtSize(placeText, placeSize);
-        const placeY = headerY - logoH + 30; // 20px sous le header
+        const placeY = headerY - logoH + 20; // 20px sous le header
         page.drawText(placeText, {
           x: (leftWidth - placeW) / 2 + margin,
           y: placeY,
@@ -349,7 +362,7 @@ export async function generateAndSendTicketPDF(
 
       const pdfDoc = await PDFDocument.create();
       // page plus large pour passer le QR à droite
-      const page = pdfDoc.addPage([800, 300]);
+      const page = pdfDoc.addPage([800, 320]);
       const { width, height } = page.getSize();
 
       // 2) fonts
@@ -459,22 +472,35 @@ export async function generateAndSendTicketPDF(
         thickness: 1,
         color: rgb(0, 0, 0),
       });
+      const ADMINSSION_NOTE = "ADMISSION GÉNÉRALE";
+      const ADMINSSION_NOTE_SIZE = 20;
+      const ADMINSSION_NOTE_W = fontBold.widthOfTextAtSize(
+        ADMINSSION_NOTE,
+        ADMINSSION_NOTE_SIZE
+      );
+      const ADMINSSION_NOTE_Y = height - 80 - 35; // 20px sous le header
+      page.drawText(ADMINSSION_NOTE, {
+        x: (leftWidth - ADMINSSION_NOTE_W) / 2 + margin,
+        y: ADMINSSION_NOTE_Y,
+        size: ADMINSSION_NOTE_SIZE,
+        font: fontBold,
+      });
 
       //i want i the center of the pdf add the logo of megatoit
-      const logoH = 110; // hauteur du logo
+      const logoH = 100; // hauteur du logo
       const logoDims = team1LogoImage.scale(logoH / team1LogoImage.height);
       const logoX = (leftWidth - logoDims.width) / 2 + margin;
       const logoY = height - 155;
       page.drawImage(team1LogoImage, {
         x: logoX,
-        y: logoY - logoDims.height / 2 + titleSize / 2,
+        y: logoY - logoDims.height / 2 + titleSize / 2 - 30,
         width: logoDims.width,
         height: logoDims.height,
       });
       const noteSize = 16;
       const noteText = "Valide pour (1) consommation gratuite par match";
       const noteW = fontRegular.widthOfTextAtSize(noteText, noteSize);
-      const noteY = logoY - 65;
+      const noteY = logoY - 90;
       page.drawText(noteText, {
         x: (leftWidth - noteW) / 2 + margin,
         y: noteY,
@@ -485,8 +511,8 @@ export async function generateAndSendTicketPDF(
       // 11) Ligne horizontale inférieure
 
       page.drawLine({
-        start: { x: margin + 20, y: 70 },
-        end: { x: separatorX - margin, y: 70 },
+        start: { x: margin + 20, y: 60 },
+        end: { x: separatorX - margin, y: 60 },
         thickness: 1,
         color: rgb(0, 0, 0),
       });
@@ -495,7 +521,7 @@ export async function generateAndSendTicketPDF(
 
       const dateSize = 18;
       const dateW = fontBold.widthOfTextAtSize(titleWithSeason, dateSize);
-      const dateY = 40;
+      const dateY = 35;
       page.drawText(titleWithSeason, {
         x: (leftWidth - dateW) / 2 + margin,
         y: dateY,

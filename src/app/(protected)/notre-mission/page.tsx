@@ -42,7 +42,7 @@ const page = () => {
           nos valeurs
         </h2>
         <p className="font-semibold font-lato text-lg mt-4 text-center">
-          Les principes qui guident notre équipe sur et en dehors de la glace
+          ROAD TO THE CUP!
         </p>
         <div className="mt-10 flex md:flex-row flex-col md:px-20 justify-center items-center gap-8">
           <div className="flex-1 flex flex-col items-center bg-[#101827] px-4 py-8 rounded-md">
