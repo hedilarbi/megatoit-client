@@ -52,10 +52,6 @@ const page = () => {
             <h3 className="font-lato font-bold mt-4 text-2xl text-center">
               Passion
             </h3>
-            <p className="text-center font-lato mt-3 font-semibold">
-              Nous ne reculons jamais devant l&apos;adversité. Chaque match est
-              une opportunité de prouver notre force de caractère.
-            </p>
           </div>
           <div className="flex-1 flex flex-col items-center bg-[#101827] px-4 py-8 rounded-md">
             <div className="bg-white flex p-3 rounded-full justify-center items-center">
@@ -64,10 +60,6 @@ const page = () => {
             <h3 className="font-lato font-bold mt-4 text-2xl text-center">
               Engagement
             </h3>
-            <p className="text-center font-lato mt-3 font-semibold">
-              La force de Mégatoit réside dans l&apos;unité. Ensemble, nous
-              sommes plus forts que la somme de nos parties.
-            </p>
           </div>
           <div className="flex-1 flex flex-col items-center bg-[#101827] px-4 py-8 rounded-md">
             <div className="bg-white flex p-3 rounded-full justify-center items-center">
@@ -76,10 +68,6 @@ const page = () => {
             <h3 className="font-lato font-bold mt-4 text-2xl text-center">
               Désire de vaincre
             </h3>
-            <p className="text-center font-lato mt-3 font-semibold">
-              Nous visons toujours la perfection dans chaque geste, chaque
-              stratégie, chaque victoire.
-            </p>
           </div>
         </div>
       </div>
