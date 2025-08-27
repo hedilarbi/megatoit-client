@@ -45,7 +45,7 @@ const page = () => {
           ROAD TO THE CUP!
         </p>
         <div className="mt-10 flex md:flex-row flex-col md:px-20 justify-center items-center gap-8">
-          <div className="flex-1 flex flex-col items-center bg-[#101827] px-4 py-8 rounded-md">
+          <div className="flex-1 flex flex-col items-center bg-[#101827] px-4 py-8 rounded-md w-full">
             <div className="bg-white flex p-3 rounded-full justify-center items-center">
               <FaHandRock color="black" size={22} />
             </div>
@@ -53,7 +53,7 @@ const page = () => {
               Passion
             </h3>
           </div>
-          <div className="flex-1 flex flex-col items-center bg-[#101827] px-4 py-8 rounded-md">
+          <div className="flex-1 flex flex-col items-center bg-[#101827] px-4 py-8 rounded-md w-full">
             <div className="bg-white flex p-3 rounded-full justify-center items-center">
               <FaUsers color="black" size={22} />
             </div>
@@ -61,7 +61,7 @@ const page = () => {
               Engagement
             </h3>
           </div>
-          <div className="flex-1 flex flex-col items-center bg-[#101827] px-4 py-8 rounded-md">
+          <div className="flex-1 flex flex-col items-center bg-[#101827] px-4 py-8 rounded-md w-full">
             <div className="bg-white flex p-3 rounded-full justify-center items-center">
               <GiTrophyCup color="black" size={22} />
             </div>
