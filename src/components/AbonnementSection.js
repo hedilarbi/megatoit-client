@@ -26,7 +26,7 @@ const AbonnementSection = () => {
           par match
         </p>
         <Link
-          href="/abonnement"
+          href="/abonnement-saison"
           className="mt-20 block text-center bg-white text-black text-xl  px-6 py-2 rounded-md hover:bg-gray-200 transition-colors"
         >
           <span className="font-bebas-neue">Achetez maintenant</span>

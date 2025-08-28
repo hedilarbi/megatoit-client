@@ -1,16 +1,31 @@
-// next.config.js
-module.exports = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   images: {
-    domains: [
-      "images.immediate.co.uk",
-      "firebasestorage.googleapis.com",
-      "scontent.ftun16-1.fna.fbcdn.net",
-    ],
     remotePatterns: [
-      { protocol: "https", hostname: "**.fbcdn.net" }, // all facebook CDNs
-      { protocol: "https", hostname: "**.fbsbx.com" }, // platform/lookaside
-      { protocol: "https", hostname: "lookaside.facebook.com" },
-      { protocol: "https", hostname: "graph.facebook.com" }, // if you ever use graph image URLs
+      // Correct patterns for Facebook
+      {
+        protocol: "https",
+        hostname: "scontent.*.fbcdn.net",
+      },
+      {
+        protocol: "https",
+        hostname: "external.*.fbcdn.net",
+      },
+      {
+        protocol: "https",
+        hostname: "lookaside.fbsbx.com",
+      },
+      // Your other domains, converted to remotePatterns
+      {
+        protocol: "https",
+        hostname: "firebasestorage.googleapis.com",
+      },
+      {
+        protocol: "https",
+        hostname: "images.immediate.co.uk",
+      },
     ],
   },
 };
+
+module.exports = nextConfig;

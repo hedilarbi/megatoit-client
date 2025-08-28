@@ -14,7 +14,7 @@ const CtaMatchsBanner = () => {
         </p>
       </div>
       <Link
-        href={"/abonnements"}
+        href={"/abonnement-saison"}
         className="bg-white rounded-md text-black px-12 py-2  font-bebas-neue text-lg text-center"
       >
         Achetez un abonnement
