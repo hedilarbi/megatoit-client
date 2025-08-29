@@ -133,11 +133,11 @@ const MatchsList = () => {
                     </p>
                   </div>
                   <div className="flex  justify-between px-4 mt-4">
-                    <p className="font-lato text-black rounded-md bg-[#D9D9D9] px-4 py-1 md:text-base text-sm uppercase">
+                    <p className="font-lato text-black rounded-md bg-[#D9D9D9] px-4 py-1 md:text-base text-xs uppercase">
                       {match.type}
                     </p>
                     {match.category !== "Ligue" && (
-                      <p className="font-lato text-black rounded-md bg-[#D9D9D9] px-4 py-1 md:text-base text-sm ">
+                      <p className="font-lato text-black rounded-md bg-[#D9D9D9] px-4 py-1 md:text-base text-xs ">
                         {match.category}
                       </p>
                     )}

@@ -94,17 +94,14 @@ const CheckoutForm = ({
       .then((response) => response.json())
       .then((data) => {
         if (data.error) {
-          console.error("Error creating payment intent:", data.error);
-          console.error(data);
           setError(data.error);
         } else {
-          console.log("Payment intent created:", data);
           setClientSecret(data.clientSecret);
         }
       })
       .catch((error) => {
         console.error("Error creating payment intent:", error);
-        setError("Failed to create payment intent");
+        setError("Un problème est survenu lors de la création du paiement");
       });
   }, []);
 

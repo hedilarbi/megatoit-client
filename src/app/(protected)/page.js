@@ -4,6 +4,7 @@ import HomeBanner from "@/components/HomeBanner";
 import MatchsList from "@/components/MatchsList";
 import CountDownVendredi from "@/components/CountDownVendredi";
 import FacebookFeed from "@/components/FacebookFeed";
+
 export const metadata = {
   title: "Accueil",
   description:
@@ -25,7 +26,7 @@ export default function Home() {
       <MatchsList />
       {/* <Commenditaires /> */}
       <AbonnementSection />
-      {/* <CallToActionBanner /> */}
+      {/* <VideoSection /> */}
       <FacebookFeed />
     </div>
   );
