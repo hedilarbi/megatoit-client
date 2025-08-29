@@ -74,12 +74,12 @@ const MatchContent = ({ id }) => {
       setTicketsError("le nombre de tickets séléctionné est indisponible");
       return;
     }
-    const QUEBEC_CUTOFF_UTC_MS = Date.UTC(2025, 7, 29, 16, 0, 0);
-    console.log(Date.now(), QUEBEC_CUTOFF_UTC_MS);
-    if (Date.now() < QUEBEC_CUTOFF_UTC_MS) {
-      alert("Les ventes ouvrent le 29/08/2025 à 12:00 .");
-      return;
-    }
+    // const QUEBEC_CUTOFF_UTC_MS = Date.UTC(2025, 7, 29, 16, 0, 0);
+    // console.log(Date.now(), QUEBEC_CUTOFF_UTC_MS);
+    // if (Date.now() < QUEBEC_CUTOFF_UTC_MS) {
+    //   alert("Les ventes ouvrent le 29/08/2025 à 12:00 .");
+    //   return;
+    // }
     router.push(`/checkout?matchId=${id}&quantity=${ticketQuantity}`);
     // Here you would
   };
