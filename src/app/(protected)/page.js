@@ -2,7 +2,7 @@ import AbonnementSection from "@/components/AbonnementSection";
 
 import HomeBanner from "@/components/HomeBanner";
 import MatchsList from "@/components/MatchsList";
-import CountDownVendredi from "@/components/CountDownVendredi";
+
 import FacebookFeed from "@/components/FacebookFeed";
 
 export const metadata = {
@@ -22,7 +22,7 @@ export default function Home() {
   return (
     <div className="pb-20">
       <HomeBanner />
-      <CountDownVendredi />
+      {/* <CountDownVendredi /> */}
       <MatchsList />
       {/* <Commenditaires /> */}
       <AbonnementSection />
