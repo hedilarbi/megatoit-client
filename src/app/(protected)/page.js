@@ -26,7 +26,7 @@ export default function Home() {
       <MatchsList />
       {/* <Commenditaires /> */}
       <AbonnementSection />
-      {/* <VideoSection /> */}
+
       <FacebookFeed />
     </div>
   );

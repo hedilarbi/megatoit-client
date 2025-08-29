@@ -1,10 +1,10 @@
 import AboutBanner from "@/components/AboutBanner";
-import Image from "next/image";
+
 import React from "react";
-import Team from "@/assets/team.png"; // Adjust the path as necessary
+
 import { FaHandRock, FaUsers } from "react-icons/fa";
 import { GiTrophyCup } from "react-icons/gi";
-
+import VideoSection from "@/components/VideoSection";
 import Link from "next/link";
 import { BsFillTicketPerforatedFill } from "react-icons/bs";
 import { IoDiamond } from "react-icons/io5";
@@ -28,13 +28,8 @@ const page = () => {
             qui croient en notre succès. Bonne saison 2025 à tous!
           </p>
         </div>
-        <div>
-          <Image
-            src={Team}
-            alt="Team Image"
-            className="w-full h-auto rounded-lg shadow-lg"
-            width={500}
-          />
+        <div className="md:w-1/2 w-full">
+          <VideoSection />
         </div>
       </div>
       <div className="mt-14 bg-black text-white py-8 px-6  w-full md:w-[95%] mx-auto">
