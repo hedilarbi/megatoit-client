@@ -296,6 +296,8 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
               abonnementId={abonnementId}
               abonnementPrice={abonnement ? abonnement.price : 0}
               ticketPrice={match ? match.price : 0}
+              userName={userData ? userData.userName : ""}
+              email={userData ? userData.email : ""}
             />
           </div>
         </div>
@@ -439,6 +441,8 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
               abonnementId={abonnementId}
               abonnementPrice={abonnement ? abonnement.price : 0}
               ticketPrice={match ? match.price : 0}
+              userName={userData ? userData.userName : ""}
+              email={userData ? userData.email : ""}
             />
           </div>
         </div>

@@ -17,6 +17,8 @@ const CheckoutForm = ({
   ticketPrice,
   abonnementPrice,
   abonnementId,
+  userName,
+  email,
 }) => {
   const stripe = useStripe();
   const elements = useElements();
@@ -57,7 +59,13 @@ const CheckoutForm = ({
         elements,
         clientSecret,
         confirmParams: {
-          return_url: `${process.env.NEXT_PUBLIC_URL}/commande-en-cours`, // Adjust this URL to your success page
+          return_url: `${process.env.NEXT_PUBLIC_URL}/commande-en-cours`,
+          payment_method_data: {
+            billing_details: {
+              email: email || undefined,
+              name: userName || undefined,
+            },
+          }, // Adjust this URL to your success page
         },
       });
 
@@ -89,6 +97,8 @@ const CheckoutForm = ({
         ticketPrice,
         abonnementId,
         abonnementPrice,
+        userName,
+        email,
       }),
     })
       .then((response) => response.json())

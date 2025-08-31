@@ -5,6 +5,25 @@ import Stripe from "stripe";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2023-10-16",
 });
+async function getOrCreateCustomer(email, name, userId) {
+  if (!email) return null;
+  // Reuse if exists
+  const existing = await stripe.customers.list({ email, limit: 1 });
+  if (existing.data.length > 0) {
+    // Optionally keep name up to date
+    const cust = existing.data[0];
+    if (name && cust.name !== name) {
+      await stripe.customers.update(cust.id, { name });
+    }
+    return cust;
+  }
+  // Or create
+  return await stripe.customers.create({
+    email,
+    name,
+    metadata: userId ? { userId } : undefined,
+  });
+}
 export async function POST(request) {
   try {
     const {
@@ -16,6 +35,8 @@ export async function POST(request) {
       ticketPrice,
       abonnementPrice,
       abonnementId,
+      userName,
+      email,
     } = await request.json();
 
     // Validate input
@@ -27,12 +48,14 @@ export async function POST(request) {
         }
       );
     }
+    const customer = await getOrCreateCustomer(email, userName, userId);
 
     let paymentIntent = null;
     if (matchId && quantity && ticketPrice) {
       paymentIntent = await stripe.paymentIntents.create({
         amount: amount, // Convert to cents
         currency: currency,
+        customer: customer?.id,
         metadata: {
           userId: userId,
           quantity,
@@ -48,6 +71,7 @@ export async function POST(request) {
       paymentIntent = await stripe.paymentIntents.create({
         amount: amount, // Convert to cents
         currency: currency,
+        customer: customer?.id,
         metadata: {
           userId: userId,
           abonnementId,

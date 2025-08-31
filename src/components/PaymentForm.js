@@ -17,6 +17,8 @@ export default function PaymentForm({
   ticketPrice,
   abonnementId,
   abonnementPrice,
+  userName,
+  email,
 }) {
   return (
     <Elements
@@ -36,6 +38,8 @@ export default function PaymentForm({
         ticketPrice={ticketPrice}
         abonnementId={abonnementId}
         abonnementPrice={abonnementPrice}
+        userName={userName}
+        email={email}
       />
     </Elements>
   );
