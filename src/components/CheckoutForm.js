@@ -117,7 +117,7 @@ const CheckoutForm = ({
 
   if (!stripe || !elements || !clientSecret) {
     return (
-      <div className="w-full md:w-1/2 lg:w-1/3 h-screen flex justify-center items-center">
+      <div className="w-full flex justify-center items-center mt-10">
         <Spinner />
       </div>
     );

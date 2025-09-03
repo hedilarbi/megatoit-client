@@ -23,6 +23,7 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
   const { user, loading } = useAuth();
   const [userData, setUserData] = useState(null);
   const [abonnement, setAbonnement] = useState(null);
+  const [confirmed, setConfirmed] = useState(false);
 
   const router = useRouter();
 
@@ -284,22 +285,31 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
               </div>
             </div>
           </div>
-          <div className="py-10 ">
-            <h2 className="f md:text-2xl text-lg font-bold text-gray-800 font-bebas-neue">
-              Paiement
-            </h2>
-            <PaymentForm
-              amount={total.toFixed(2)}
-              userId={user.uid}
-              quantity={quantity}
-              matchId={match ? matchId : ""}
-              abonnementId={abonnementId}
-              abonnementPrice={abonnement ? abonnement.price : 0}
-              ticketPrice={match ? match.price : 0}
-              userName={userData ? userData.userName : ""}
-              email={userData ? userData.email : ""}
-            />
-          </div>
+          {!confirmed && (
+            <button className="text-white w-full p-5 bg-black mt-2 rounded-md font-bold text-xl disabled:opacity-50 disabled:animate-pulse font-bebas-neue cursor-pointer">
+              <span onClick={() => setConfirmed(true)}>
+                Confirmer la commande
+              </span>
+            </button>
+          )}
+          {confirmed && (
+            <div className="py-10 ">
+              <h2 className="f md:text-2xl text-lg font-bold text-gray-800 font-bebas-neue">
+                Paiement
+              </h2>
+              <PaymentForm
+                amount={total.toFixed(2)}
+                userId={user.uid}
+                quantity={quantity}
+                matchId={match ? matchId : ""}
+                abonnementId={abonnementId}
+                abonnementPrice={abonnement ? abonnement.price : 0}
+                ticketPrice={match ? match.price : 0}
+                userName={userData ? userData.userName : ""}
+                email={userData ? userData.email : ""}
+              />
+            </div>
+          )}
         </div>
       )}
       {abonnement && (
@@ -429,22 +439,31 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
               </div>
             </div>
           </div>
-          <div className="py-10 ">
-            <h2 className="f md:text-2xl text-lg font-bold text-gray-800 font-bebas-neue">
-              Paiement
-            </h2>
-            <PaymentForm
-              amount={total.toFixed(2)}
-              userId={user?.uid}
-              quantity={quantity}
-              matchId={match ? matchId : ""}
-              abonnementId={abonnementId}
-              abonnementPrice={abonnement ? abonnement.price : 0}
-              ticketPrice={match ? match.price : 0}
-              userName={userData ? userData.userName : ""}
-              email={userData ? userData.email : ""}
-            />
-          </div>
+          {!confirmed && (
+            <button className="text-white w-full p-5 bg-black mt-2 rounded-md font-bold text-xl disabled:opacity-50 disabled:animate-pulse font-bebas-neue cursor-pointer">
+              <span onClick={() => setConfirmed(true)}>
+                Confirmer la commande
+              </span>
+            </button>
+          )}
+          {confirmed && (
+            <div className="py-10 ">
+              <h2 className="f md:text-2xl text-lg font-bold text-gray-800 font-bebas-neue">
+                Paiement
+              </h2>
+              <PaymentForm
+                amount={total.toFixed(2)}
+                userId={user?.uid}
+                quantity={quantity}
+                matchId={match ? matchId : ""}
+                abonnementId={abonnementId}
+                abonnementPrice={abonnement ? abonnement.price : 0}
+                ticketPrice={match ? match.price : 0}
+                userName={userData ? userData.userName : ""}
+                email={userData ? userData.email : ""}
+              />
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -62,6 +62,7 @@ export async function POST(request) {
           matchId,
           ticketPrice,
         },
+        receipt_email: email,
         automatic_payment_methods: {
           enabled: true,
         },
@@ -80,6 +81,7 @@ export async function POST(request) {
         automatic_payment_methods: {
           enabled: true,
         },
+        receipt_email: email,
       });
     }
 
