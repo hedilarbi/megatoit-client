@@ -1,6 +1,6 @@
 "use client";
 import { useAuth } from "@/context/AuthContext";
-import { getMatchByUid } from "@/services/match.service";
+import { getMatchByUid, verifyPromoCode } from "@/services/match.service";
 import { getAllTaxes } from "@/services/taxes.service";
 
 import { useRouter } from "next/navigation";
@@ -24,6 +24,10 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
   const [userData, setUserData] = useState(null);
   const [abonnement, setAbonnement] = useState(null);
   const [confirmed, setConfirmed] = useState(false);
+  const [code, setCode] = useState("");
+  const [codeData, setCodeData] = useState(null);
+  const [codeIsValid, setCodeIsValid] = useState(true);
+  const [codeError, setCodeError] = useState(null);
 
   const router = useRouter();
 
@@ -85,7 +89,7 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
             percentage: tax.valeur,
             value: (abonnementResponse.data.price * tax.valeur) / 100,
           }));
-          console.log(TaxesList);
+
           setTotal(
             abonnementResponse.data.price +
               TaxesList.reduce((acc, tax) => acc + tax.value, 0)
@@ -133,6 +137,64 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
       dayName,
       date: str,
     };
+  };
+
+  const verifyCode = async () => {
+    setCodeError(null);
+
+    try {
+      const response = await verifyPromoCode(code, user.uid);
+
+      if (response.success) {
+        setCodeIsValid(true);
+        setCodeData(response.data);
+        console.log("code", response.data);
+        if (abonnement) {
+          let newSubtotal = abonnement.price;
+          if (response.data.type === "percent") {
+            newSubtotal = abonnement.price * (1 - response.data.percent / 100);
+          } else if (response.data.type === "amount") {
+            newSubtotal = Math.max(0, abonnement.price - response.data.amount);
+          }
+
+          const newTaxes = taxes.map((tax) => ({
+            ...tax,
+            value: (newSubtotal * tax.percentage) / 100,
+          }));
+          setTaxes(newTaxes);
+          setTotal(
+            newSubtotal + newTaxes.reduce((acc, tax) => acc + tax.value, 0)
+          );
+        }
+        if (match) {
+          let newSubtotal = match.price * quantity;
+          if (response.data.type === "percent") {
+            newSubtotal =
+              match.price * quantity * (1 - response.data.percent / 100);
+          } else if (response.data.type === "amount") {
+            newSubtotal = Math.max(
+              0,
+              match.price * quantity - response.data.amount
+            );
+          }
+          const newTaxes = taxes.map((tax) => ({
+            ...tax,
+            value: (newSubtotal * tax.percentage) / 100,
+          }));
+          setTaxes(newTaxes);
+          setTotal(
+            newSubtotal + newTaxes.reduce((acc, tax) => acc + tax.value, 0)
+          );
+        }
+      } else {
+        setCodeIsValid(false);
+        setCodeError(response.error);
+      }
+    } catch (error) {
+      console.error("Error verifying code:", error);
+      setCodeIsValid(false);
+      setCodeError("An error occurred while verifying the code");
+    }
   };
 
   if (isLoading) {
@@ -218,6 +280,45 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
           </div>
           <div className="py-10 border-b border-black">
             <h2 className="f md:text-2xl text-lg font-bold text-gray-800 font-bebas-neue">
+              Code Promo (optionnel)
+            </h2>
+            <div className="border border-gray-300 rounded-md p-4 mt-4 bg-white ">
+              <div className="flex justify-between gap-4">
+                <input
+                  type="text"
+                  name="promoCode"
+                  id="promoCode"
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  className={`border border-gray-300 rounded-md p-2 flex-1 focus:outline-none focus:ring-2 focus:ring-black ${
+                    codeIsValid ? "" : "border-red-500"
+                  }`}
+                  placeholder="Entrez votre code promo"
+                />
+                <button
+                  onClick={verifyCode}
+                  className="text-white py-2 px-6 bg-black rounded-md  text-xl font-bebas-neue cursor-pointer"
+                >
+                  Appliquer
+                </button>
+              </div>
+              {codeError && (
+                <p className="text-red-500 mt-2 font-lato font-semibold">
+                  {codeError}
+                </p>
+              )}
+              {codeIsValid && codeData && (
+                <p className="text-green-500 mt-2 font-lato font-semibold">
+                  Code promo appliqué:{" "}
+                  {codeData.type === "percent"
+                    ? `${codeData.percent}% de réduction`
+                    : `$${codeData.amount} de réduction`}
+                </p>
+              )}
+            </div>
+          </div>
+          <div className="py-10 border-b border-black">
+            <h2 className="f md:text-2xl text-lg font-bold text-gray-800 font-bebas-neue">
               Vos Informations
             </h2>
             <div className="border border-gray-300 rounded-md p-4 mt-4 bg-white flex justify-between">
@@ -268,6 +369,19 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
                 <p className="font-semibold uppercase">Sous-total</p>
                 <p>${(match.price * quantity).toFixed(2)}</p>
               </div>
+              {codeIsValid && codeData && (
+                <div className="flex justify-between w-full font-lato text-base">
+                  <p className="font-semibold uppercase">Réduction</p>
+                  <p>
+                    {codeData.type === "percent"
+                      ? `-$${(
+                          (match.price * quantity * codeData.percent) /
+                          100
+                        ).toFixed(2)}`
+                      : `-$${parseFloat(codeData.amount).toFixed(2)}`}
+                  </p>
+                </div>
+              )}
               {taxes.map((tax, index) => (
                 <div
                   key={index}
@@ -286,10 +400,11 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
             </div>
           </div>
           {!confirmed && (
-            <button className="text-white w-full p-5 bg-black mt-2 rounded-md font-bold text-xl disabled:opacity-50 disabled:animate-pulse font-bebas-neue cursor-pointer">
-              <span onClick={() => setConfirmed(true)}>
-                Confirmer la commande
-              </span>
+            <button
+              onClick={() => setConfirmed(true)}
+              className="text-white w-full p-5 bg-black mt-4 rounded-md font-bold text-xl disabled:opacity-50 disabled:animate-pulse font-bebas-neue cursor-pointer"
+            >
+              Confirmer la commande
             </button>
           )}
           {confirmed && (
@@ -307,6 +422,7 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
                 ticketPrice={match ? match.price : 0}
                 userName={userData ? userData.userName : ""}
                 email={userData ? userData.email : ""}
+                codeId={codeData?.id || null}
               />
             </div>
           )}
@@ -372,6 +488,45 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
           </div>
           <div className="py-10 border-b border-black">
             <h2 className="f md:text-2xl text-lg font-bold text-gray-800 font-bebas-neue">
+              Code Promo (optionnel)
+            </h2>
+            <div className="border border-gray-300 rounded-md p-4 mt-4 bg-white ">
+              <div className="flex justify-between gap-4">
+                <input
+                  type="text"
+                  name="promoCode"
+                  id="promoCode"
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  className={`border border-gray-300 rounded-md p-2 flex-1 focus:outline-none focus:ring-2 focus:ring-black ${
+                    codeIsValid ? "" : "border-red-500"
+                  }`}
+                  placeholder="Entrez votre code promo"
+                />
+                <button
+                  onClick={verifyCode}
+                  className="text-white py-2 px-6 bg-black rounded-md  text-xl font-bebas-neue cursor-pointer"
+                >
+                  Appliquer
+                </button>
+              </div>
+              {codeError && (
+                <p className="text-red-500 mt-2 font-lato font-semibold">
+                  {codeError}
+                </p>
+              )}
+              {codeIsValid && codeData && (
+                <p className="text-green-500 mt-2 font-lato font-semibold">
+                  Code promo appliqué:{" "}
+                  {codeData.type === "percent"
+                    ? `${codeData.percent}% de réduction`
+                    : `$${codeData.amount} de réduction`}
+                </p>
+              )}
+            </div>
+          </div>
+          <div className="py-10 border-b border-black">
+            <h2 className="f md:text-2xl text-lg font-bold text-gray-800 font-bebas-neue">
               Vos Informations
             </h2>
             <div className="border border-gray-300 rounded-md p-4 mt-4 bg-white flex justify-between">
@@ -422,6 +577,19 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
                 <p className="font-semibold uppercase">Sous-total</p>
                 <p>${abonnement.price.toFixed(2)}</p>
               </div>
+              {codeIsValid && codeData && (
+                <div className="flex justify-between w-full font-lato text-base">
+                  <p className="font-semibold uppercase">Réduction</p>
+                  <p>
+                    {codeData.type === "percent"
+                      ? `-$${(
+                          (abonnement.price * codeData.percent) /
+                          100
+                        ).toFixed(2)}`
+                      : `-$${parseFloat(codeData.amount).toFixed(2)}`}
+                  </p>
+                </div>
+              )}
               {taxes.map((tax, index) => (
                 <div
                   key={index}
@@ -440,10 +608,11 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
             </div>
           </div>
           {!confirmed && (
-            <button className="text-white w-full p-5 bg-black mt-2 rounded-md font-bold text-xl disabled:opacity-50 disabled:animate-pulse font-bebas-neue cursor-pointer">
-              <span onClick={() => setConfirmed(true)}>
-                Confirmer la commande
-              </span>
+            <button
+              onClick={() => setConfirmed(true)}
+              className="text-white mt-4 w-full p-5 bg-black rounded-md font-bold text-xl disabled:opacity-50 disabled:animate-pulse font-bebas-neue cursor-pointer"
+            >
+              Confirmer la commande
             </button>
           )}
           {confirmed && (
@@ -461,6 +630,7 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
                 ticketPrice={match ? match.price : 0}
                 userName={userData ? userData.userName : ""}
                 email={userData ? userData.email : ""}
+                codeId={codeData?.id || null}
               />
             </div>
           )}

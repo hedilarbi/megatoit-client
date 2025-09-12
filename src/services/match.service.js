@@ -153,3 +153,53 @@ export const getOrderByIntent = async (paymentIntentId) => {
     };
   }
 };
+
+export const verifyPromoCode = async (code, userId) => {
+  try {
+    const promoCodesCollection = collection(db, "promoCodes");
+    const q = query(promoCodesCollection, where("code", "==", code));
+    const promoCodesSnapshot = await getDocs(q);
+    if (promoCodesSnapshot.empty) {
+      return { success: false, error: "Code promo non trouvé" };
+    }
+
+    const promoCodeData = {
+      id: promoCodesSnapshot.docs[0].id,
+      ...promoCodesSnapshot.docs[0].data(),
+    };
+
+    const currentDate = new Date();
+    if (
+      promoCodeData.startDate > currentDate ||
+      promoCodeData.endDate < currentDate
+    ) {
+      return { success: false, error: "Code promo expiré" };
+    }
+
+    const userDoc = await getDoc(doc(db, "users", userId));
+    if (!userDoc.exists()) {
+      return { success: false, error: "Utilisateur non trouvé" };
+    }
+    const userData = userDoc.data();
+
+    const usedPromoCode = userData?.usedPromoCodes?.find(
+      (usedCode) => usedCode.promoCode === promoCodeData.id
+    );
+    if (usedPromoCode) {
+      if (
+        typeof promoCodeData.usagePerUser === "number" &&
+        usedPromoCode.numberOfUses >= promoCodeData.usagePerUser
+      ) {
+        return { success: false, error: "Code promo déjà utilisé" };
+      }
+    }
+
+    return { success: true, data: promoCodeData };
+  } catch (error) {
+    console.error("Erreur lors de la vérification du code promo :", error);
+    return {
+      success: false,
+      error: "Une erreur s'est produite lors de la vérification du code promo",
+    };
+  }
+};

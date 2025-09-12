@@ -12,6 +12,7 @@ export const createTicketAndOrder = async ({
   abonnementPrice,
   abonnementId,
   paymentIntentId,
+  promoCodeId,
 }) => {
   try {
     const orderRef = admin.firestore().collection("orders").doc();
@@ -31,6 +32,7 @@ export const createTicketAndOrder = async ({
         paiement_status: true,
         tickets: [],
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        promoCodeId,
       };
     }
     if (abonnementId && abonnementPrice) {
@@ -46,6 +48,7 @@ export const createTicketAndOrder = async ({
         subscriptionId: "",
         paiement_status: true,
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        promoCodeId,
       };
     }
 

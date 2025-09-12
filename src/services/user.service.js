@@ -80,12 +80,24 @@ export const getUserOrders = async (uid) => {
             abonnement: abonnementData,
           };
         }
+        // If neither matchId nor subscriptionId, just return the order data
+        return {
+          id: orderDoc.id,
+          ...orderData,
+        };
       })
     );
-    // const orders = ordersSnapshot.docs.map((doc) => ({
-    //   id: doc.id,
-    //   ...doc.data(),
-    // }));
+
+    // Sort by createdAt descending (newest first)
+    orders.sort((a, b) => {
+      const aTime = a.createdAt?.toMillis
+        ? a.createdAt.toMillis()
+        : a.createdAt || 0;
+      const bTime = b.createdAt?.toMillis
+        ? b.createdAt.toMillis()
+        : b.createdAt || 0;
+      return bTime - aTime;
+    });
 
     return orders;
   } catch (error) {
@@ -103,6 +115,17 @@ export const getOrderById = async (id) => {
         const matchDoc = await getDoc(doc(db, "matchs", orderData.matchId));
         if (matchDoc.exists()) {
           orderData.match = { id: matchDoc.id, ...matchDoc.data() };
+        }
+      }
+      if (orderData.promoCodeId) {
+        const promoCodeDoc = await getDoc(
+          doc(db, "promoCodes", orderData.promoCodeId)
+        );
+        if (promoCodeDoc.exists()) {
+          orderData.promoCode = {
+            id: promoCodeDoc.id,
+            ...promoCodeDoc.data(),
+          };
         }
       }
       if (orderData.tickets) {

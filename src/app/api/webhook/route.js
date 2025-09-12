@@ -37,7 +37,7 @@ export async function POST(request) {
       const paymentIntent = event.data.object;
       const userId = paymentIntent.metadata?.userId;
       const quantity = parseInt(paymentIntent.metadata?.quantity || "1");
-
+      const promoCodeId = paymentIntent.metadata?.codeId || null;
       const matchId = paymentIntent.metadata?.matchId;
       const ticketPrice = paymentIntent.metadata?.ticketPrice;
       const abonnementId = paymentIntent.metadata?.abonnementId;
@@ -49,6 +49,33 @@ export async function POST(request) {
         console.error("User not found:", userId);
         return new Response("User not found", { status: 404 });
       }
+      if (promoCodeId) {
+        const promoCodeRef = admin
+          .firestore()
+          .collection("promoCodes")
+          .doc(promoCodeId);
+        const promoCodeDoc = await promoCodeRef.get();
+        if (promoCodeId && !promoCodeDoc.exists) {
+          console.error("Promo code not found:", promoCodeId);
+          return new Response("Promo code not found", { status: 404 });
+        }
+
+        const usedPromoCodes = userDoc.data().usedPromoCodes || [];
+        const existingPromoIndex = usedPromoCodes.findIndex(
+          (item) => item.promoCode === promoCodeId
+        );
+
+        if (existingPromoIndex !== -1) {
+          usedPromoCodes[existingPromoIndex].numberOfUses += 1;
+        } else {
+          usedPromoCodes.push({
+            promoCode: promoCodeId,
+            numberOfUses: 1,
+          });
+        }
+
+        await userRef.update({ usedPromoCodes });
+      }
 
       let response = null;
       if (matchId && quantity && ticketPrice) {
@@ -59,6 +86,7 @@ export async function POST(request) {
           ticketPrice: parseFloat(ticketPrice),
           amount: paymentIntent.amount, // Convert from cents to dollars
           paymentIntentId: paymentIntent.id,
+          promoCodeId,
         });
       }
       if (abonnementId && abonnementPrice) {
@@ -69,6 +97,7 @@ export async function POST(request) {
           abonnementPrice,
           amount: paymentIntent.amount, // Convert from cents to dollars
           paymentIntentId: paymentIntent.id,
+          promoCodeId,
         });
       }
 

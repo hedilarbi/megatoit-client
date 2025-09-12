@@ -37,6 +37,7 @@ export async function POST(request) {
       abonnementId,
       userName,
       email,
+      codeId,
     } = await request.json();
 
     // Validate input
@@ -61,6 +62,7 @@ export async function POST(request) {
           quantity,
           matchId,
           ticketPrice,
+          codeId,
         },
         receipt_email: email,
         automatic_payment_methods: {
@@ -77,6 +79,7 @@ export async function POST(request) {
           userId: userId,
           abonnementId,
           abonnementPrice,
+          codeId,
         },
         automatic_payment_methods: {
           enabled: true,

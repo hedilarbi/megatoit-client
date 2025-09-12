@@ -133,7 +133,7 @@ const SuccessContent = ({ paymentIntentId }) => {
                 </div>
               )}
               {order.match && (
-                <div className="flex justify-between items-center  pb-4 border-b border-gray-300 mt-4">
+                <div className="flex justify-between items-center  pb-4 border-b border-gray-300 mt-4 text-sm md:text-base">
                   <p className="font-lato text-base text-[#414A5A]">Date</p>
                   <p>
                     <span className="capitalize">{date.dayName},</span>{" "}

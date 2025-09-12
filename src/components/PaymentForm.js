@@ -19,6 +19,7 @@ export default function PaymentForm({
   abonnementPrice,
   userName,
   email,
+  codeId,
 }) {
   return (
     <Elements
@@ -26,7 +27,7 @@ export default function PaymentForm({
       options={{
         mode: "payment",
         currency: "cad",
-        amount: amount * 100, // amount in cents
+        amount: Math.trunc(amount * 100), // amount in cents
         locale: "fr",
       }}
     >
@@ -40,6 +41,7 @@ export default function PaymentForm({
         abonnementPrice={abonnementPrice}
         userName={userName}
         email={email}
+        codeId={codeId}
       />
     </Elements>
   );

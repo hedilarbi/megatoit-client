@@ -19,6 +19,7 @@ const CheckoutForm = ({
   abonnementId,
   userName,
   email,
+  codeId,
 }) => {
   const stripe = useStripe();
   const elements = useElements();
@@ -89,7 +90,7 @@ const CheckoutForm = ({
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        amount: amount * 100,
+        amount: Math.trunc(amount * 100),
         currency: "cad",
         userId,
         quantity,
@@ -99,6 +100,7 @@ const CheckoutForm = ({
         abonnementPrice,
         userName,
         email,
+        codeId,
       }),
     })
       .then((response) => response.json())

@@ -22,6 +22,7 @@ const Profil = () => {
 
   const fetchUserData = async () => {
     try {
+      setIsLoading(true);
       const [ordersResponse, userDocumentResponse] = await Promise.all([
         getUserOrders(user?.uid || ""),
         getUserDocument(user?.uid || ""),
@@ -161,6 +162,7 @@ const Profil = () => {
                 ) : (
                   content.map((order) => {
                     const matchDate = formatDate(order?.match?.date);
+                    const createdDate = formatDate(order.createdAt);
                     return (
                       <div
                         key={order.id}
@@ -172,6 +174,8 @@ const Profil = () => {
                               src={Logo}
                               alt="Logo"
                               className="h-12 w-12 "
+                              width={48}
+                              height={48}
                             />
                             <h3 className="font-bebas-neue text-xl text-black">
                               Mégatoit
@@ -194,26 +198,27 @@ const Profil = () => {
                           </div>
                         </div>
 
-                        <p className="text-sm text-gray-600 mt-2">
+                        <p className="text-sm text-gray-600 mt-2 capitalize">
                           <span className="font-semibold">Date du match: </span>
                           {matchDate?.dayName}, {matchDate?.date} à{" "}
                           {matchDate?.time}
                         </p>
-                        <p className="text-sm text-gray-600 mt-1">
-                          <span className="font-semibold">Stade: </span>
-                          {order?.match?.place}
-                        </p>
-                        <div className="flex justify-between items-center mt-2">
-                          <p className="text-sm text-gray-600">
-                            <span className="font-semibold">
-                              Nombre de billets:{" "}
-                            </span>
+                        <p className="text-sm text-gray-600 capitalize">
+                          <span className="font-semibold">
+                            Nombre de billets:{" "}
+                          </span>
 
-                            {order?.tickets?.length}
-                          </p>
-                          <p className="text-sm text-gray-600">
-                            <span className="font-semibold">Total payé: </span>$
-                            {(order?.amount / 100).toFixed(2)}
+                          {order?.tickets?.length}
+                        </p>
+                        <p className="text-sm text-gray-600 capitalize">
+                          <span className="font-semibold">Total payé: </span>$
+                          {(order?.amount / 100).toFixed(2)}
+                        </p>
+                        <div className="flex justify-between items-center ">
+                          <p className="text-sm text-gray-600 mt-1 capitalize">
+                            <span className="font-semibold ">Achété le:</span>{" "}
+                            {createdDate.dayName}, {createdDate.date} à{" "}
+                            {createdDate.time}
                           </p>
                         </div>
                         <div className="mt-4 flex justify-center">
@@ -246,13 +251,17 @@ const Profil = () => {
                           {order.abonnement.title} ({order.abonnement.season})
                         </h3>
 
-                        <p className="text-sm text-gray-600 mt-1">
-                          Achété le: {matchDate.dayName}, {matchDate.date} à{" "}
+                        <p className="text-sm text-gray-600 mt-1 capitalize">
+                          <span className="font-semibold mr-1">Achété le:</span>
+                          {matchDate.dayName}, {matchDate.date} à{" "}
                           {matchDate.time}
                         </p>
-                        <div className="flex justify-between items-center mt-2">
-                          <p className="text-sm text-gray-600">
-                            Total payé: ${(order.amount / 100).toFixed(2)}
+                        <div className="flex justify-between items-center capitalize">
+                          <p className="text-sm text-gray-600 ">
+                            <span className="font-semibold mr-1">
+                              Total payé:
+                            </span>
+                            ${(order.amount / 100).toFixed(2)}
                           </p>
                         </div>
                         <div className="mt-4 flex justify-center">

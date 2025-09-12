@@ -6,7 +6,7 @@ import Image from "next/image";
 import Logo from "@/assets/logo-small.png"; // Adjust the path as necessary
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
-
+import { FaArrowLeftLong } from "react-icons/fa6";
 const OrderComponent = ({ id }) => {
   const { user } = useAuth();
   const [order, setOrder] = React.useState(null);
@@ -94,6 +94,12 @@ const OrderComponent = ({ id }) => {
 
   return (
     <div className="bg-[#F7F7F7] font-lato ">
+      <button
+        className="bg-black text-white p-3 rounded-full ml-4 mb-4 cursor-pointer"
+        onClick={() => router.back()}
+      >
+        <FaArrowLeftLong />
+      </button>
       {order.match && (
         <>
           <div className="flex justify-center ">
@@ -136,6 +142,15 @@ const OrderComponent = ({ id }) => {
 
               {order.tickets.length}
             </p>
+            {order.promoCode && (
+              <p className="text-base text-gray-600 mt-1 md:text-lg">
+                <span className="font-semibold">Réduction: </span>
+                {order.promoCode.type === "percent"
+                  ? order.promoCode.percent + "%"
+                  : "$" + parseFloat(order.promoCode.amount).toFixed(2)}{" "}
+              </p>
+            )}
+
             <p className="text-base text-gray-600 mt-1 md:text-lg">
               <span className="font-semibold">Total payé: </span>$
               {(order.amount / 100).toFixed(2)}
@@ -165,7 +180,7 @@ const OrderComponent = ({ id }) => {
         </>
       )}
       {order.abonnement && (
-        <div className="mt-8 px-4 md:px-8">
+        <div className=" px-4 md:px-8">
           <h3 className="font-lato text-[#414A5A] font-semibold text-2xl text-center">
             Abonnement
           </h3>
@@ -184,6 +199,18 @@ const OrderComponent = ({ id }) => {
             {formatDate(order.createdAt).dayName},{" "}
             {formatDate(order.createdAt).date} à{" "}
             {formatDate(order.createdAt).time}
+          </p>
+          {order.promoCode && (
+            <p className="text-base text-gray-600 mt-1 md:text-lg">
+              <span className="font-semibold">Réduction: </span>
+              {order.promoCode.type === "percent"
+                ? order.promoCode.percent + "%"
+                : "$" + parseFloat(order.promoCode.amount).toFixed(2)}{" "}
+            </p>
+          )}
+          <p className="text-base text-gray-600 mt-1 md:text-lg">
+            <span className="font-semibold">Total payé: </span>$
+            {(order.amount / 100).toFixed(2)}
           </p>
           <div className="mt-4 border border-black rounded-md shadow-md p-3 flex justify-between items-center ">
             <p className="text-base text-gray-600 font-semibold">
