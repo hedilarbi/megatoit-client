@@ -6,10 +6,11 @@ const Page = async ({ searchParams }) => {
   const awaitedSearchParams = await searchParams;
 
   const paymentIntentId = awaitedSearchParams?.payment_intent || null;
+  const orderId = awaitedSearchParams?.orderId || null;
 
   return (
     <div className="bg-[#F8F8F8] w-screen py-20">
-      <SuccessContent paymentIntentId={paymentIntentId} />
+      <SuccessContent paymentIntentId={paymentIntentId} orderId={orderId} />
     </div>
   );
 };

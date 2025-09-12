@@ -154,6 +154,48 @@ export const getOrderByIntent = async (paymentIntentId) => {
   }
 };
 
+export const getOrderByUID = async (orderId) => {
+  try {
+    const orderDoc = await getDoc(doc(db, "orders", orderId));
+
+    if (!orderDoc.exists()) {
+      return { success: false, error: "Order not found" };
+    }
+
+    const orderData = orderDoc.data();
+
+    if (orderData.matchId) {
+      const matchDoc = await getDoc(doc(db, "matchs", orderData.matchId));
+      if (matchDoc.exists()) {
+        orderData.match = { id: matchDoc.id, ...matchDoc.data() };
+      }
+    }
+
+    if (orderData.abonnementId) {
+      const abonnementDoc = await getDoc(
+        doc(db, "abonements", orderData.abonnementId)
+      );
+      if (abonnementDoc.exists()) {
+        orderData.abonnement = {
+          id: abonnementDoc.id,
+          ...abonnementDoc.data(),
+        };
+      }
+    }
+
+    return { success: true, data: orderData };
+  } catch (error) {
+    console.error(
+      "Erreur lors de la récupération de la commande par PaymentIntent ID :",
+      error
+    );
+    return {
+      success: false,
+      error: "Une erreur s'est produite lors de la récupération de la commande",
+    };
+  }
+};
+
 export const verifyPromoCode = async (code, userId) => {
   try {
     const promoCodesCollection = collection(db, "promoCodes");

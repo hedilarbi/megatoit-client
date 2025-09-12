@@ -1,5 +1,5 @@
 "use client";
-import { getOrderByIntent } from "@/services/match.service";
+import { getOrderByIntent, getOrderByUID } from "@/services/match.service";
 import React from "react";
 import Spinner from "./spinner/Spinner";
 import { FaCircleCheck } from "react-icons/fa6";
@@ -11,7 +11,7 @@ import { BsFillTicketPerforatedFill } from "react-icons/bs";
 import { RiHome2Fill } from "react-icons/ri";
 import { IoMail } from "react-icons/io5";
 
-const SuccessContent = ({ paymentIntentId }) => {
+const SuccessContent = ({ paymentIntentId, orderId }) => {
   const [order, setOrder] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
 
@@ -21,15 +21,31 @@ const SuccessContent = ({ paymentIntentId }) => {
     setLoading(true);
 
     try {
-      const response = await getOrderByIntent(paymentIntentId);
-      if (response.success) {
-        setOrder(response.data);
-        if (response.data.match) {
-          const { dayName, date } = formatDate(response.data.match.date);
-          setDate({
-            dayName,
-            date,
-          });
+      if (paymentIntentId) {
+        const response = await getOrderByIntent(paymentIntentId);
+        if (response.success) {
+          setOrder(response.data);
+          if (response.data.match) {
+            const { dayName, date } = formatDate(response.data.match.date);
+            setDate({
+              dayName,
+              date,
+            });
+          }
+        }
+      }
+      if (orderId) {
+        const response = await getOrderByUID(orderId);
+        console.log("response", response);
+        if (response.success) {
+          setOrder(response.data);
+          if (response.data.match) {
+            const { dayName, date } = formatDate(response.data.match.date);
+            setDate({
+              dayName,
+              date,
+            });
+          }
         }
       }
     } catch (err) {

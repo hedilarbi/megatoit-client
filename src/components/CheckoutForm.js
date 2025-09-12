@@ -115,7 +115,16 @@ const CheckoutForm = ({
         console.error("Error creating payment intent:", error);
         setError("Un problème est survenu lors de la création du paiement");
       });
-  }, []);
+  }, [
+    codeId,
+    amount,
+    userId,
+    quantity,
+    matchId,
+    ticketPrice,
+    abonnementId,
+    abonnementPrice,
+  ]);
 
   if (!stripe || !elements || !clientSecret) {
     return (

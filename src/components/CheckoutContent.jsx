@@ -13,6 +13,7 @@ import { IoMdPin } from "react-icons/io";
 import { FaCalendarAlt, FaCheck } from "react-icons/fa";
 import { getUserDocument } from "@/services/user.service";
 import { getAbonementById } from "@/services/abonement.service";
+import axios from "axios";
 const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
   const [match, setMatch] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -28,6 +29,7 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
   const [codeData, setCodeData] = useState(null);
   const [codeIsValid, setCodeIsValid] = useState(true);
   const [codeError, setCodeError] = useState(null);
+  const [treatingOrder, setTreatingOrder] = useState(false);
 
   const router = useRouter();
 
@@ -220,6 +222,31 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
       }));
       setTaxes(newTaxes);
       setTotal(subtotal + newTaxes.reduce((acc, tax) => acc + tax.value, 0));
+    }
+  };
+
+  const processOrder = async () => {
+    try {
+      setTreatingOrder(true);
+      const response = await axios.post("/api/process-free-order", {
+        userId: user.uid,
+        matchId: match ? matchId : null,
+        quantity: match ? quantity : null,
+        ticketPrice: match ? match.price : null,
+        abonnementId: abonnement ? abonnementId : null,
+        abonnementPrice: abonnement ? abonnement.price : null,
+        amount: total,
+        promoCodeId: codeData ? codeData.id : null,
+      });
+      if (response.status === 200) {
+        const orderId = response.data.data;
+        router.push(`/commande-reussi?orderId=${orderId}`);
+      }
+    } catch (error) {
+      console.error("Error processing order:", error);
+      setError("An error occurred while processing your order");
+    } finally {
+      setTreatingOrder(false);
     }
   };
 
@@ -444,9 +471,18 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
               Confirmer la commande
             </button>
           )}
-          {confirmed && (
+          {confirmed && total === 0 && codeData && (
+            <button
+              onClick={processOrder}
+              disabled={treatingOrder}
+              className="text-white w-full p-5 bg-black mt-4 rounded-md font-bold text-xl disabled:opacity-50 disabled:animate-pulse font-bebas-neue cursor-pointer"
+            >
+              {treatingOrder ? "Traitement..." : "Traiter ma commande"}
+            </button>
+          )}
+          {confirmed && total > 0 && (
             <div className="py-10 ">
-              <h2 className="f md:text-2xl text-lg font-bold text-gray-800 font-bebas-neue">
+              <h2 className=" md:text-2xl text-lg font-bold text-gray-800 font-bebas-neue">
                 Paiement
               </h2>
               <PaymentForm
@@ -540,12 +576,23 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
                   }`}
                   placeholder="Entrez votre code promo"
                 />
-                <button
-                  onClick={verifyCode}
-                  className="text-white py-2 px-6 bg-black rounded-md  text-xl font-bebas-neue cursor-pointer"
-                >
-                  Appliquer
-                </button>
+                {!codeData && (
+                  <button
+                    onClick={verifyCode}
+                    className="text-white py-2 px-6 bg-black rounded-md  text-xl font-bebas-neue cursor-pointer"
+                  >
+                    Appliquer
+                  </button>
+                )}
+
+                {codeData && (
+                  <button
+                    onClick={removeCode}
+                    className="text-white py-2 px-6 bg-red-500 rounded-md  text-xl font-bebas-neue cursor-pointer"
+                  >
+                    Enlever
+                  </button>
+                )}
               </div>
               {codeError && (
                 <p className="text-red-500 mt-2 font-lato font-semibold">
@@ -652,9 +699,18 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
               Confirmer la commande
             </button>
           )}
-          {confirmed && (
+          {confirmed && total === 0 && codeData && (
+            <button
+              onClick={processOrder}
+              disabled={treatingOrder}
+              className="text-white w-full p-5 bg-black mt-4 rounded-md font-bold text-xl disabled:opacity-50 disabled:animate-pulse font-bebas-neue cursor-pointer"
+            >
+              {treatingOrder ? "Traitement..." : "Traiter ma commande"}
+            </button>
+          )}
+          {confirmed && total > 0 && (
             <div className="py-10 ">
-              <h2 className="f md:text-2xl text-lg font-bold text-gray-800 font-bebas-neue">
+              <h2 className=" md:text-2xl text-lg font-bold text-gray-800 font-bebas-neue">
                 Paiement
               </h2>
               <PaymentForm
