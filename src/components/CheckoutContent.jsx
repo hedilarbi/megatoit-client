@@ -148,7 +148,7 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
       if (response.success) {
         setCodeIsValid(true);
         setCodeData(response.data);
-        console.log("code", response.data);
+
         if (abonnement) {
           let newSubtotal = abonnement.price;
           if (response.data.type === "percent") {
@@ -194,6 +194,32 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
       console.error("Error verifying code:", error);
       setCodeIsValid(false);
       setCodeError("An error occurred while verifying the code");
+    }
+  };
+
+  const removeCode = () => {
+    setCode("");
+    setCodeData(null);
+    setCodeIsValid(true);
+    setCodeError(null);
+    // Recalculate total without the promo code
+    if (abonnement) {
+      const subtotal = abonnement.price;
+      const newTaxes = taxes.map((tax) => ({
+        ...tax,
+        value: (subtotal * tax.percentage) / 100,
+      }));
+      setTaxes(newTaxes);
+      setTotal(subtotal + newTaxes.reduce((acc, tax) => acc + tax.value, 0));
+    }
+    if (match) {
+      const subtotal = match.price * quantity;
+      const newTaxes = taxes.map((tax) => ({
+        ...tax,
+        value: (subtotal * tax.percentage) / 100,
+      }));
+      setTaxes(newTaxes);
+      setTotal(subtotal + newTaxes.reduce((acc, tax) => acc + tax.value, 0));
     }
   };
 
@@ -295,12 +321,23 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
                   }`}
                   placeholder="Entrez votre code promo"
                 />
-                <button
-                  onClick={verifyCode}
-                  className="text-white py-2 px-6 bg-black rounded-md  text-xl font-bebas-neue cursor-pointer"
-                >
-                  Appliquer
-                </button>
+                {!codeData && (
+                  <button
+                    onClick={verifyCode}
+                    className="text-white py-2 px-6 bg-black rounded-md  text-xl font-bebas-neue cursor-pointer"
+                  >
+                    Appliquer
+                  </button>
+                )}
+
+                {codeData && (
+                  <button
+                    onClick={removeCode}
+                    className="text-white py-2 px-6 bg-red-500 rounded-md  text-xl font-bebas-neue cursor-pointer"
+                  >
+                    Enlever
+                  </button>
+                )}
               </div>
               {codeError && (
                 <p className="text-red-500 mt-2 font-lato font-semibold">
