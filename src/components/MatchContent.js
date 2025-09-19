@@ -164,7 +164,7 @@ const MatchContent = ({ id }) => {
                     <p className="text-black md:text-lg text-base font-lato">
                       Ne manquez pas ce match explosif entre Le Mégatoit et{" "}
                       {match.opponent.name} ! Vivez l&apos;intensité du hockey
-                      professionnel en direct au {match.place} !
+                      LHSAAAQ en direct au {match.place} !
                     </p>
                   </div>
                 </div>
