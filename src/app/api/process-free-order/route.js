@@ -57,6 +57,9 @@ export async function POST(request) {
       }
 
       await userRef.update({ usedPromoCodes });
+      await promoCodeRef.update({
+        used: admin.firestore.FieldValue.increment(1),
+      });
     }
 
     let response = null;

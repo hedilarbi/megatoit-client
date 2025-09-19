@@ -73,6 +73,9 @@ export async function POST(request) {
             numberOfUses: 1,
           });
         }
+        await promoCodeRef.update({
+          used: admin.firestore.FieldValue.increment(1),
+        });
 
         await userRef.update({ usedPromoCodes });
       }

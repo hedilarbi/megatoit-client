@@ -218,6 +218,12 @@ export const verifyPromoCode = async (code, userId) => {
       return { success: false, error: "Code promo expiré" };
     }
 
+    if (promoCodeData.totalUsage) {
+      if (promoCodeData.used >= promoCodeData.totalUsage) {
+        return { success: false, error: "Code promo épuisé" };
+      }
+    }
+
     const userDoc = await getDoc(doc(db, "users", userId));
     if (!userDoc.exists()) {
       return { success: false, error: "Utilisateur non trouvé" };
