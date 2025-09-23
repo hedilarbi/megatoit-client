@@ -13,26 +13,6 @@ const MatchsContent = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [type, setType] = useState("Tous");
-  const fetchMatchs = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await getAllMatchsList();
-
-      if (response.success) {
-        setMatchsList(response.data);
-      } else {
-        setError(response.error);
-        console.error("Error fetching matchs:", response.error);
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
-      console.error("Error fetching matchs:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const formatDate = (timestamp) => {
     const milliseconds =
       timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000;
@@ -54,6 +34,43 @@ const MatchsContent = () => {
       dayName,
       date: str,
     };
+  };
+  const fetchMatchs = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await getAllMatchsList();
+
+      if (response.success) {
+        const filteredData = response.data.filter((match) => {
+          const matchDate = new Date(
+            match.date.seconds * 1000 + match.date.nanoseconds / 1000000
+          );
+          const today = new Date();
+          // Compare only year, month, and date
+          const matchYMD = new Date(
+            matchDate.getFullYear(),
+            matchDate.getMonth(),
+            matchDate.getDate()
+          );
+          const todayYMD = new Date(
+            today.getFullYear(),
+            today.getMonth(),
+            today.getDate()
+          );
+          return matchYMD >= todayYMD;
+        });
+        setMatchsList(filteredData);
+      } else {
+        setError(response.error);
+        console.error("Error fetching matchs:", response.error);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred");
+      console.error("Error fetching matchs:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
