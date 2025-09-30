@@ -16,7 +16,7 @@
     "firebase": "^11.9.1",
     "firebase-admin": "^13.4.0",
     "install": "^0.13.0",
-    "luxon": "^3.7.1",
+    "luxon": "^3.7.2",
     "next": "15.3.4",
     "nodemailer": "^7.0.4",
     "npm": "^11.4.2",

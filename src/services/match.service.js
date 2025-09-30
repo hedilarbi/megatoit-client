@@ -10,6 +10,8 @@ import {
   orderBy,
 } from "firebase/firestore";
 
+import { isNowWithinWindow } from "../utils/promoDateUtils";
+
 export const getAllMatches = async () => {
   try {
     const matchsCollection = collection(db, "matchs");
@@ -196,55 +198,61 @@ export const getOrderByUID = async (orderId) => {
   }
 };
 
+function getUserTimeZone() {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+  } catch (e) {
+    console.error(
+      "Erreur lors de la récupération du fuseau horaire de l'utilisateur :",
+      e
+    );
+    return "UTC"; // SSR fallback
+  }
+}
+
 export const verifyPromoCode = async (code, userId) => {
   try {
-    const promoCodesCollection = collection(db, "promoCodes");
-    const q = query(promoCodesCollection, where("code", "==", code));
-    const promoCodesSnapshot = await getDocs(q);
-    if (promoCodesSnapshot.empty) {
-      return { success: false, error: "Code promo non trouvé" };
-    }
+    const q = query(collection(db, "promoCodes"), where("code", "==", code));
+    const snap = await getDocs(q);
+    if (snap.empty) return { success: false, error: "Code promo non trouvé" };
 
-    const promoCodeData = {
-      id: promoCodesSnapshot.docs[0].id,
-      ...promoCodesSnapshot.docs[0].data(),
-    };
+    const promoCodeData = { id: snap.docs[0].id, ...snap.docs[0].data() };
 
-    const currentDate = new Date();
-    if (
-      promoCodeData.startDate > currentDate ||
-      promoCodeData.endDate < currentDate
-    ) {
-      return { success: false, error: "Code promo expiré" };
-    }
-
-    if (promoCodeData.totalUsage) {
-      if (promoCodeData.used >= promoCodeData.totalUsage) {
-        return { success: false, error: "Code promo épuisé" };
-      }
-    }
-
-    const userDoc = await getDoc(doc(db, "users", userId));
-    if (!userDoc.exists()) {
-      return { success: false, error: "Utilisateur non trouvé" };
-    }
-    const userData = userDoc.data();
-
-    const usedPromoCode = userData?.usedPromoCodes?.find(
-      (usedCode) => usedCode.promoCode === promoCodeData.id
+    // Timezone-aware, inclusive day window
+    const zone = getUserTimeZone(); // e.g., "America/Toronto" for Québec
+    const active = isNowWithinWindow(
+      promoCodeData.startDate,
+      promoCodeData.endDate,
+      zone
     );
-    if (usedPromoCode) {
-      if (
-        typeof promoCodeData.usagePerUser === "number" &&
-        usedPromoCode.numberOfUses >= promoCodeData.usagePerUser
-      ) {
-        return { success: false, error: "Code promo déjà utilisé" };
-      }
+    if (!active) return { success: false, error: "Code promo expiré" };
+
+    if (
+      promoCodeData.totalUsage &&
+      (promoCodeData.used || 0) >= promoCodeData.totalUsage
+    ) {
+      return { success: false, error: "Code promo épuisé" };
+    }
+
+    const userSnap = await getDoc(doc(db, "users", userId));
+    if (!userSnap.exists())
+      return { success: false, error: "Utilisateur non trouvé" };
+
+    const userData = userSnap.data();
+    const used = userData?.usedPromoCodes?.find(
+      (u) => u.promoCode === promoCodeData.id
+    );
+    if (
+      used &&
+      typeof promoCodeData.usagePerUser === "number" &&
+      (used.numberOfUses || 0) >= promoCodeData.usagePerUser
+    ) {
+      return { success: false, error: "Code promo déjà utilisé" };
     }
 
     return { success: true, data: promoCodeData };
-  } catch (error) {
-    console.error("Erreur lors de la vérification du code promo :", error);
+  } catch (e) {
+    console.error("Erreur lors de la vérification du code promo :", e);
     return {
       success: false,
       error: "Une erreur s'est produite lors de la vérification du code promo",

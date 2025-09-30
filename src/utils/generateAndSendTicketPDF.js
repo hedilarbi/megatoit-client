@@ -312,7 +312,6 @@ export async function generateAndSendTicketPDF(
         requireTLS: false, // only require STARTTLS on ports like 587
         auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
         tls: { minVersion: "TLSv1.2" },
-        name: "lemegatoit.com",
       });
       const subjectTickets = ` ${
         tickets.length > 1 ? "Vos billets" : "Votre billet"
@@ -340,11 +339,19 @@ export async function generateAndSendTicketPDF(
 `;
 
       await transporter.sendMail({
-        from: `"Billetterie Mégatoit" <${process.env.EMAIL_USER}>`,
+        from: `${process.env.EMAIL_USER}`,
         to: user.email,
         subject: subjectTickets,
         text: textTickets, // << ajoute la version texte
         html: htmlTickets,
+        envelope: {
+          from: process.env.EMAIL_USER, // MAIL FROM / Return-Path = billets@lemegatoit.com
+          to: user.email,
+        },
+        headers: {
+          "List-Unsubscribe": `<mailto:support@lemegatoit.com>`,
+          "X-Entity-Type": "Transactional", // indicatif, certains filtres aiment
+        },
         attachments: [
           ...attachments,
           {
@@ -547,12 +554,11 @@ export async function generateAndSendTicketPDF(
         requireTLS: false, // only require STARTTLS on ports like 587
         auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
         tls: { minVersion: "TLSv1.2" },
-        name: "lemegatoit.com",
       });
       await transporter.verify();
 
       await transporter.sendMail({
-        from: `"Billetterie Mégatoit" <${process.env.EMAIL_USER}>`,
+        from: `${process.env.EMAIL_USER}`,
         to: user.email,
         subject: `Votre abonnement Mégatoit pour la saison ${abonnement.data.season}`,
         text:
@@ -578,6 +584,14 @@ export async function generateAndSendTicketPDF(
         Sa présentation est <u>obligatoire</u> à chaque entrée au Colisée Jean-Guy Talbot.
           </p>
         `,
+        envelope: {
+          from: process.env.EMAIL_USER, // MAIL FROM / Return-Path = billets@lemegatoit.com
+          to: user.email,
+        },
+        headers: {
+          "List-Unsubscribe": `<mailto:support@lemegatoit.com>`,
+          "X-Entity-Type": "Transactional", // indicatif, certains filtres aiment
+        },
         attachments: [
           {
             filename: `abonnement-${subscription.code}.pdf`,
