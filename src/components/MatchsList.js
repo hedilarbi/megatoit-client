@@ -1,13 +1,77 @@
 "use client";
 import { getAllMatches } from "@/services/match.service";
-
 import React, { useEffect, useState } from "react";
-import Spinner from "@/components/spinner/Spinner"; // Assuming you have a Spinner component
-
+import Spinner from "@/components/spinner/Spinner";
 import Logo from "@/assets/logo-small.png";
 import Image from "next/image";
 import { MdPinDrop } from "react-icons/md";
 import Link from "next/link";
+import { DateTime } from "luxon";
+
+/* --------- League timezone: fixed to Québec for ALL users --------- */
+const LEAGUE_TZ = "America/Toronto"; // DST-aware
+
+/* --------- Robust Firestore/ISO/Date parsing to Luxon in LEAGUE_TZ --------- */
+function toDateTimeInLeagueTZ(dateLike) {
+  if (!dateLike) return null;
+
+  // 1) ISO string (with/without Z)
+  if (typeof dateLike === "string") {
+    const isDateOnly = /^\d{4}-\d{2}-\d{2}$/.test(dateLike);
+    return isDateOnly
+      ? DateTime.fromISO(dateLike, { zone: LEAGUE_TZ }) // treat as local calendar date in Québec
+      : DateTime.fromISO(dateLike).setZone(LEAGUE_TZ); // instant -> Québec
+  }
+
+  // 2) JS Date
+  if (dateLike instanceof Date) {
+    return DateTime.fromJSDate(dateLike, { zone: LEAGUE_TZ });
+  }
+
+  // 3) Firestore Timestamp (client) with toDate()
+  if (dateLike && typeof dateLike.toDate === "function") {
+    return DateTime.fromJSDate(dateLike.toDate(), { zone: LEAGUE_TZ });
+  }
+
+  // 4) Serialized Firestore Timestamp: {seconds, nanoseconds} or {_seconds, _nanoseconds}
+  const sec = (dateLike && (dateLike.seconds ?? dateLike._seconds)) ?? null;
+  const nsec =
+    (dateLike && (dateLike.nanoseconds ?? dateLike._nanoseconds)) ?? 0;
+
+  if (sec != null) {
+    const secondsNum = typeof sec === "string" ? Number(sec) : sec;
+    const nanosNum = typeof nsec === "string" ? Number(nsec) : nsec;
+    const ms = secondsNum * 1000 + Math.floor((nanosNum || 0) / 1e6);
+    return DateTime.fromMillis(ms, { zone: LEAGUE_TZ });
+  }
+
+  return null; // unknown shape
+}
+
+/** Visible until 23:59:59.999 on match day in Québec (global cutoff) */
+function isMatchVisibleForAll(matchDateLike) {
+  const dt = toDateTimeInLeagueTZ(matchDateLike);
+  if (!dt || !dt.isValid) return false;
+
+  // End of that calendar day in Québec
+  const endOfDayInQuebec = DateTime.fromObject(
+    { year: dt.year, month: dt.month, day: dt.day },
+    { zone: LEAGUE_TZ }
+  ).endOf("day");
+
+  const nowInQuebec = DateTime.now().setZone(LEAGUE_TZ);
+  return nowInQuebec <= endOfDayInQuebec;
+}
+
+/** Everyone sees Québec-local formatted date (French) */
+function formatMatchDateForAll(matchDateLike) {
+  const dt = toDateTimeInLeagueTZ(matchDateLike);
+  if (!dt || !dt.isValid) return { dayName: "", date: "" };
+
+  const dayName = dt.setLocale("fr-FR").toFormat("cccc"); // "vendredi"
+  const date = dt.setLocale("fr-FR").toFormat("d LLLL yyyy, HH:mm"); // "10 octobre 2025, 20:30"
+  return { dayName, date };
+}
 
 const MatchsList = () => {
   const [matchs, setMatchs] = useState([]);
@@ -20,7 +84,22 @@ const MatchsList = () => {
     try {
       const response = await getAllMatches();
       if (response.success) {
-        setMatchs(response.data?.slice(0, 3) || []);
+        // 1) Filter out matches that have passed the Québec end-of-day cutoff
+        const visible = (response.data || []).filter((m) =>
+          isMatchVisibleForAll(m.date)
+        );
+
+        // 2) Sort ascending by match instant (in Québec time)
+        visible.sort((a, b) => {
+          const da = toDateTimeInLeagueTZ(a.date);
+          const db = toDateTimeInLeagueTZ(b.date);
+          const ama = da ? da.toMillis() : 0;
+          const bma = db ? db.toMillis() : 0;
+          return ama - bma;
+        });
+
+        // 3) Keep first three upcoming
+        setMatchs(visible.slice(0, 3));
       } else {
         setError(response.error);
         console.error("Error fetching matchs:", response.error);
@@ -33,36 +112,12 @@ const MatchsList = () => {
     }
   };
 
-  const formatDate = (timestamp) => {
-    const milliseconds =
-      timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000;
-
-    const date = new Date(milliseconds);
-
-    const str = new Intl.DateTimeFormat("fr-FR", {
-      timeZone: "Etc/GMT-1", // ← freeze at UTC
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    }).format(date);
-
-    const dayName = date.toLocaleDateString("fr-FR", { weekday: "long" });
-
-    return {
-      dayName,
-      date: str,
-    };
-  };
-
   useEffect(() => {
     fetchMatchs();
   }, []);
 
   return (
-    <section className="md:px-8 px-4 w-full py-12 ">
+    <section className="md:px-8 px-4 w-full py-12">
       <h2 className="font-bebas-neue md:text-4xl text-2xl text-center">
         MATCH À VENIR
       </h2>
@@ -79,7 +134,7 @@ const MatchsList = () => {
         <div>
           <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {matchs.map((match) => {
-              const { dayName, date } = formatDate(match.date);
+              const { dayName, date } = formatMatchDateForAll(match.date);
               return (
                 <div
                   key={match.id}
@@ -87,9 +142,10 @@ const MatchsList = () => {
                 >
                   <div className="bg-black py-4 rounded-t-md">
                     <p className="font-lato text-center text-white font-semibold capitalize">
-                      {dayName}, {date}
+                      {dayName}, {date} {/* Always Québec time */}
                     </p>
                   </div>
+
                   <div className="px-4 mt-6">
                     <div
                       className={`flex justify-between items-center ${
@@ -101,7 +157,7 @@ const MatchsList = () => {
                           match.type === "Domicile" ? "flex-row-reverse" : ""
                         }`}
                       >
-                        <Image src={Logo} alt="Logo" className="h-12 w-12 " />
+                        <Image src={Logo} alt="Logo" className="h-12 w-12" />
                         <h3 className="font-bebas-neue text-xl text-black">
                           Mégatoit
                         </h3>
@@ -118,7 +174,7 @@ const MatchsList = () => {
                         <Image
                           src={match.opponent.imageUrl}
                           alt="Logo"
-                          className="h-12 w-12 "
+                          className="h-12 w-12"
                           width={48}
                           height={48}
                         />
@@ -132,23 +188,18 @@ const MatchsList = () => {
                       {match.place}
                     </p>
                   </div>
-                  <div className="flex  justify-between px-4 mt-4">
+
+                  <div className="flex justify-between px-4 mt-4">
                     <p className="font-lato text-black rounded-md bg-[#D9D9D9] px-4 py-1 md:text-base text-xs uppercase">
                       {match.type}
                     </p>
                     {match.category !== "Ligue" && (
-                      <p className="font-lato text-black rounded-md bg-[#D9D9D9] px-4 py-1 md:text-base text-xs ">
+                      <p className="font-lato text-black rounded-md bg-[#D9D9D9] px-4 py-1 md:text-base text-xs">
                         {match.category}
                       </p>
                     )}
                   </div>
-                  <div className="mt-6 flex justify-between items-center px-4">
-                    {/* {match.type === "Domicile" && (
-                      <p className="font-bebas-neue text-black text-xl">
-                        $ {match.price.toFixed(2)}
-                      </p>
-                    )} */}
-                  </div>
+
                   {match.type === "Domicile" && (
                     <Link
                       href={`/calendrier/${match.id}`}
@@ -161,10 +212,11 @@ const MatchsList = () => {
               );
             })}
           </div>
+
           <div className="flex justify-center mt-8">
             <Link
               href={"/calendrier"}
-              className=" text-center font-bebas-neue text-xl py-3 px-12 text-black border-black  border rounded-md "
+              className="text-center font-bebas-neue text-xl py-3 px-12 text-black border-black border rounded-md"
             >
               <span>Voir le calendrier complet</span>
             </Link>

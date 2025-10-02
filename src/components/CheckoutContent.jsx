@@ -2,72 +2,148 @@
 import { useAuth } from "@/context/AuthContext";
 import { getMatchByUid, verifyPromoCode } from "@/services/match.service";
 import { getAllTaxes } from "@/services/taxes.service";
+import { getUserDocument } from "@/services/user.service";
+import { getAbonementById } from "@/services/abonement.service";
 
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import PaymentForm from "./PaymentForm";
 import Spinner from "./spinner/Spinner";
 import Image from "next/image";
-import Logo from "@/assets/logo-small.png"; // Adjust the path as necessary
+import Logo from "@/assets/logo-small.png";
 import { IoMdPin } from "react-icons/io";
 import { FaCalendarAlt, FaCheck } from "react-icons/fa";
-import { getUserDocument } from "@/services/user.service";
-import { getAbonementById } from "@/services/abonement.service";
 import axios from "axios";
+
+// ===== Date formatting fixed to Québec (America/Toronto) =====
+const QUEBEC_TZ = "America/Toronto";
+
+/** Firestore Timestamp | Date | string | millis -> JS Date */
+function toJSDate(dateLike) {
+  if (!dateLike) return null;
+
+  // Firestore Timestamp shape { seconds, nanoseconds }
+  if (
+    typeof dateLike === "object" &&
+    typeof dateLike.seconds === "number" &&
+    typeof dateLike.nanoseconds === "number"
+  ) {
+    const ms = dateLike.seconds * 1000 + Math.floor(dateLike.nanoseconds / 1e6);
+    return new Date(ms);
+  }
+
+  // Firestore Timestamp with toDate()
+  if (dateLike && typeof dateLike.toDate === "function") {
+    return dateLike.toDate();
+  }
+
+  // JS Date | ISO string | millis
+  try {
+    return dateLike instanceof Date ? dateLike : new Date(dateLike);
+  } catch {
+    return null;
+  }
+}
+
+/** Returns { dayName, date } e.g. "vendredi", "10 octobre 2025 à 15:30" */
+function formatDate(timestamp) {
+  const d = toJSDate(timestamp);
+  if (!d || isNaN(d.getTime())) return { dayName: "", date: "" };
+
+  const dayName = new Intl.DateTimeFormat("fr-FR", {
+    weekday: "long",
+    timeZone: QUEBEC_TZ,
+  }).format(d);
+
+  const datePart = new Intl.DateTimeFormat("fr-FR", {
+    timeZone: QUEBEC_TZ,
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(d);
+
+  const timePart = new Intl.DateTimeFormat("fr-FR", {
+    timeZone: QUEBEC_TZ,
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(d);
+
+  return {
+    dayName, // ex: "vendredi"
+    date: `${datePart} à ${timePart}`, // ex: "10 octobre 2025 à 15:30"
+  };
+}
+
 const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
   const [match, setMatch] = useState(null);
+  const [abonnement, setAbonnement] = useState(null);
+
   const [isLoading, setIsLoading] = useState(true);
+  const [treatingOrder, setTreatingOrder] = useState(false);
+
   const [error, setError] = useState(null);
+
   const [taxes, setTaxes] = useState([]);
-  const [date, setDate] = useState(null);
   const [total, setTotal] = useState(0);
+
+  const [date, setDate] = useState(null);
+
   const { user, loading } = useAuth();
   const [userData, setUserData] = useState(null);
-  const [abonnement, setAbonnement] = useState(null);
+
   const [confirmed, setConfirmed] = useState(false);
+
   const [code, setCode] = useState("");
   const [codeData, setCodeData] = useState(null);
   const [codeIsValid, setCodeIsValid] = useState(true);
   const [codeError, setCodeError] = useState(null);
-  const [treatingOrder, setTreatingOrder] = useState(false);
 
   const router = useRouter();
 
   const fetchData = async () => {
     try {
       setIsLoading(true);
+      setError(null);
+
       if (matchId) {
         const [matchResponse, taxesResponse, userResponse] = await Promise.all([
           getMatchByUid(matchId),
           getAllTaxes(),
           getUserDocument(user?.uid || ""),
         ]);
+
         if (matchResponse.success) {
-          setMatch(matchResponse.data);
-          if (matchResponse.data.availableSeats < quantity) {
+          const m = matchResponse.data;
+          setMatch(m);
+
+          if (m.availableSeats < quantity) {
             setError("Nombre de billets séléctionné est indisponible");
           }
-          const { dayName, date } = formatDate(matchResponse.data.date);
+
+          const { dayName, date } = formatDate(m.date);
           setDate({ dayName, date });
-        }
-        if (userResponse) {
-          setUserData(userResponse);
+
+          if (taxesResponse.success && taxesResponse.data) {
+            const TaxesList = taxesResponse.data.map((tax) => ({
+              name: tax.nom,
+              percentage: tax.valeur,
+              value: (quantity * m.price * tax.valeur) / 100,
+            }));
+            setTaxes(TaxesList);
+            setTotal(
+              quantity * m.price +
+                TaxesList.reduce((acc, tax) => acc + tax.value, 0)
+            );
+          }
         } else {
-          setError("Utilisateur non trouvé");
+          setError("Match introuvable");
         }
-        if (taxesResponse.success && taxesResponse.data && matchResponse.data) {
-          const TaxesList = taxesResponse.data.map((tax) => ({
-            name: tax.nom,
-            percentage: tax.valeur,
-            value: (quantity * matchResponse.data.price * tax.valeur) / 100,
-          }));
-          setTotal(
-            quantity * matchResponse.data.price +
-              TaxesList.reduce((acc, tax) => acc + tax.value, 0)
-          );
-          setTaxes(TaxesList);
-        }
+
+        if (userResponse) setUserData(userResponse);
+        else setError("Utilisateur non trouvé");
       }
+
       if (abonnementId) {
         const [abonnementResponse, taxesResponse, userResponse] =
           await Promise.all([
@@ -75,32 +151,29 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
             getAllTaxes(),
             getUserDocument(user?.uid || ""),
           ]);
-        if (abonnementResponse.success) {
-          setAbonnement(abonnementResponse.data);
-        }
-        if (userResponse) {
-          setUserData(userResponse);
-        }
-        if (
-          taxesResponse.success &&
-          taxesResponse.data &&
-          abonnementResponse.data
-        ) {
-          const TaxesList = taxesResponse.data.map((tax) => ({
-            name: tax.nom,
-            percentage: tax.valeur,
-            value: (abonnementResponse.data.price * tax.valeur) / 100,
-          }));
 
-          setTotal(
-            abonnementResponse.data.price +
-              TaxesList.reduce((acc, tax) => acc + tax.value, 0)
-          );
-          setTaxes(TaxesList);
+        if (abonnementResponse.success) {
+          const a = abonnementResponse.data;
+          setAbonnement(a);
+
+          if (taxesResponse.success && taxesResponse.data) {
+            const TaxesList = taxesResponse.data.map((tax) => ({
+              name: tax.nom,
+              percentage: tax.valeur,
+              value: (a.price * tax.valeur) / 100,
+            }));
+            setTaxes(TaxesList);
+            setTotal(a.price + TaxesList.reduce((acc, t) => acc + t.value, 0));
+          }
+        } else {
+          setError("Abonnement introuvable");
         }
+
+        if (userResponse) setUserData(userResponse);
+        else setError("Utilisateur non trouvé");
       }
-    } catch (error) {
-      console.error("Error fetching data:", error);
+    } catch (e) {
+      console.error("Error fetching data:", e);
       setError("An error occurred while fetching data");
     } finally {
       setIsLoading(false);
@@ -110,40 +183,18 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
   useEffect(() => {
     if (!user && !loading) {
       router.push("/");
-      return;
     }
-  }, [user, loading]);
+  }, [user, loading, router]);
 
   useEffect(() => {
     if (((matchId && quantity) || abonnementId) && user) {
       fetchData();
     }
-  }, [matchId, user, abonnementId, error]);
-  const formatDate = (timestamp) => {
-    const milliseconds =
-      timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000;
-
-    const date = new Date(milliseconds);
-
-    const dayName = date.toLocaleDateString("fr-FR", { weekday: "long" });
-    const str = new Intl.DateTimeFormat("fr-FR", {
-      timeZone: "Etc/GMT-1", // ← freeze at UTC
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    }).format(date);
-    return {
-      dayName,
-      date: str,
-    };
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [matchId, abonnementId, user]);
 
   const verifyCode = async () => {
     setCodeError(null);
-
     try {
       const response = await verifyPromoCode(code, user.uid);
 
@@ -158,7 +209,6 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
           } else if (response.data.type === "amount") {
             newSubtotal = Math.max(0, abonnement.price - response.data.amount);
           }
-
           const newTaxes = taxes.map((tax) => ({
             ...tax,
             value: (newSubtotal * tax.percentage) / 100,
@@ -168,6 +218,7 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
             newSubtotal + newTaxes.reduce((acc, tax) => acc + tax.value, 0)
           );
         }
+
         if (match) {
           let newSubtotal = match.price * quantity;
           if (response.data.type === "percent") {
@@ -192,8 +243,8 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
         setCodeIsValid(false);
         setCodeError(response.error);
       }
-    } catch (error) {
-      console.error("Error verifying code:", error);
+    } catch (e) {
+      console.error("Error verifying code:", e);
       setCodeIsValid(false);
       setCodeError("An error occurred while verifying the code");
     }
@@ -204,7 +255,7 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
     setCodeData(null);
     setCodeIsValid(true);
     setCodeError(null);
-    // Recalculate total without the promo code
+
     if (abonnement) {
       const subtotal = abonnement.price;
       const newTaxes = taxes.map((tax) => ({
@@ -214,6 +265,7 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
       setTaxes(newTaxes);
       setTotal(subtotal + newTaxes.reduce((acc, tax) => acc + tax.value, 0));
     }
+
     if (match) {
       const subtotal = match.price * quantity;
       const newTaxes = taxes.map((tax) => ({
@@ -242,8 +294,8 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
         const orderId = response.data.data;
         router.push(`/commande-reussi?orderId=${orderId}`);
       }
-    } catch (error) {
-      console.error("Error processing order:", error);
+    } catch (e) {
+      console.error("Error processing order:", e);
       setError("An error occurred while processing your order");
     } finally {
       setTreatingOrder(false);
@@ -260,23 +312,27 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
 
   if (error) {
     return (
-      <div className="h-screen flex justify-center items-center">
+      <div className="h-screen flex flex-col justify-center items-center gap-4">
         <p className="text-red-500">{error}</p>
         <button
-          onClick={() => setError(null)}
-          className="ml-4 px-4 py-2 bg-blue-500 text-white rounded"
+          onClick={() => {
+            setError(null);
+            fetchData();
+          }}
+          className="px-4 py-2 bg-blue-500 text-white rounded cursor-pointer"
         >
           Réessayer
         </button>
       </div>
     );
   }
+
   return (
     <div className="pt-16 md:px-24 px-4 w-full">
       {match && (
         <div>
           <div className="border-b border-black pb-10">
-            <h1 className="flex  md:text-2xl text-lg justify-center md:justify-start font-bold text-gray-800 items-center font-bebas-neue">
+            <h1 className="flex md:text-2xl text-lg justify-center md:justify-start font-bold text-gray-800 items-center font-bebas-neue">
               <Image
                 src={Logo}
                 alt="logo"
@@ -285,7 +341,7 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
                 className="md:h-16 h-12 md:w-16 w-12"
               />
               <span className="ml-4 uppercase">Mégatoit</span>
-              <span className="mx-4 font-bold ">VS</span>
+              <span className="mx-4 font-bold">VS</span>
               <span className="mr-4 uppercase">{match.opponent.name}</span>
               <Image
                 src={match.opponent.imageUrl}
@@ -295,30 +351,38 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
                 className="md:h-16 h-12 md:w-16 w-12"
               />
             </h1>
+
             <div className="mt-8">
-              <div className="flex items-center ">
+              <div className="flex items-center">
                 <FaCalendarAlt
                   className="inline mr-2"
                   color="#585858"
                   size={20}
                 />
-
-                <p className=" text-[#585858] md:text-lg text-base font-lato">
-                  <span className="uppercase">{date.dayName},</span>{" "}
-                  <span className="uppercase"> {date.date}</span>
+                <p className="text-[#585858] md:text-lg text-base font-lato">
+                  {(() => {
+                    const d = formatDate(match.date);
+                    return (
+                      <>
+                        <span className="uppercase">{d.dayName},</span>{" "}
+                        <span className="uppercase">{d.date}</span>
+                      </>
+                    );
+                  })()}
                 </p>
               </div>
+
               <div className="flex items-center mt-4">
                 <IoMdPin className="inline mr-2" color="#585858" size={20} />
-
-                <p className=" text-[#585858] text-capitalize md:text-lg text-base font-lato uppercase">
+                <p className="text-[#585858] text-capitalize md:text-lg text-base font-lato uppercase">
                   {match.place}
                 </p>
               </div>
             </div>
           </div>
+
           <div className="py-10 border-b border-black">
-            <h2 className="f md:text-2xl text-lg font-bold text-gray-800 font-bebas-neue">
+            <h2 className="md:text-2xl text-lg font-bold text-gray-800 font-bebas-neue">
               Résumé de la commande
             </h2>
             <div className="border border-gray-300 rounded-md p-4 mt-4 bg-white flex justify-between">
@@ -331,11 +395,12 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
               </p>
             </div>
           </div>
+
           <div className="py-10 border-b border-black">
-            <h2 className="f md:text-2xl text-lg font-bold text-gray-800 font-bebas-neue">
+            <h2 className="md:text-2xl text-lg font-bold text-gray-800 font-bebas-neue">
               Code Promo (optionnel)
             </h2>
-            <div className="border border-gray-300 rounded-md p-4 mt-4 bg-white ">
+            <div className="border border-gray-300 rounded-md p-4 mt-4 bg-white">
               <div className="flex justify-between gap-4">
                 <input
                   type="text"
@@ -351,21 +416,21 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
                 {!codeData && (
                   <button
                     onClick={verifyCode}
-                    className="text-white py-2 px-6 bg-black rounded-md  text-xl font-bebas-neue cursor-pointer"
+                    className="text-white py-2 px-6 bg-black rounded-md text-xl font-bebas-neue cursor-pointer"
                   >
                     Appliquer
                   </button>
                 )}
-
                 {codeData && (
                   <button
                     onClick={removeCode}
-                    className="text-white py-2 px-6 bg-red-500 rounded-md  text-xl font-bebas-neue cursor-pointer"
+                    className="text-white py-2 px-6 bg-red-500 rounded-md text-xl font-bebas-neue cursor-pointer"
                   >
                     Enlever
                   </button>
                 )}
               </div>
+
               {codeError && (
                 <p className="text-red-500 mt-2 font-lato font-semibold">
                   {codeError}
@@ -381,8 +446,9 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
               )}
             </div>
           </div>
+
           <div className="py-10 border-b border-black">
-            <h2 className="f md:text-2xl text-lg font-bold text-gray-800 font-bebas-neue">
+            <h2 className="md:text-2xl text-lg font-bold text-gray-800 font-bebas-neue">
               Vos Informations
             </h2>
             <div className="border border-gray-300 rounded-md p-4 mt-4 bg-white flex justify-between">
@@ -424,15 +490,17 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
               </div>
             </div>
           </div>
+
           <div className="py-10 border-b border-black">
-            <h2 className="f md:text-2xl text-lg font-bold text-gray-800 font-bebas-neue uppercase">
+            <h2 className="md:text-2xl text-lg font-bold text-gray-800 font-bebas-neue uppercase">
               Récapitulatif
             </h2>
-            <div className="border border-gray-300 rounded-md p-4 mt-4 bg-white ">
+            <div className="border border-gray-300 rounded-md p-4 mt-4 bg-white">
               <div className="flex justify-between w-full font-lato text-base">
                 <p className="font-semibold uppercase">Sous-total</p>
                 <p>${(match.price * quantity).toFixed(2)}</p>
               </div>
+
               {codeIsValid && codeData && (
                 <div className="flex justify-between w-full font-lato text-base">
                   <p className="font-semibold uppercase">Réduction</p>
@@ -446,6 +514,7 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
                   </p>
                 </div>
               )}
+
               {taxes.map((tax, index) => (
                 <div
                   key={index}
@@ -457,12 +526,14 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
                   <p>${tax.value.toFixed(2)}</p>
                 </div>
               ))}
+
               <div className="flex justify-between w-full font-lato text-base mt-4">
                 <p className="font-semibold uppercase">Total</p>
                 <p className="text-lg font-bold">${total.toFixed(2)}</p>
               </div>
             </div>
           </div>
+
           {!confirmed && (
             <button
               onClick={() => setConfirmed(true)}
@@ -471,6 +542,7 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
               Confirmer la commande
             </button>
           )}
+
           {confirmed && total === 0 && codeData && (
             <button
               onClick={processOrder}
@@ -480,9 +552,10 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
               {treatingOrder ? "Traitement..." : "Traiter ma commande"}
             </button>
           )}
+
           {confirmed && total > 0 && (
-            <div className="py-10 ">
-              <h2 className=" md:text-2xl text-lg font-bold text-gray-800 font-bebas-neue">
+            <div className="py-10">
+              <h2 className="md:text-2xl text-lg font-bold text-gray-800 font-bebas-neue">
                 Paiement
               </h2>
               <PaymentForm
@@ -501,14 +574,16 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
           )}
         </div>
       )}
+
       {abonnement && (
         <div>
           <div className="border-b border-black pb-10">
-            <h1 className="flex  md:text-2xl text-lg uppercase justify-center md:justify-start font-bold text-gray-800 items-center font-bebas-neue">
+            <h1 className="flex md:text-2xl text-lg uppercase justify-center md:justify-start font-bold text-gray-800 items-center font-bebas-neue">
               {abonnement.title}
             </h1>
+
             <div className="bg-white p-4 rounded-md mt-4">
-              <p className="font-lato text-black text-base  uppercase">
+              <p className="font-lato text-black text-base uppercase">
                 <FaCheck className="inline text-black mr-2" />
                 13 matchs de saison régulière
               </p>
@@ -521,33 +596,22 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
               </p>
             </div>
 
-            <div className="mt-4">
-              <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded-md shadow-sm flex items-start gap-2">
-                <span className="font-bold ">Note:</span>
-                <span className="ml-2">
-                  Ce billet de saison donne droit à l’accès à tous les matchs de
-                  la saison régulière du MégaToit de Trois-Rivières. Il est
-                  unique et incessible. Sa présentation est obligatoire à chaque
-                  entrée au Colisée Jean-Guy Talbot.
-                </span>
-              </div>
-            </div>
             <div className="mt-8">
-              <div className="flex items-center ">
+              <div className="flex items-center">
                 <FaCalendarAlt
                   className="inline mr-2"
                   color="#585858"
                   size={20}
                 />
-
-                <p className=" text-[#585858] md:text-lg text-base font-lato uppercase">
+                <p className="text-[#585858] md:text-lg text-base font-lato uppercase">
                   saison {abonnement.season}
                 </p>
               </div>
             </div>
           </div>
+
           <div className="py-10 border-b border-black">
-            <h2 className="f md:text-2xl text-lg font-bold text-gray-800 font-bebas-neue">
+            <h2 className="md:text-2xl text-lg font-bold text-gray-800 font-bebas-neue">
               Résumé de la commande
             </h2>
             <div className="border border-gray-300 rounded-md p-4 mt-4 bg-white flex justify-between">
@@ -559,11 +623,12 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
               </p>
             </div>
           </div>
+
           <div className="py-10 border-b border-black">
-            <h2 className="f md:text-2xl text-lg font-bold text-gray-800 font-bebas-neue">
+            <h2 className="md:text-2xl text-lg font-bold text-gray-800 font-bebas-neue">
               Code Promo (optionnel)
             </h2>
-            <div className="border border-gray-300 rounded-md p-4 mt-4 bg-white ">
+            <div className="border border-gray-300 rounded-md p-4 mt-4 bg-white">
               <div className="flex justify-between gap-4">
                 <input
                   type="text"
@@ -579,21 +644,21 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
                 {!codeData && (
                   <button
                     onClick={verifyCode}
-                    className="text-white py-2 px-6 bg-black rounded-md  text-xl font-bebas-neue cursor-pointer"
+                    className="text-white py-2 px-6 bg-black rounded-md text-xl font-bebas-neue cursor-pointer"
                   >
                     Appliquer
                   </button>
                 )}
-
                 {codeData && (
                   <button
                     onClick={removeCode}
-                    className="text-white py-2 px-6 bg-red-500 rounded-md  text-xl font-bebas-neue cursor-pointer"
+                    className="text-white py-2 px-6 bg-red-500 rounded-md text-xl font-bebas-neue cursor-pointer"
                   >
                     Enlever
                   </button>
                 )}
               </div>
+
               {codeError && (
                 <p className="text-red-500 mt-2 font-lato font-semibold">
                   {codeError}
@@ -609,8 +674,9 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
               )}
             </div>
           </div>
+
           <div className="py-10 border-b border-black">
-            <h2 className="f md:text-2xl text-lg font-bold text-gray-800 font-bebas-neue">
+            <h2 className="md:text-2xl text-lg font-bold text-gray-800 font-bebas-neue">
               Vos Informations
             </h2>
             <div className="border border-gray-300 rounded-md p-4 mt-4 bg-white flex justify-between">
@@ -652,15 +718,17 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
               </div>
             </div>
           </div>
+
           <div className="py-10 border-b border-black">
-            <h2 className="f md:text-2xl text-lg font-bold text-gray-800 font-bebas-neue">
+            <h2 className="md:text-2xl text-lg font-bold text-gray-800 font-bebas-neue">
               Récapitulatif
             </h2>
-            <div className="border border-gray-300 rounded-md p-4 mt-4 bg-white ">
+            <div className="border border-gray-300 rounded-md p-4 mt-4 bg-white">
               <div className="flex justify-between w-full font-lato text-base">
                 <p className="font-semibold uppercase">Sous-total</p>
                 <p>${abonnement.price.toFixed(2)}</p>
               </div>
+
               {codeIsValid && codeData && (
                 <div className="flex justify-between w-full font-lato text-base">
                   <p className="font-semibold uppercase">Réduction</p>
@@ -674,6 +742,7 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
                   </p>
                 </div>
               )}
+
               {taxes.map((tax, index) => (
                 <div
                   key={index}
@@ -685,12 +754,14 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
                   <p>${tax.value.toFixed(2)}</p>
                 </div>
               ))}
+
               <div className="flex justify-between w-full font-lato text-base mt-4">
                 <p className="font-semibold uppercase">Total</p>
                 <p className="text-lg font-bold">${total.toFixed(2)}</p>
               </div>
             </div>
           </div>
+
           {!confirmed && (
             <button
               onClick={() => setConfirmed(true)}
@@ -699,6 +770,7 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
               Confirmer la commande
             </button>
           )}
+
           {confirmed && total === 0 && codeData && (
             <button
               onClick={processOrder}
@@ -708,9 +780,10 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
               {treatingOrder ? "Traitement..." : "Traiter ma commande"}
             </button>
           )}
+
           {confirmed && total > 0 && (
-            <div className="py-10 ">
-              <h2 className=" md:text-2xl text-lg font-bold text-gray-800 font-bebas-neue">
+            <div className="py-10">
+              <h2 className="md:text-2xl text-lg font-bold text-gray-800 font-bebas-neue">
                 Paiement
               </h2>
               <PaymentForm

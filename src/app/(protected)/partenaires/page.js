@@ -11,7 +11,7 @@ const page = () => {
     "HE.jpg",
     "immo3r.jpg",
     "MegaToit.jpg",
-    "PowerPlay.jpg",
+    "PowerPlay.png",
     "MaisonDebauche.jpg",
     "SevignyEpoxy.jpg",
     "SphereExtermination.jpg",

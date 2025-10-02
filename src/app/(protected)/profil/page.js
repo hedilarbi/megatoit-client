@@ -8,6 +8,92 @@ import Logo from "@/assets/logo-small.png"; // Adjust the path as necessary
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+/* =========================
+   Québec-fixed match date formatter
+   ========================= */
+const QUEBEC_TZ = "America/Toronto";
+
+/** Firestore Timestamp | Date | string | millis -> JS Date */
+function toJSDate(dateLike) {
+  if (!dateLike) return null;
+
+  // Firestore Timestamp shape { seconds, nanoseconds }
+  if (
+    typeof dateLike === "object" &&
+    typeof dateLike.seconds === "number" &&
+    typeof dateLike.nanoseconds === "number"
+  ) {
+    const ms = dateLike.seconds * 1000 + Math.floor(dateLike.nanoseconds / 1e6);
+    return new Date(ms);
+  }
+
+  // Firestore Timestamp with toDate()
+  if (dateLike && typeof dateLike.toDate === "function") {
+    return dateLike.toDate();
+  }
+
+  // JS Date | ISO string | millis
+  try {
+    return dateLike instanceof Date ? dateLike : new Date(dateLike);
+  } catch {
+    return null;
+  }
+}
+
+/** Match date in Québec time: { dayName, date } -> "vendredi", "10 octobre 2025 à 15:30" */
+function formatMatchDateQuebec(timestamp) {
+  const d = toJSDate(timestamp);
+  if (!d || isNaN(d.getTime())) return { dayName: "", date: "" };
+
+  const dayName = new Intl.DateTimeFormat("fr-FR", {
+    weekday: "long",
+    timeZone: QUEBEC_TZ,
+  }).format(d);
+
+  const datePart = new Intl.DateTimeFormat("fr-FR", {
+    timeZone: QUEBEC_TZ,
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(d);
+
+  const timePart = new Intl.DateTimeFormat("fr-FR", {
+    timeZone: QUEBEC_TZ,
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(d);
+
+  return {
+    dayName, // e.g. "vendredi"
+    date: `${datePart} à ${timePart}`, // e.g. "10 octobre 2025 à 15:30"
+  };
+}
+
+/** Your old local formatter for "Acheté le" etc. (kept as-is) */
+function formatLocalDate(timestamp) {
+  if (!timestamp) return { dayName: "", date: "", time: "" };
+  const d = toJSDate(timestamp);
+  if (!d || isNaN(d.getTime())) return { dayName: "", date: "", time: "" };
+
+  const dayName = d.toLocaleDateString("fr-FR", { weekday: "long" });
+  const time = d.toLocaleTimeString("fr-FR", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  const formattedDateShort = d.toLocaleDateString("fr-FR", {
+    month: "short",
+    day: "2-digit",
+    year: "numeric",
+  });
+
+  return {
+    dayName,
+    date: formattedDateShort,
+    time,
+  };
+}
+
 const Profil = () => {
   const { user, loading } = useAuth();
   const [userData, setUserData] = React.useState(null);
@@ -60,30 +146,6 @@ const Profil = () => {
       setIsLoading(false);
     }
   };
-  const formatDate = (timestamp) => {
-    if (!timestamp) return { dayName: "", date: "", time: "" };
-    const milliseconds =
-      timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000;
-
-    const date = new Date(milliseconds);
-
-    const dayName = date.toLocaleDateString("fr-FR", { weekday: "long" });
-    const time = date.toLocaleTimeString("fr-FR", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-    const formattedDateShort = date.toLocaleDateString("fr-FR", {
-      month: "short",
-      day: "2-digit",
-      year: "numeric",
-    });
-
-    return {
-      dayName,
-      date: formattedDateShort,
-      time,
-    };
-  };
 
   const handleFilterChange = (type) => {
     setFilterType(type);
@@ -92,7 +154,6 @@ const Profil = () => {
       setContent(tickets);
     } else if (type === "abonnements") {
       const abonnements = orders.filter((order) => order.abonnementId);
-
       setContent(abonnements);
     }
   };
@@ -104,7 +165,7 @@ const Profil = () => {
     if (!user && !loading) {
       router.replace("/connexion");
     }
-  }, [user, loading]);
+  }, [user, loading]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (isLoading || loading) {
     return (
@@ -127,7 +188,7 @@ const Profil = () => {
               <h2 className="font-semibold text-2xl">{userData.userName}</h2>
               <h3 className="mt-2 ">{userData.email}</h3>
               <div className="text-sm mt-2 flex gap-3 flex-wrap justify-center">
-                <p>membre depuis {formatDate(userData.createdAt).date}</p>
+                <p>membre depuis {formatLocalDate(userData.createdAt).date}</p>
                 <p>|</p>
                 <p> {ticketsCount} billets achetés</p>
                 <p>|</p>
@@ -155,14 +216,15 @@ const Profil = () => {
                 Abonnements
               </button>
             </div>
+
             {filterType === "tickets" && (
               <div className="p-3">
                 {content.length === 0 ? (
                   <p>Aucun billet trouvé.</p>
                 ) : (
                   content.map((order) => {
-                    const matchDate = formatDate(order?.match?.date);
-                    const createdDate = formatDate(order.createdAt);
+                    const matchD = formatMatchDateQuebec(order?.match?.date); // <-- QUÉBEC-FIXED
+                    const createdD = formatLocalDate(order.createdAt); // <-- local as before
                     return (
                       <div
                         key={order.id}
@@ -198,29 +260,33 @@ const Profil = () => {
                           </div>
                         </div>
 
+                        {/* Match date - Québec fixed */}
                         <p className="text-sm text-gray-600 mt-2 capitalize">
                           <span className="font-semibold">Date du match: </span>
-                          {matchDate?.dayName}, {matchDate?.date} à{" "}
-                          {matchDate?.time}
+                          {matchD.dayName}, {matchD.date}
                         </p>
+
                         <p className="text-sm text-gray-600 capitalize">
                           <span className="font-semibold">
                             Nombre de billets:{" "}
                           </span>
-
                           {order?.tickets?.length}
                         </p>
+
                         <p className="text-sm text-gray-600 capitalize">
                           <span className="font-semibold">Total payé: </span>$
                           {(order?.amount / 100).toFixed(2)}
                         </p>
+
                         <div className="flex justify-between items-center ">
+                          {/* Created at - local */}
                           <p className="text-sm text-gray-600 mt-1 capitalize">
-                            <span className="font-semibold ">Achété le:</span>{" "}
-                            {createdDate.dayName}, {createdDate.date} à{" "}
-                            {createdDate.time}
+                            <span className="font-semibold ">Acheté le:</span>{" "}
+                            {createdD.dayName}, {createdD.date} à{" "}
+                            {createdD.time}
                           </p>
                         </div>
+
                         <div className="mt-4 flex justify-center">
                           <Link
                             href={`/profil/achats/${order.id}`}
@@ -235,13 +301,14 @@ const Profil = () => {
                 )}
               </div>
             )}
+
             {filterType === "abonnements" && (
               <div className="p-3">
                 {content.length === 0 ? (
                   <p>Aucun abonnement trouvé.</p>
                 ) : (
                   content.map((order) => {
-                    const matchDate = formatDate(order.createdAt);
+                    const createdD = formatLocalDate(order.createdAt);
                     return (
                       <div
                         key={order.id}
@@ -252,9 +319,8 @@ const Profil = () => {
                         </h3>
 
                         <p className="text-sm text-gray-600 mt-1 capitalize">
-                          <span className="font-semibold mr-1">Achété le:</span>
-                          {matchDate.dayName}, {matchDate.date} à{" "}
-                          {matchDate.time}
+                          <span className="font-semibold mr-1">Acheté le:</span>
+                          {createdD.dayName}, {createdD.date} à {createdD.time}
                         </p>
                         <div className="flex justify-between items-center capitalize">
                           <p className="text-sm text-gray-600 ">
@@ -264,6 +330,7 @@ const Profil = () => {
                             ${(order.amount / 100).toFixed(2)}
                           </p>
                         </div>
+
                         <div className="mt-4 flex justify-center">
                           <Link
                             href={`/profil/achats/${order.id}`}

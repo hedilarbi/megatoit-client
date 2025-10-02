@@ -10,17 +10,13 @@ import {
   orderBy,
 } from "firebase/firestore";
 
-import { isNowWithinWindow } from "../utils/promoDateUtils";
+import { isActiveInQuebec_DateOnly_0000_to_2359 } from "../utils/promoDateUtils";
 
 export const getAllMatches = async () => {
   try {
     const matchsCollection = collection(db, "matchs");
-    const today = new Date();
-    const q = query(
-      matchsCollection,
-      where("date", ">=", today),
-      orderBy("date", "asc")
-    );
+
+    const q = query(matchsCollection, orderBy("date", "asc"));
     const matchsSnapshot = await getDocs(q);
     const matchs = matchsSnapshot.docs.map((doc) => ({
       id: doc.id,
@@ -198,18 +194,6 @@ export const getOrderByUID = async (orderId) => {
   }
 };
 
-function getUserTimeZone() {
-  try {
-    return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
-  } catch (e) {
-    console.error(
-      "Erreur lors de la récupération du fuseau horaire de l'utilisateur :",
-      e
-    );
-    return "UTC"; // SSR fallback
-  }
-}
-
 export const verifyPromoCode = async (code, userId) => {
   try {
     const q = query(collection(db, "promoCodes"), where("code", "==", code));
@@ -218,30 +202,30 @@ export const verifyPromoCode = async (code, userId) => {
 
     const promoCodeData = { id: snap.docs[0].id, ...snap.docs[0].data() };
 
-    // Timezone-aware, inclusive day window
-    const zone = getUserTimeZone(); // e.g., "America/Toronto" for Québec
-    const active = isNowWithinWindow(
+    // ✅ Ignore time parts completely; Québec window = [00:00, 23:59]
+    const active = isActiveInQuebec_DateOnly_0000_to_2359(
       promoCodeData.startDate,
-      promoCodeData.endDate,
-      zone
+      promoCodeData.endDate
     );
     if (!active) return { success: false, error: "Code promo expiré" };
 
     if (
-      promoCodeData.totalUsage &&
+      typeof promoCodeData.totalUsage === "number" &&
       (promoCodeData.used || 0) >= promoCodeData.totalUsage
     ) {
       return { success: false, error: "Code promo épuisé" };
     }
 
     const userSnap = await getDoc(doc(db, "users", userId));
-    if (!userSnap.exists())
+    if (!userSnap.exists()) {
       return { success: false, error: "Utilisateur non trouvé" };
+    }
 
     const userData = userSnap.data();
     const used = userData?.usedPromoCodes?.find(
       (u) => u.promoCode === promoCodeData.id
     );
+
     if (
       used &&
       typeof promoCodeData.usagePerUser === "number" &&

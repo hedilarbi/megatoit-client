@@ -1,40 +1,76 @@
 "use client";
 import { getAllMatchsList } from "@/services/match.service";
-
 import React, { useEffect, useState } from "react";
 import Spinner from "./spinner/Spinner";
 import Image from "next/image";
 import Logo from "@/assets/logo-small.png";
 import { MdPinDrop } from "react-icons/md";
 import Link from "next/link";
+import { DateTime } from "luxon";
+
+/* --------- League timezone: fixed to Québec for ALL users --------- */
+const LEAGUE_TZ = "America/Toronto"; // Québec time (handles DST)
+
+/* Firestore Timestamp | JS Date | ISO string -> Luxon in LEAGUE_TZ */
+function toDateTimeInLeagueTZ(dateLike) {
+  if (!dateLike) return null;
+
+  // ISO string
+  if (typeof dateLike === "string") {
+    const isDateOnly = /^\d{4}-\d{2}-\d{2}$/.test(dateLike);
+    return isDateOnly
+      ? DateTime.fromISO(dateLike, { zone: LEAGUE_TZ })
+      : DateTime.fromISO(dateLike).setZone(LEAGUE_TZ);
+  }
+  // JS Date
+  if (dateLike instanceof Date) {
+    return DateTime.fromJSDate(dateLike, { zone: LEAGUE_TZ });
+  }
+  // Firestore Timestamp (client SDK)
+  if (dateLike && typeof dateLike.toDate === "function") {
+    return DateTime.fromJSDate(dateLike.toDate(), { zone: LEAGUE_TZ });
+  }
+  // Serialized Firestore Timestamp {seconds, nanoseconds}
+  if (dateLike && typeof dateLike.seconds === "number") {
+    const ms =
+      dateLike.seconds * 1000 + Math.floor((dateLike.nanoseconds || 0) / 1e6);
+    return DateTime.fromMillis(ms, { zone: LEAGUE_TZ });
+  }
+
+  return null;
+}
+
+/** Visible until the END of the match DAY in Québec (23:59:59.999) */
+function isMatchVisibleForAll(matchDateLike) {
+  const dt = toDateTimeInLeagueTZ(matchDateLike);
+  if (!dt || !dt.isValid) return false;
+
+  const endOfDayInQuebec = DateTime.fromObject(
+    { year: dt.year, month: dt.month, day: dt.day },
+    { zone: LEAGUE_TZ }
+  ).endOf("day");
+
+  const nowInQuebec = DateTime.now().setZone(LEAGUE_TZ);
+  return nowInQuebec <= endOfDayInQuebec;
+}
+
+/** Formatting shown to everyone in Québec time (French) */
+function formatMatchDateForAll(matchDateLike) {
+  const dt = toDateTimeInLeagueTZ(matchDateLike);
+  if (!dt || !dt.isValid) return { dayName: "", date: "" };
+
+  const dayName = dt.setLocale("fr-FR").toFormat("cccc"); // e.g. "vendredi"
+  const date = dt.setLocale("fr-FR").toFormat("d LLLL yyyy, HH:mm"); // "10 octobre 2025, 20:30"
+  return { dayName, date };
+}
+
 const MatchsContent = () => {
   const [matchs, setMatchs] = useState([]);
   const [matchsList, setMatchsList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [type, setType] = useState("Tous");
-  const formatDate = (timestamp) => {
-    const milliseconds =
-      timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000;
 
-    const date = new Date(milliseconds);
-
-    const dayName = date.toLocaleDateString("fr-FR", { weekday: "long" });
-    const str = new Intl.DateTimeFormat("fr-FR", {
-      timeZone: "Etc/GMT-1", // ← freeze at UTC
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    }).format(date);
-
-    return {
-      dayName,
-      date: str,
-    };
-  };
   const fetchMatchs = async () => {
     setLoading(true);
     setError(null);
@@ -42,25 +78,19 @@ const MatchsContent = () => {
       const response = await getAllMatchsList();
 
       if (response.success) {
-        const filteredData = response.data.filter((match) => {
-          const matchDate = new Date(
-            match.date.seconds * 1000 + match.date.nanoseconds / 1000000
-          );
-          const today = new Date();
-          // Compare only year, month, and date
-          const matchYMD = new Date(
-            matchDate.getFullYear(),
-            matchDate.getMonth(),
-            matchDate.getDate()
-          );
-          const todayYMD = new Date(
-            today.getFullYear(),
-            today.getMonth(),
-            today.getDate()
-          );
-          return matchYMD >= todayYMD;
+        // 1) Hide matches that are past end-of-day in Québec
+        const visible = response.data.filter((match) =>
+          isMatchVisibleForAll(match.date)
+        );
+
+        // 2) (Optional) sort by date ascending in Québec time
+        visible.sort((a, b) => {
+          const da = toDateTimeInLeagueTZ(a.date);
+          const db = toDateTimeInLeagueTZ(b.date);
+          return da.toMillis() - db.toMillis();
         });
-        setMatchsList(filteredData);
+
+        setMatchsList(visible);
       } else {
         setError(response.error);
         console.error("Error fetching matchs:", response.error);
@@ -123,9 +153,10 @@ const MatchsContent = () => {
               Matchs à l&apos;étranger
             </button>
           </div>
+
           <div className="my-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4 pb-4">
             {matchs.map((match) => {
-              const { dayName, date } = formatDate(match.date);
+              const { dayName, date } = formatMatchDateForAll(match.date);
               return (
                 <div
                   key={match.id}
@@ -133,9 +164,10 @@ const MatchsContent = () => {
                 >
                   <div className="bg-black py-4 rounded-t-md">
                     <p className="font-lato text-center text-white font-semibold capitalize ">
-                      {dayName}, {date}
+                      {dayName}, {date} {/* Always Québec time for everyone */}
                     </p>
                   </div>
+
                   <div className="px-4 mt-6">
                     <div
                       className={`flex justify-between items-center ${
@@ -178,7 +210,7 @@ const MatchsContent = () => {
                       {match.place}
                     </p>
                   </div>
-                  <div className="flex  justify-between px-4 mt-4">
+                  <div className="flex justify-between px-4 mt-4">
                     <p className="font-lato text-black rounded-md bg-[#D9D9D9] px-4 py-1 md:text-base text-xs uppercase ">
                       {match.type}
                     </p>
@@ -188,13 +220,7 @@ const MatchsContent = () => {
                       </p>
                     )}
                   </div>
-                  <div className="mt-6 flex justify-between items-center px-4">
-                    {/* {match.type === "Domicile" && (
-                      <p className="font-bebas-neue text-black text-xl">
-                        $ {match.price.toFixed(2)}
-                      </p>
-                    )} */}
-                  </div>
+
                   {match.type === "Domicile" && (
                     <Link
                       href={`/calendrier/${match.id}`}
