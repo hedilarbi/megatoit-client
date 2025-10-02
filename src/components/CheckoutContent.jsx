@@ -15,65 +15,22 @@ import { IoMdPin } from "react-icons/io";
 import { FaCalendarAlt, FaCheck } from "react-icons/fa";
 import axios from "axios";
 
-// ===== Date formatting fixed to Québec (America/Toronto) =====
-const QUEBEC_TZ = "America/Toronto";
-
-/** Firestore Timestamp | Date | string | millis -> JS Date */
-function toJSDate(dateLike) {
-  if (!dateLike) return null;
-
-  // Firestore Timestamp shape { seconds, nanoseconds }
-  if (
-    typeof dateLike === "object" &&
-    typeof dateLike.seconds === "number" &&
-    typeof dateLike.nanoseconds === "number"
-  ) {
-    const ms = dateLike.seconds * 1000 + Math.floor(dateLike.nanoseconds / 1e6);
-    return new Date(ms);
-  }
-
-  // Firestore Timestamp with toDate()
-  if (dateLike && typeof dateLike.toDate === "function") {
-    return dateLike.toDate();
-  }
-
-  // JS Date | ISO string | millis
-  try {
-    return dateLike instanceof Date ? dateLike : new Date(dateLike);
-  } catch {
-    return null;
-  }
-}
-
-/** Returns { dayName, date } e.g. "vendredi", "10 octobre 2025 à 15:30" */
-function formatDate(timestamp) {
-  const d = toJSDate(timestamp);
-  if (!d || isNaN(d.getTime())) return { dayName: "", date: "" };
-
-  const dayName = new Intl.DateTimeFormat("fr-FR", {
-    weekday: "long",
-    timeZone: QUEBEC_TZ,
-  }).format(d);
-
-  const datePart = new Intl.DateTimeFormat("fr-FR", {
-    timeZone: QUEBEC_TZ,
+const formatDate = (timestamp) => {
+  const milliseconds =
+    timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000;
+  const date = new Date(milliseconds);
+  const dayName = date.toLocaleDateString("fr-FR", { weekday: "long" });
+  const str = new Intl.DateTimeFormat("fr-FR", {
+    timeZone: "Etc/GMT-1",
     day: "numeric",
     month: "long",
     year: "numeric",
-  }).format(d);
-
-  const timePart = new Intl.DateTimeFormat("fr-FR", {
-    timeZone: QUEBEC_TZ,
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
-  }).format(d);
-
-  return {
-    dayName, // ex: "vendredi"
-    date: `${datePart} à ${timePart}`, // ex: "10 octobre 2025 à 15:30"
-  };
-}
+  }).format(date);
+  return { dayName, date: str };
+};
 
 const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
   const [match, setMatch] = useState(null);

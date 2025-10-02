@@ -8,33 +8,34 @@ import { MdPinDrop } from "react-icons/md";
 import Link from "next/link";
 import { DateTime } from "luxon";
 
-/* --------- League timezone: fixed to Québec for ALL users --------- */
-const LEAGUE_TZ = "America/Toronto"; // Québec time (handles DST)
+/** ---- League timezone only for visibility cutoff (not for display) ---- */
+const LEAGUE_TZ = "America/Toronto";
 
-/* Firestore Timestamp | JS Date | ISO string -> Luxon in LEAGUE_TZ */
-function toDateTimeInLeagueTZ(dateLike) {
+/** Parse and KEEP the original wall-clock time / offset/zone from the value */
+function toDateTimePreserve(dateLike) {
   if (!dateLike) return null;
 
-  // ISO string
   if (typeof dateLike === "string") {
     const isDateOnly = /^\d{4}-\d{2}-\d{2}$/.test(dateLike);
     return isDateOnly
-      ? DateTime.fromISO(dateLike, { zone: LEAGUE_TZ })
-      : DateTime.fromISO(dateLike).setZone(LEAGUE_TZ);
+      ? DateTime.fromISO(dateLike) // stays "naive" at 00:00, no conversion
+      : DateTime.fromISO(dateLike, { setZone: true }); // respect embedded offset/zone
   }
-  // JS Date
+
   if (dateLike instanceof Date) {
-    return DateTime.fromJSDate(dateLike, { zone: LEAGUE_TZ });
+    return DateTime.fromJSDate(dateLike); // no forced setZone
   }
-  // Firestore Timestamp (client SDK)
+
   if (dateLike && typeof dateLike.toDate === "function") {
-    return DateTime.fromJSDate(dateLike.toDate(), { zone: LEAGUE_TZ });
+    // Firestore Timestamp -> JS Date
+    return DateTime.fromJSDate(dateLike.toDate());
   }
-  // Serialized Firestore Timestamp {seconds, nanoseconds}
+
   if (dateLike && typeof dateLike.seconds === "number") {
+    // Serialized Firestore Timestamp {seconds, nanoseconds}
     const ms =
       dateLike.seconds * 1000 + Math.floor((dateLike.nanoseconds || 0) / 1e6);
-    return DateTime.fromMillis(ms, { zone: LEAGUE_TZ });
+    return DateTime.fromMillis(ms);
   }
 
   return null;
@@ -42,7 +43,7 @@ function toDateTimeInLeagueTZ(dateLike) {
 
 /** Visible until the END of the match DAY in Québec (23:59:59.999) */
 function isMatchVisibleForAll(matchDateLike) {
-  const dt = toDateTimeInLeagueTZ(matchDateLike);
+  const dt = toDateTimePreserve(matchDateLike);
   if (!dt || !dt.isValid) return false;
 
   const endOfDayInQuebec = DateTime.fromObject(
@@ -52,16 +53,6 @@ function isMatchVisibleForAll(matchDateLike) {
 
   const nowInQuebec = DateTime.now().setZone(LEAGUE_TZ);
   return nowInQuebec <= endOfDayInQuebec;
-}
-
-/** Formatting shown to everyone in Québec time (French) */
-function formatMatchDateForAll(matchDateLike) {
-  const dt = toDateTimeInLeagueTZ(matchDateLike);
-  if (!dt || !dt.isValid) return { dayName: "", date: "" };
-
-  const dayName = dt.setLocale("fr-FR").toFormat("cccc"); // e.g. "vendredi"
-  const date = dt.setLocale("fr-FR").toFormat("d LLLL yyyy, HH:mm"); // "10 octobre 2025, 20:30"
-  return { dayName, date };
 }
 
 const MatchsContent = () => {
@@ -79,28 +70,44 @@ const MatchsContent = () => {
 
       if (response.success) {
         // 1) Hide matches that are past end-of-day in Québec
-        const visible = response.data.filter((match) =>
+        const visible = (response.data || []).filter((match) =>
           isMatchVisibleForAll(match.date)
         );
 
-        // 2) (Optional) sort by date ascending in Québec time
+        // 2) Sort by the stored time as-is (no timezone conversion)
         visible.sort((a, b) => {
-          const da = toDateTimeInLeagueTZ(a.date);
-          const db = toDateTimeInLeagueTZ(b.date);
-          return da.toMillis() - db.toMillis();
+          const da = toDateTimePreserve(a.date);
+          const db = toDateTimePreserve(b.date);
+          return (da?.toMillis() ?? 0) - (db?.toMillis() ?? 0);
         });
 
         setMatchsList(visible);
       } else {
-        setError(response.error);
+        setError(response.error || "Erreur inconnue");
         console.error("Error fetching matchs:", response.error);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
+      setError(err?.message || "An error occurred");
       console.error("Error fetching matchs:", err);
     } finally {
       setLoading(false);
     }
+  };
+  const formatDate = (timestamp) => {
+    const milliseconds =
+      timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000;
+    const date = new Date(milliseconds);
+    const dayName = date.toLocaleDateString("fr-FR", { weekday: "long" });
+    const str = new Intl.DateTimeFormat("fr-FR", {
+      timeZone: "Etc/GMT-1",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }).format(date);
+    return { dayName, date: str };
   };
 
   useEffect(() => {
@@ -156,7 +163,7 @@ const MatchsContent = () => {
 
           <div className="my-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4 pb-4">
             {matchs.map((match) => {
-              const { dayName, date } = formatMatchDateForAll(match.date);
+              const { dayName, date } = formatDate(match.date);
               return (
                 <div
                   key={match.id}
@@ -164,7 +171,7 @@ const MatchsContent = () => {
                 >
                   <div className="bg-black py-4 rounded-t-md">
                     <p className="font-lato text-center text-white font-semibold capitalize ">
-                      {dayName}, {date} {/* Always Québec time for everyone */}
+                      {dayName}, {date} {/* EXACT stored wall time */}
                     </p>
                   </div>
 
@@ -191,15 +198,17 @@ const MatchsContent = () => {
                         }`}
                       >
                         <h3 className="font-bebas-neue text-xl text-black">
-                          {match.opponent.name}
+                          {match?.opponent?.name}
                         </h3>
-                        <Image
-                          src={match.opponent.imageUrl}
-                          alt="Logo"
-                          className="h-12 w-12 "
-                          width={48}
-                          height={48}
-                        />
+                        {match?.opponent?.imageUrl ? (
+                          <Image
+                            src={match.opponent.imageUrl}
+                            alt="Logo"
+                            className="h-12 w-12 "
+                            width={48}
+                            height={48}
+                          />
+                        ) : null}
                       </div>
                     </div>
                   </div>

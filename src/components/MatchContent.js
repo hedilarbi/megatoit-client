@@ -51,15 +51,25 @@ function getQuebecParts(d) {
   };
 }
 
-/** now(Quebec) > matchDate(Quebec) @ 23:59 ? */
+/** Strict numeric tuple compare: return +1 if a>b, -1 if a<b, 0 if equal */
+function compareParts(a, b) {
+  if (a.year !== b.year) return a.year - b.year;
+  if (a.month !== b.month) return a.month - b.month;
+  if (a.day !== b.day) return a.day - b.day;
+  if (a.hour !== b.hour) return a.hour - b.hour;
+  if (a.minute !== b.minute) return a.minute - b.minute;
+  if (a.second !== b.second) return a.second - b.second;
+  return 0;
+}
+
+/** now(Quebec) > matchDate(Quebec) @ 23:59:59 ?  (numeric compare, no string) */
 function isExpiredAtEndOfDayQuebec(matchTs) {
   const matchDate = toJSDateFromFirestore(matchTs);
-  if (isNaN(matchDate.getTime())) return false; // if invalid, don't block
+  if (isNaN(matchDate.getTime())) return false; // invalid -> don't block
 
   const nowParts = getQuebecParts(new Date());
   const mParts = getQuebecParts(matchDate);
 
-  // Compare lexicographically: now  vs  match@23:59:59
   const boundary = {
     year: mParts.year,
     month: mParts.month,
@@ -69,43 +79,26 @@ function isExpiredAtEndOfDayQuebec(matchTs) {
     second: 59,
   };
 
-  const toTuple = (p) => [p.year, p.month, p.day, p.hour, p.minute, p.second];
-
-  const cmp =
-    JSON.stringify(toTuple(nowParts)) > JSON.stringify(toTuple(boundary));
-
-  return cmp;
+  return compareParts(nowParts, boundary) > 0;
 }
 
 // ---- Display formatting (Québec) ----
-function formatDate(timestamp) {
-  const date = toJSDateFromFirestore(timestamp);
-
-  const dayName = date.toLocaleDateString("fr-FR", {
-    weekday: "long",
-    timeZone: QUEBEC_TZ,
-  });
-
-  const datePart = date.toLocaleDateString("fr-FR", {
-    timeZone: QUEBEC_TZ,
+const formatDate = (timestamp) => {
+  const milliseconds =
+    timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000;
+  const date = new Date(milliseconds);
+  const dayName = date.toLocaleDateString("fr-FR", { weekday: "long" });
+  const str = new Intl.DateTimeFormat("fr-FR", {
+    timeZone: "Etc/GMT-1",
     day: "numeric",
     month: "long",
     year: "numeric",
-  });
-
-  const timePart = new Intl.DateTimeFormat("fr-FR", {
-    timeZone: QUEBEC_TZ,
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
   }).format(date);
-
-  return {
-    dayName,
-    date: `${datePart} à ${timePart}`,
-  };
-}
-
+  return { dayName, date: str };
+};
 const MatchContent = ({ id }) => {
   const { user } = useAuth();
   const [match, setMatch] = useState(null);

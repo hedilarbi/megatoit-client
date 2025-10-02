@@ -63,16 +63,6 @@ function isMatchVisibleForAll(matchDateLike) {
   return nowInQuebec <= endOfDayInQuebec;
 }
 
-/** Everyone sees Québec-local formatted date (French) */
-function formatMatchDateForAll(matchDateLike) {
-  const dt = toDateTimeInLeagueTZ(matchDateLike);
-  if (!dt || !dt.isValid) return { dayName: "", date: "" };
-
-  const dayName = dt.setLocale("fr-FR").toFormat("cccc"); // "vendredi"
-  const date = dt.setLocale("fr-FR").toFormat("d LLLL yyyy, HH:mm"); // "10 octobre 2025, 20:30"
-  return { dayName, date };
-}
-
 const MatchsList = () => {
   const [matchs, setMatchs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -111,7 +101,22 @@ const MatchsList = () => {
       setLoading(false);
     }
   };
-
+  const formatDate = (timestamp) => {
+    const milliseconds =
+      timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000;
+    const date = new Date(milliseconds);
+    const dayName = date.toLocaleDateString("fr-FR", { weekday: "long" });
+    const str = new Intl.DateTimeFormat("fr-FR", {
+      timeZone: "Etc/GMT-1",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }).format(date);
+    return { dayName, date: str };
+  };
   useEffect(() => {
     fetchMatchs();
   }, []);
@@ -134,7 +139,7 @@ const MatchsList = () => {
         <div>
           <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {matchs.map((match) => {
-              const { dayName, date } = formatMatchDateForAll(match.date);
+              const { dayName, date } = formatDate(match.date);
               return (
                 <div
                   key={match.id}

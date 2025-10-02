@@ -8,9 +8,6 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { FaArrowLeftLong } from "react-icons/fa6";
 
-/* ========= Québec-fixed match date formatter ========= */
-const QUEBEC_TZ = "America/Toronto";
-
 /** Firestore Timestamp | Date | string | millis -> JS Date */
 function toJSDate(dateLike) {
   if (!dateLike) return null;
@@ -38,35 +35,22 @@ function toJSDate(dateLike) {
   }
 }
 
-/** Match date in Québec time: { dayName, date } -> "vendredi", "10 octobre 2025 à 15:30" */
-function formatMatchDateQuebec(timestamp) {
-  const d = toJSDate(timestamp);
-  if (!d || isNaN(d.getTime())) return { dayName: "", date: "" };
-
-  const dayName = new Intl.DateTimeFormat("fr-FR", {
-    weekday: "long",
-    timeZone: QUEBEC_TZ,
-  }).format(d);
-
-  const datePart = new Intl.DateTimeFormat("fr-FR", {
-    timeZone: QUEBEC_TZ,
+const formatDate = (timestamp) => {
+  const milliseconds =
+    timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000;
+  const date = new Date(milliseconds);
+  const dayName = date.toLocaleDateString("fr-FR", { weekday: "long" });
+  const str = new Intl.DateTimeFormat("fr-FR", {
+    timeZone: "Etc/GMT-1",
     day: "numeric",
     month: "long",
     year: "numeric",
-  }).format(d);
-
-  const timePart = new Intl.DateTimeFormat("fr-FR", {
-    timeZone: QUEBEC_TZ,
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
-  }).format(d);
-
-  return {
-    dayName, // e.g. "vendredi"
-    date: `${datePart} à ${timePart}`, // e.g. "10 octobre 2025 à 15:30"
-  };
-}
+  }).format(date);
+  return { dayName, date: str };
+};
 
 /** Local-style formatting for created/paid dates (kept similar to your original) */
 function formatLocalDate(timestamp) {
@@ -172,7 +156,7 @@ const OrderComponent = ({ id }) => {
             <p className="text-base text-gray-600 mt-1 md:text-lg capitalize">
               <span className="font-semibold capitalize">Date: </span>
               {(() => {
-                const d = formatMatchDateQuebec(order.match.date);
+                const d = formatDate(order.match.date);
                 return (
                   <>
                     {d.dayName}, {d.date}

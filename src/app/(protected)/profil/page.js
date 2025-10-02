@@ -8,11 +8,6 @@ import Logo from "@/assets/logo-small.png"; // Adjust the path as necessary
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-/* =========================
-   Québec-fixed match date formatter
-   ========================= */
-const QUEBEC_TZ = "America/Toronto";
-
 /** Firestore Timestamp | Date | string | millis -> JS Date */
 function toJSDate(dateLike) {
   if (!dateLike) return null;
@@ -40,36 +35,23 @@ function toJSDate(dateLike) {
   }
 }
 
-/** Match date in Québec time: { dayName, date } -> "vendredi", "10 octobre 2025 à 15:30" */
-function formatMatchDateQuebec(timestamp) {
-  const d = toJSDate(timestamp);
-  if (!d || isNaN(d.getTime())) return { dayName: "", date: "" };
-
-  const dayName = new Intl.DateTimeFormat("fr-FR", {
-    weekday: "long",
-    timeZone: QUEBEC_TZ,
-  }).format(d);
-
-  const datePart = new Intl.DateTimeFormat("fr-FR", {
-    timeZone: QUEBEC_TZ,
+const formatDate = (timestamp) => {
+  if (!timestamp) return { dayName: "", date: "" };
+  const milliseconds =
+    timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000;
+  const date = new Date(milliseconds);
+  const dayName = date.toLocaleDateString("fr-FR", { weekday: "long" });
+  const str = new Intl.DateTimeFormat("fr-FR", {
+    timeZone: "Etc/GMT-1",
     day: "numeric",
     month: "long",
     year: "numeric",
-  }).format(d);
-
-  const timePart = new Intl.DateTimeFormat("fr-FR", {
-    timeZone: QUEBEC_TZ,
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
-  }).format(d);
-
-  return {
-    dayName, // e.g. "vendredi"
-    date: `${datePart} à ${timePart}`, // e.g. "10 octobre 2025 à 15:30"
-  };
-}
-
+  }).format(date);
+  return { dayName, date: str };
+};
 /** Your old local formatter for "Acheté le" etc. (kept as-is) */
 function formatLocalDate(timestamp) {
   if (!timestamp) return { dayName: "", date: "", time: "" };
@@ -223,7 +205,7 @@ const Profil = () => {
                   <p>Aucun billet trouvé.</p>
                 ) : (
                   content.map((order) => {
-                    const matchD = formatMatchDateQuebec(order?.match?.date); // <-- QUÉBEC-FIXED
+                    const matchD = formatDate(order?.match?.date); // <-- QUÉBEC-FIXED
                     const createdD = formatLocalDate(order.createdAt); // <-- local as before
                     return (
                       <div
