@@ -167,7 +167,7 @@ const MatchsContent = () => {
               return (
                 <div
                   key={match.id}
-                  className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
+                  className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 pb-6"
                 >
                   <div className="bg-black py-4 rounded-t-md">
                     <p className="font-lato text-center text-white font-semibold capitalize ">
@@ -233,7 +233,7 @@ const MatchsContent = () => {
                   {match.type === "Domicile" && (
                     <Link
                       href={`/calendrier/${match.id}`}
-                      className="block text-center bg-black text-white font-bebas-neue py-2 rounded-md mx-4 hover:bg-gray-800 transition-colors duration-300 mt-4 mb-6"
+                      className="block text-center bg-black text-white font-bebas-neue py-2 rounded-md mx-4 hover:bg-gray-800 transition-colors duration-300 mt-4 "
                     >
                       Achetez vos billets
                     </Link>
