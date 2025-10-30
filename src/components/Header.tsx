@@ -54,12 +54,11 @@ const Header = () => {
           Calendrier
         </Link>
         <Link
-          href="/abonnement-saison"
-          className={`text-black hover:underline ${
-            pathname === "/abonnement-saison" && "underline"
-          } `}
+          href="https://megatoit.atelierqg.com/"
+          target="_blank"
+          className={`text-black hover:underline `}
         >
-          Abonnement de saison
+          Boutique en ligne
         </Link>
         <Link
           href="/partenaires"

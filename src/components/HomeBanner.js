@@ -22,11 +22,12 @@ const HomeBanner = () => {
                 </span>
               </Link>
               <Link
-                href="/abonnement-saison"
+                href="https://megatoit.atelierqg.com/"
+                target="_blank"
                 className=" border border-white text-white hover:text-black px-10 text-lg py-1 rounded-md bg-black hover:bg-white  transition-colors  "
               >
                 <span className="font-bebas-neue text-center">
-                  Abonnement de saison 2025-26
+                  Boutique en ligne
                 </span>
               </Link>
             </div>

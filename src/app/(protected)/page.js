@@ -1,10 +1,10 @@
-import AbonnementSection from "@/components/AbonnementSection";
+// import AbonnementSection from "@/components/AbonnementSection";
 
 import HomeBanner from "@/components/HomeBanner";
 import MatchsList from "@/components/MatchsList";
 
 import FacebookFeed from "@/components/FacebookFeed";
-
+import CtaBoutique from "@/components/CtaBoutique";
 export const metadata = {
   title: "Accueil",
   description:
@@ -25,7 +25,8 @@ export default function Home() {
       {/* <CountDownVendredi /> */}
       <MatchsList />
       {/* <Commenditaires /> */}
-      <AbonnementSection />
+      {/* <AbonnementSection /> */}
+      <CtaBoutique />
 
       <FacebookFeed />
     </div>
