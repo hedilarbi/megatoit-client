@@ -62,7 +62,8 @@
     "src/components/CallToActionBanner.js",
     "src/components/AbonnementSection.js",
     "src/components/HomeBanner.js",
-    "src/app/(protected)/page.js"
+    "src/app/(protected)/page.js",
+    "src/components/CtaBoutique.jsx"
   ],
   "exclude": ["node_modules"]
 }

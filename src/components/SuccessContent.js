@@ -189,7 +189,7 @@ const SuccessContent = ({ paymentIntentId, orderId }) => {
               <IoMdMail className="text-[#0CA5E9] text-2xl mr-2" />
               <p className="font-lato text-[#414A5A]">
                 Vous pouvez également retrouver vos billets dans la section
-                "Profil" de notre site web
+                Profil de notre site web
               </p>
             </div>
             <div className="flex mb-3">
