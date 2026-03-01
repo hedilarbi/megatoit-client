@@ -188,19 +188,41 @@ export const getUserDocument = async (id) => {
   }
 };
 
-export const getOrderByIntent = async (paymentIntentId) => {
+export const findOrderByPaymentIntentId = async (paymentIntentId) => {
   try {
+    if (!paymentIntentId) {
+      return null;
+    }
+
     const ordersRef = admin.firestore().collection("orders");
     const querySnapshot = await ordersRef
       .where("paymentIntentId", "==", paymentIntentId)
+      .limit(1)
       .get();
 
     if (querySnapshot.empty) {
+      return null;
+    }
+
+    const doc = querySnapshot.docs[0];
+    return {
+      id: doc.id,
+      data: doc.data(),
+    };
+  } catch (error) {
+    console.error("Error finding order by payment intent:", error);
+    throw new Error("Failed to find order by payment intent");
+  }
+};
+
+export const getOrderByIntent = async (paymentIntentId) => {
+  try {
+    const order = await findOrderByPaymentIntentId(paymentIntentId);
+    if (!order) {
       throw new Error("Order not found");
     }
 
-    const order = querySnapshot.docs[0].data();
-    return order;
+    return order.data;
   } catch (error) {
     console.error("Error fetching order by payment intent:", error);
     //throw new Error("Failed to fetch order by payment intent");

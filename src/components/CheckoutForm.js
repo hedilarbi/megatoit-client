@@ -3,7 +3,7 @@ import {
   useElements,
   PaymentElement,
 } from "@stripe/react-stripe-js";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import Spinner from "./spinner/Spinner";
 import { getMatchById } from "@/services/match.service";
@@ -25,20 +25,63 @@ const CheckoutForm = ({
   const elements = useElements();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isCreatingIntent, setIsCreatingIntent] = useState(false);
   const [clientSecret, setClientSecret] = useState("");
+  const submitLockRef = useRef(false);
+  const checkoutSessionIdRef = useRef(
+    typeof globalThis !== "undefined" && globalThis.crypto?.randomUUID
+      ? globalThis.crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(36).slice(2)}`
+  );
+
+  const paymentIntentPayload = useMemo(
+    () => ({
+      amount: Math.trunc(Number(amount) * 100),
+      currency: "cad",
+      userId,
+      quantity,
+      matchId,
+      ticketPrice,
+      abonnementId,
+      abonnementPrice,
+      userName,
+      email,
+      codeId,
+      checkoutSessionId: checkoutSessionIdRef.current,
+    }),
+    [
+      amount,
+      userId,
+      quantity,
+      matchId,
+      ticketPrice,
+      abonnementId,
+      abonnementPrice,
+      userName,
+      email,
+      codeId,
+    ]
+  );
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    if (submitLockRef.current || loading) {
+      return;
+    }
+    submitLockRef.current = true;
     setLoading(true);
     setError(null);
-    if (!stripe || !elements) return;
+    if (!stripe || !elements || !clientSecret) {
+      setLoading(false);
+      submitLockRef.current = false;
+      return;
+    }
 
     try {
       const { error: submitError } = await elements.submit();
       if (submitError) {
         console.error("Error submitting payment:", submitError);
         setError(submitError.message);
-        setLoading(false);
         return;
       }
       if (matchId) {
@@ -52,7 +95,6 @@ const CheckoutForm = ({
       }
       if (!userId) {
         setError("Vous devez être connecté pour effectuer un paiement");
-        setLoading(false);
         return;
       }
 
@@ -74,7 +116,6 @@ const CheckoutForm = ({
         console.error("Payment confirmation error:", error);
 
         setError(error.message);
-        setLoading(false);
         return;
       }
     } catch (err) {
@@ -82,51 +123,65 @@ const CheckoutForm = ({
       setError(err.message);
     } finally {
       setLoading(false);
+      submitLockRef.current = false;
     }
   };
 
   useEffect(() => {
-    fetch("/api/create-payment-intent", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        amount: Math.trunc(amount * 100),
-        currency: "cad",
-        userId,
-        quantity,
-        matchId,
-        ticketPrice,
-        abonnementId,
-        abonnementPrice,
-        userName,
-        email,
-        codeId,
-      }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.error) {
-          setError(data.error);
-        } else {
-          setClientSecret(data.clientSecret);
-        }
-      })
-      .catch((error) => {
-        console.error("Error creating payment intent:", error);
-        setError("Un problème est survenu lors de la création du paiement");
-      });
-  }, [
-    codeId,
-    amount,
-    userId,
-    quantity,
-    matchId,
-    ticketPrice,
-    abonnementId,
-    abonnementPrice,
-  ]);
+    let ignore = false;
+    const controller = new AbortController();
 
-  if (!stripe || !elements || !clientSecret) {
+    const createPaymentIntent = async () => {
+      if (
+        !paymentIntentPayload.userId ||
+        !paymentIntentPayload.email ||
+        !Number.isInteger(paymentIntentPayload.amount) ||
+        paymentIntentPayload.amount <= 0
+      ) {
+        return;
+      }
+
+      setIsCreatingIntent(true);
+      setError("");
+
+      try {
+        const response = await fetch("/api/create-payment-intent", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(paymentIntentPayload),
+          signal: controller.signal,
+        });
+        const data = await response.json();
+        if (!response.ok || data.error) {
+          throw new Error(data.error || "Impossible de créer le paiement");
+        }
+        if (!ignore) {
+          setClientSecret(data.clientSecret || "");
+        }
+      } catch (fetchError) {
+        if (controller.signal.aborted) {
+          return;
+        }
+        console.error("Error creating payment intent:", fetchError);
+        if (!ignore) {
+          setError("Un problème est survenu lors de la création du paiement");
+          setClientSecret("");
+        }
+      } finally {
+        if (!ignore) {
+          setIsCreatingIntent(false);
+        }
+      }
+    };
+
+    createPaymentIntent();
+    return () => {
+      ignore = true;
+      controller.abort();
+    };
+  }, [paymentIntentPayload]);
+
+  if (!stripe || !elements || isCreatingIntent) {
     return (
       <div className="w-full flex justify-center items-center mt-10">
         <Spinner />
@@ -140,13 +195,18 @@ const CheckoutForm = ({
       className="bg-white rounded-md p-2 w-full  mx-auto  mt-4"
     >
       {clientSecret && <PaymentElement />}
+      {!clientSecret && !error && (
+        <div className="w-full flex justify-center items-center my-4">
+          <Spinner />
+        </div>
+      )}
       {error && (
         <div className="text-red-400 text-center font-lato font-semibold text-lg my-4">
           {error}
         </div>
       )}
       <button
-        disabled={!stripe || loading}
+        disabled={!stripe || loading || isCreatingIntent || !clientSecret}
         className="text-white w-full p-5 bg-black mt-2 rounded-md font-bold text-xl disabled:opacity-50 disabled:animate-pulse font-bebas-neue cursor-pointer"
       >
         {!loading ? "CONFIRMER LE PAIEMENT" : "Chargement..."}

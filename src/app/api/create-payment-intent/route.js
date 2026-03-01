@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import crypto from "crypto";
 
 import Stripe from "stripe";
 
@@ -24,6 +25,44 @@ async function getOrCreateCustomer(email, name, userId) {
     metadata: userId ? { userId } : undefined,
   });
 }
+
+const sanitizeSessionPart = (value) =>
+  String(value || "session")
+    .replace(/[^a-zA-Z0-9_-]/g, "")
+    .slice(0, 40) || "session";
+
+const buildIntentIdempotencyKey = ({
+  checkoutSessionId,
+  userId,
+  email,
+  amount,
+  currency,
+  quantity,
+  matchId,
+  ticketPrice,
+  abonnementPrice,
+  abonnementId,
+  codeId,
+}) => {
+  const hashInput = JSON.stringify({
+    userId,
+    email: email || null,
+    amount,
+    currency,
+    quantity: quantity || null,
+    matchId: matchId || null,
+    ticketPrice: ticketPrice || null,
+    abonnementPrice: abonnementPrice || null,
+    abonnementId: abonnementId || null,
+    codeId: codeId || null,
+  });
+  const hash = crypto.createHash("sha256").update(hashInput).digest("hex");
+  const sessionPart = sanitizeSessionPart(
+    checkoutSessionId || crypto.randomUUID()
+  );
+  return `checkout_${sessionPart}_${hash.slice(0, 24)}`;
+};
+
 export async function POST(request) {
   try {
     const {
@@ -38,10 +77,17 @@ export async function POST(request) {
       userName,
       email,
       codeId,
+      checkoutSessionId,
     } = await request.json();
 
     // Validate input
-    if (!amount || !currency || !userId) {
+    const amountInCents = Number(amount);
+    if (
+      !Number.isInteger(amountInCents) ||
+      amountInCents <= 0 ||
+      !currency ||
+      !userId
+    ) {
       return new Response(
         JSON.stringify({ error: "Missing required fields" }),
         {
@@ -49,42 +95,82 @@ export async function POST(request) {
         }
       );
     }
+
+    const hasMatchPurchase = Boolean(matchId && quantity && ticketPrice);
+    const hasAbonnementPurchase = Boolean(abonnementId && abonnementPrice);
+    if (hasMatchPurchase === hasAbonnementPurchase) {
+      return new Response(
+        JSON.stringify({
+          error:
+            "Invalid purchase payload: expected either match purchase or abonnement purchase",
+        }),
+        { status: 400 }
+      );
+    }
+
     const customer = await getOrCreateCustomer(email, userName, userId);
+    const idempotencyKey = buildIntentIdempotencyKey({
+      checkoutSessionId,
+      userId,
+      email,
+      amount: amountInCents,
+      currency,
+      quantity,
+      matchId,
+      ticketPrice,
+      abonnementPrice,
+      abonnementId,
+      codeId,
+    });
 
     let paymentIntent = null;
-    if (matchId && quantity && ticketPrice) {
+    if (hasMatchPurchase) {
+      const metadata = {
+        userId: String(userId),
+        quantity: String(quantity),
+        matchId: String(matchId),
+        ticketPrice: String(ticketPrice),
+      };
+      if (codeId) metadata.codeId = String(codeId);
+      if (checkoutSessionId) {
+        metadata.checkoutSessionId = String(checkoutSessionId);
+      }
+
       paymentIntent = await stripe.paymentIntents.create({
-        amount: amount, // Convert to cents
+        amount: amountInCents,
         currency: currency,
         customer: customer?.id,
-        metadata: {
-          userId: userId,
-          quantity,
-          matchId,
-          ticketPrice,
-          codeId,
-        },
+        metadata,
         receipt_email: email,
         automatic_payment_methods: {
           enabled: true,
         },
+      }, {
+        idempotencyKey,
       });
     }
-    if (abonnementId && abonnementPrice) {
+    if (hasAbonnementPurchase) {
+      const metadata = {
+        userId: String(userId),
+        abonnementId: String(abonnementId),
+        abonnementPrice: String(abonnementPrice),
+      };
+      if (codeId) metadata.codeId = String(codeId);
+      if (checkoutSessionId) {
+        metadata.checkoutSessionId = String(checkoutSessionId);
+      }
+
       paymentIntent = await stripe.paymentIntents.create({
-        amount: amount, // Convert to cents
+        amount: amountInCents,
         currency: currency,
         customer: customer?.id,
-        metadata: {
-          userId: userId,
-          abonnementId,
-          abonnementPrice,
-          codeId,
-        },
+        metadata,
         automatic_payment_methods: {
           enabled: true,
         },
         receipt_email: email,
+      }, {
+        idempotencyKey,
       });
     }
 
