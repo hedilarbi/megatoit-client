@@ -28,17 +28,8 @@ export async function generateAndSendTicketPDF(
     if (tickets.length > 0) {
       match = await getMatchById(tickets[0].matchId);
 
-      const team1Name =
-        match?.homeTeam?.name ||
-        match?.homeTeam?.["full-name"] ||
-        match?.homeTeam?.fullName ||
-        "BSR DE TROIS-RIVIÈRES";
-
-      const team2Name =
-        match?.opponent?.name ||
-        match?.opponent?.["full-name"] ||
-        match?.opponent?.fullName ||
-        "Adversaire";
+      const team1Name = match?.homeTeam?.name || "BSR DE TROIS-RIVIÈRES";
+      const team2Name = match?.opponent?.name || "Adversaire";
 
       const attachments = [];
       const downloadLinks = [];

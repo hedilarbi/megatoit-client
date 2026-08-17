@@ -207,18 +207,12 @@ const Profil = () => {
                   content.map((order) => {
                     const matchD = formatDate(order?.match?.date); // <-- QUÉBEC-FIXED
                     const createdD = formatLocalDate(order.createdAt); // <-- local as before
-                    const homeTeamFullName =
-                      order?.match?.homeTeam?.["full-name"] ||
-                      order?.match?.homeTeam?.fullName ||
-                      order?.match?.homeTeam?.name ||
-                      "BSR DE TROIS-RIVIÈRES";
+                    const homeTeamName =
+                      order?.match?.homeTeam?.name || "BSR DE TROIS-RIVIÈRES";
                     const homeTeamImageUrl =
                       order?.match?.homeTeam?.imageUrl || Logo;
-                    const opponentFullName =
-                      order?.match?.opponent?.["full-name"] ||
-                      order?.match?.opponent?.fullName ||
-                      order?.match?.opponent?.name ||
-                      "";
+                    const opponentName =
+                      order?.match?.opponent?.name || "";
                     const opponentImageUrl =
                       order?.match?.opponent?.imageUrl;
 
@@ -227,31 +221,36 @@ const Profil = () => {
                         key={order.id}
                         className="bg-white p-4 mb-4 rounded-md shadow-md"
                       >
-                        <div className="flex items-center">
-                          <div className="flex items-center gap-2">
+                        <div className="flex justify-between items-center w-full">
+                          {/* Équipe 1 (Gauche - 50% centré) */}
+                          <div className="flex-1 min-w-0 flex items-center justify-center gap-2 text-center">
                             <Image
                               src={homeTeamImageUrl}
                               alt="Logo Equipe 1"
-                              className="h-12 w-12 object-contain"
+                              className="h-12 w-12 flex-shrink-0 object-contain"
                               width={48}
                               height={48}
                             />
-                            <h3 className="font-bebas-neue text-xl text-black">
-                              {homeTeamFullName}
+                            <h3 className="font-bebas-neue text-lg md:text-xl text-black line-clamp-2 break-words leading-tight text-center">
+                              {homeTeamName}
                             </h3>
                           </div>
-                          <p className="font-bebas-neue text-xl text-black mx-3">
+
+                          {/* VS (Centre) */}
+                          <p className="font-bebas-neue text-xl text-black mx-2 flex-shrink-0">
                             VS
                           </p>
-                          <div className="flex items-center gap-2">
-                            <h3 className="font-bebas-neue text-xl text-black">
-                              {opponentFullName}
+
+                          {/* Équipe 2 (Droite - 50% centré) */}
+                          <div className="flex-1 min-w-0 flex items-center justify-center gap-2 text-center">
+                            <h3 className="font-bebas-neue text-lg md:text-xl text-black line-clamp-2 break-words leading-tight text-center">
+                              {opponentName}
                             </h3>
                             {opponentImageUrl && (
                               <Image
                                 src={opponentImageUrl}
                                 alt="Logo Equipe 2"
-                                className="h-12 w-12 object-contain"
+                                className="h-12 w-12 flex-shrink-0 object-contain"
                                 width={48}
                                 height={48}
                               />

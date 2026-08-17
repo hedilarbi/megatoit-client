@@ -298,51 +298,51 @@ const CheckoutContent = ({ matchId, quantity: rawQuantity, abonnementId }) => {
       {match && (
         <div>
           {(() => {
-            const homeTeamFullName =
-              match?.homeTeam?.["full-name"] ||
-              match?.homeTeam?.fullName ||
-              match?.homeTeam?.name ||
-              "BSR DE TROIS-RIVIÈRES";
-            const opponentFullName =
-              match?.opponent?.["full-name"] ||
-              match?.opponent?.fullName ||
-              match?.opponent?.name ||
-              "";
+            const homeTeamName = match?.homeTeam?.name || "BSR DE TROIS-RIVIÈRES";
+            const opponentName = match?.opponent?.name || "";
+
+            const homeTeamImageUrl = match?.homeTeam?.imageUrl || Logo;
+            const opponentImageUrl = match?.opponent?.imageUrl;
 
             return (
               <>
                 <div className="border-b border-black pb-10">
-                  <h1 className="flex md:text-2xl text-lg justify-center md:justify-start font-bold text-gray-800 items-center font-bebas-neue">
-                    {match?.homeTeam?.imageUrl ? (
+                  <div className="flex justify-between items-center w-full my-4">
+                    {/* Équipe 1 (Gauche - 50% centré) */}
+                    <div className="flex-1 min-w-0 flex items-center justify-center gap-3 text-center">
                       <Image
-                        src={match.homeTeam.imageUrl}
-                        alt="logo"
+                        src={homeTeamImageUrl}
+                        alt="Logo Équipe 1"
+                        className="md:h-16 h-12 md:w-16 w-12 flex-shrink-0 object-contain"
                         width={64}
                         height={64}
-                        className="md:h-16 h-12 md:w-16 w-12"
                       />
-                    ) : (
-                      <Image
-                        src={Logo}
-                        alt="logo"
-                        width={64}
-                        height={64}
-                        className="md:h-16 h-12 md:w-16 w-12"
-                      />
-                    )}
-                    <span className="ml-4 uppercase">{homeTeamFullName}</span>
-                    <span className="mx-4 font-bold">VS</span>
-                    <span className="mr-4 uppercase">{opponentFullName}</span>
-                    {match?.opponent?.imageUrl && (
-                      <Image
-                        src={match.opponent.imageUrl}
-                        alt="logo"
-                        width={64}
-                        height={64}
-                        className="md:h-16 h-12 md:w-16 w-12"
-                      />
-                    )}
-                  </h1>
+                      <h1 className="font-bebas-neue md:text-3xl text-xl text-gray-800 line-clamp-2 break-words leading-tight text-center uppercase">
+                        {homeTeamName}
+                      </h1>
+                    </div>
+
+                    {/* VS (Centre) */}
+                    <span className="font-bebas-neue md:text-3xl text-xl text-gray-800 mx-4 flex-shrink-0 font-bold">
+                      VS
+                    </span>
+
+                    {/* Équipe 2 (Droite - 50% centré) */}
+                    <div className="flex-1 min-w-0 flex items-center justify-center gap-3 text-center">
+                      <h1 className="font-bebas-neue md:text-3xl text-xl text-gray-800 line-clamp-2 break-words leading-tight text-center uppercase">
+                        {opponentName}
+                      </h1>
+                      {opponentImageUrl && (
+                        <Image
+                          src={opponentImageUrl}
+                          alt="Logo Équipe 2"
+                          className="md:h-16 h-12 md:w-16 w-12 flex-shrink-0 object-contain"
+                          width={64}
+                          height={64}
+                        />
+                      )}
+                    </div>
+                  </div>
 
                   <div className="mt-8">
                     <div className="flex items-center">

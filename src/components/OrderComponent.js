@@ -113,17 +113,9 @@ const OrderComponent = ({ id }) => {
     );
   }
 
-  const homeTeamFullName =
-    order?.match?.homeTeam?.["full-name"] ||
-    order?.match?.homeTeam?.fullName ||
-    order?.match?.homeTeam?.name ||
-    "BSR DE TROIS-RIVIÈRES";
+  const homeTeamName = order?.match?.homeTeam?.name || "BSR DE TROIS-RIVIÈRES";
   const homeTeamImageUrl = order?.match?.homeTeam?.imageUrl || Logo;
-  const opponentFullName =
-    order?.match?.opponent?.["full-name"] ||
-    order?.match?.opponent?.fullName ||
-    order?.match?.opponent?.name ||
-    "";
+  const opponentName = order?.match?.opponent?.name || "";
   const opponentImageUrl = order?.match?.opponent?.imageUrl;
 
   return (
@@ -137,30 +129,30 @@ const OrderComponent = ({ id }) => {
 
       {order?.match && (
         <>
-          <div className="flex justify-center">
-            <div className="flex justify-between items-center">
-              <div className="flex items-center gap-2">
+          <div className="flex justify-center w-full px-4">
+            <div className="flex justify-between items-center w-full max-w-xl">
+              <div className="flex-1 min-w-0 flex items-center justify-center gap-2 text-center">
                 <Image
                   src={homeTeamImageUrl}
                   alt="Logo Equipe 1"
-                  className="h-16 w-20 object-contain"
+                  className="h-16 w-20 flex-shrink-0 object-contain"
                   width={80}
                   height={64}
                 />
-                <h3 className="font-bebas-neue text-xl text-black">
-                  {homeTeamFullName}
+                <h3 className="font-bebas-neue text-xl text-black line-clamp-2 break-words leading-tight text-center">
+                  {homeTeamName}
                 </h3>
               </div>
-              <p className="font-bebas-neue text-xl text-black mx-3">VS</p>
-              <div className="flex items-center gap-2">
-                <h3 className="font-bebas-neue text-xl text-black">
-                  {opponentFullName}
+              <p className="font-bebas-neue text-xl text-black mx-3 flex-shrink-0">VS</p>
+              <div className="flex-1 min-w-0 flex items-center justify-center gap-2 text-center">
+                <h3 className="font-bebas-neue text-xl text-black line-clamp-2 break-words leading-tight text-center">
+                  {opponentName}
                 </h3>
                 {opponentImageUrl && (
                   <Image
                     src={opponentImageUrl}
                     alt="Logo Equipe 2"
-                    className="h-16 w-16 object-contain"
+                    className="h-16 w-16 flex-shrink-0 object-contain"
                     width={64}
                     height={64}
                   />
@@ -172,7 +164,7 @@ const OrderComponent = ({ id }) => {
           <div className="mt-6 px-4 md:px-8">
             <p className="text-base text-gray-600 mt-1 md:text-lg">
               <span className="font-semibold">Match: </span>
-              {homeTeamFullName} vs {opponentFullName}
+              {homeTeamName} vs {opponentName}
             </p>
 
             {/* --- Match date (Québec-fixed) --- */}

@@ -140,10 +140,15 @@ const MatchsList = () => {
           <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {matchs.map((match) => {
               const { dayName, date } = formatDate(match.date);
+              const homeTeamName = match?.homeTeam?.name || "BSR DE TROIS-RIVIÈRES";
+              const homeTeamImageUrl = match?.homeTeam?.imageUrl || Logo;
+              const opponentName = match?.opponent?.name || "";
+              const opponentImageUrl = match?.opponent?.imageUrl;
+
               return (
                 <div
                   key={match.id}
-                  className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 pb-6"
+                  className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 pb-6 overflow-hidden"
                 >
                   <div className="bg-black border-b-4 border-brand py-4 rounded-t-md">
                     <p className="font-lato text-center text-white font-semibold capitalize">
@@ -151,48 +156,41 @@ const MatchsList = () => {
                     </p>
                   </div>
 
-                  <div className="px-4 mt-6">
-                    <div
-                      className={`flex justify-between items-center ${
-                        match.type === "Domicile" ? "flex-row-reverse" : ""
-                      }`}
-                    >
-                      <div
-                        className={`flex items-center gap-2 ${
-                          match.type === "Domicile" ? "flex-row-reverse" : ""
-                        }`}
-                      >
-                        {match?.homeTeam?.imageUrl ? (
-                          <Image
-                            src={match.homeTeam.imageUrl}
-                            alt="Logo"
-                            className="h-12 w-12"
-                            width={48}
-                            height={48}
-                          />
-                        ) : (
-                          <Image src={Logo} alt="Logo" className="h-12 w-12" />
-                        )}
-                        <h3 className="font-bebas-neue text-xl text-black">
-                          {match?.homeTeam?.name || "BSR DE TROIS-RIVIÈRES"}
-                        </h3>
-                      </div>
-                      <p className="font-bebas-neue text-xl text-black">VS</p>
-                      <div
-                        className={`flex items-center gap-2 ${
-                          match.type === "Domicile" ? "flex-row-reverse" : ""
-                        }`}
-                      >
-                        <h3 className="font-bebas-neue text-xl text-black">
-                          {match.opponent.name}
-                        </h3>
+                  <div className="px-2 mt-6">
+                    <div className="flex justify-between items-center w-full">
+                      {/* Équipe 1 (Gauche - 50% centré) */}
+                      <div className="flex-1 min-w-0 flex items-center justify-center gap-2 text-center">
                         <Image
-                          src={match.opponent.imageUrl}
-                          alt="Logo"
-                          className="h-12 w-12"
+                          src={homeTeamImageUrl}
+                          alt="Logo Équipe 1"
+                          className="h-12 w-12 flex-shrink-0 object-contain"
                           width={48}
                           height={48}
                         />
+                        <h3 className="font-bebas-neue text-lg md:text-xl text-black line-clamp-2 break-words leading-tight text-center">
+                          {homeTeamName}
+                        </h3>
+                      </div>
+
+                      {/* VS (Centre) */}
+                      <p className="font-bebas-neue text-xl text-black mx-2 flex-shrink-0">
+                        VS
+                      </p>
+
+                      {/* Équipe 2 (Droite - 50% centré) */}
+                      <div className="flex-1 min-w-0 flex items-center justify-center gap-2 text-center">
+                        <h3 className="font-bebas-neue text-lg md:text-xl text-black line-clamp-2 break-words leading-tight text-center">
+                          {opponentName}
+                        </h3>
+                        {opponentImageUrl && (
+                          <Image
+                            src={opponentImageUrl}
+                            alt="Logo Équipe 2"
+                            className="h-12 w-12 flex-shrink-0 object-contain"
+                            width={48}
+                            height={48}
+                          />
+                        )}
                       </div>
                     </div>
                   </div>
