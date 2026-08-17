@@ -239,7 +239,6 @@ export async function generateAndSendTicketPDF(
         const leftBlockMaxX = vsX - 10;
         const blockWidth = leftBlockMaxX - leftBlockMinX;
 
-        const rightBlockMinX = vsX + vsW + 10;
         const rightBlockMaxX = separatorX - margin - 15;
 
         // Scale logos to max 55x55 maintaining aspect ratio
