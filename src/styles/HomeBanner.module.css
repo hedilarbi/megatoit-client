@@ -1,5 +1,5 @@
 .heroBanner {
-  background-image: url("/HeroBanner.jpg");
+  background-image: url("/HeroBanner.png");
   background-size: cover;
   background-position: center;
   height: 70vh;
@@ -12,6 +12,6 @@
 
 @media (max-width: 768px) {
   .heroBanner {
-    background-image: url("/HeroBannerPhone.jpg");
+    background-image: url("/HeroBannerPhone.png");
   }
 }
