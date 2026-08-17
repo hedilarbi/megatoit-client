@@ -207,22 +207,37 @@ const Profil = () => {
                   content.map((order) => {
                     const matchD = formatDate(order?.match?.date); // <-- QUÉBEC-FIXED
                     const createdD = formatLocalDate(order.createdAt); // <-- local as before
+                    const homeTeamFullName =
+                      order?.match?.homeTeam?.["full-name"] ||
+                      order?.match?.homeTeam?.fullName ||
+                      order?.match?.homeTeam?.name ||
+                      "BSR DE TROIS-RIVIÈRES";
+                    const homeTeamImageUrl =
+                      order?.match?.homeTeam?.imageUrl || Logo;
+                    const opponentFullName =
+                      order?.match?.opponent?.["full-name"] ||
+                      order?.match?.opponent?.fullName ||
+                      order?.match?.opponent?.name ||
+                      "";
+                    const opponentImageUrl =
+                      order?.match?.opponent?.imageUrl;
+
                     return (
                       <div
                         key={order.id}
                         className="bg-white p-4 mb-4 rounded-md shadow-md"
                       >
-                        <div className="flex   items-center ">
-                          <div className="flex items-center  gap-2">
+                        <div className="flex items-center">
+                          <div className="flex items-center gap-2">
                             <Image
-                              src={Logo}
-                              alt="Logo"
-                              className="h-12 w-12 "
+                              src={homeTeamImageUrl}
+                              alt="Logo Equipe 1"
+                              className="h-12 w-12 object-contain"
                               width={48}
                               height={48}
                             />
                             <h3 className="font-bebas-neue text-xl text-black">
-                              BSR DE TROIS-RIVIÈRES
+                              {homeTeamFullName}
                             </h3>
                           </div>
                           <p className="font-bebas-neue text-xl text-black mx-3">
@@ -230,15 +245,17 @@ const Profil = () => {
                           </p>
                           <div className="flex items-center gap-2">
                             <h3 className="font-bebas-neue text-xl text-black">
-                              {order?.match?.opponent?.name}
+                              {opponentFullName}
                             </h3>
-                            <Image
-                              src={order?.match?.opponent?.imageUrl}
-                              alt="Logo"
-                              className="h-12 w-12 "
-                              width={48}
-                              height={48}
-                            />
+                            {opponentImageUrl && (
+                              <Image
+                                src={opponentImageUrl}
+                                alt="Logo Equipe 2"
+                                className="h-12 w-12 object-contain"
+                                width={48}
+                                height={48}
+                              />
+                            )}
                           </div>
                         </div>
 

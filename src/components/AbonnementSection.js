@@ -6,7 +6,7 @@ const AbonnementSection = () => {
   return (
     <section className={styles.AbonnementSection}>
       <h2 className="font-bebas-neue md:text-4xl text-3xl text-center text-white">
-        Abonnement de saison 2025-26
+        Abonnement de saison 2026-27
       </h2>
 
       <div className="bg-black border-2 border-brand mt-8 mx-auto md:w-1/3 w-full rounded-md py-6 px-8 shadow-[0_12px_40px_rgba(123,253,72,0.18)]">

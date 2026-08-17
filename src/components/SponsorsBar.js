@@ -6,8 +6,8 @@ const LOGOS = [
   { src: "/commenditaires/GroupeCTR.jpg", alt: "Groupe CTR" },
   { src: "/commenditaires/immo3r.jpg", alt: "Immo3R" },
   { src: "/commenditaires/MaisonDebauche.jpg", alt: "Maison Debauche" },
-  { src: "/commenditaires/HE.jpg", alt: "HE" },
-  { src: "/commenditaires/MegaToit.jpg", alt: "BSR DE TROIS-RIVIÈRES" },
+
+
   { src: "/commenditaires/SphereExtermination.jpg", alt: "Sphere" },
 ];
 

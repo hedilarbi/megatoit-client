@@ -20,13 +20,25 @@ export async function generateAndSendTicketPDF(
 ) {
   try {
     const bucket = getStorage().bucket();
-    const logoPath = path.join(process.cwd(), "public", "logo-big.png");
+    const logoPath = path.join(process.cwd(), "public", "logo-big.jpeg");
 
     const userName = user.userName.toUpperCase();
     let match = null;
 
     if (tickets.length > 0) {
       match = await getMatchById(tickets[0].matchId);
+
+      const team1Name =
+        match?.homeTeam?.name ||
+        match?.homeTeam?.["full-name"] ||
+        match?.homeTeam?.fullName ||
+        "BSR DE TROIS-RIVIÈRES";
+
+      const team2Name =
+        match?.opponent?.name ||
+        match?.opponent?.["full-name"] ||
+        match?.opponent?.fullName ||
+        "Adversaire";
 
       const attachments = [];
       const downloadLinks = [];
@@ -64,19 +76,37 @@ export async function generateAndSendTicketPDF(
         const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
         // 3) données
-        const team1Name = "BSR DE TROIS-RIVIÈRES";
-        const team2Name = match.opponent.name;
-
         const placeText = match.place;
         const ticketCode = ticket.TicketCode;
 
+        // Helper to embed team logo from URL (PNG/JPG) with local fallback
+        const embedTeamLogo = async (imageUrl) => {
+          if (imageUrl) {
+            try {
+              const res = await fetch(imageUrl);
+              if (res.ok) {
+                const buffer = await res.arrayBuffer();
+                try {
+                  return await pdfDoc.embedPng(buffer);
+                } catch {
+                  return await pdfDoc.embedJpg(buffer);
+                }
+              }
+            } catch (e) {
+              console.error(`Error fetching team logo from ${imageUrl}:`, e);
+            }
+          }
+          const logoBytes = fs.readFileSync(logoPath);
+          try {
+            return await pdfDoc.embedPng(logoBytes);
+          } catch {
+            return await pdfDoc.embedJpg(logoBytes);
+          }
+        };
+
         // 4) embeds
-        const logoBytes = fs.readFileSync(logoPath);
-        const team1LogoImage = await pdfDoc.embedPng(logoBytes);
-        const team2LogoBuffer = await (
-          await fetch(match.opponent.imageUrl)
-        ).arrayBuffer();
-        const team2LogoImage = await pdfDoc.embedPng(team2LogoBuffer);
+        const team1LogoImage = await embedTeamLogo(match?.homeTeam?.imageUrl);
+        const team2LogoImage = await embedTeamLogo(match?.opponent?.imageUrl);
         const qrImage = await pdfDoc.embedPng(ticket.qrCodeImage);
 
         // 5) régions et dimensions
@@ -186,70 +216,170 @@ export async function generateAndSendTicketPDF(
           font: fontBold,
         });
 
-        // 9) Header logos + « VS »
-        const logoH = 70; // hauteur des logos
-        const spacing = 8;
-        const headerSize = 24;
-        const team1Dims = team1LogoImage.scale(logoH / team1LogoImage.height);
-        const team2Dims = team2LogoImage.scale(logoH / team2LogoImage.height);
+        // 9) Header logos + « VS » (Fixed symmetric 2-block layout with text wrapping)
         const vsText = " VS ";
-        const team1W = fontBold.widthOfTextAtSize(team1Name, headerSize);
-        const team2W = fontBold.widthOfTextAtSize(team2Name, headerSize);
-        const vsW = fontBold.widthOfTextAtSize(vsText, headerSize);
-        const totalHeader =
-          team1Dims.width +
-          spacing +
-          team1W +
-          spacing +
-          vsW +
-          spacing +
-          team2W +
-          spacing +
-          team2Dims.width;
-        const startX = (leftWidth - totalHeader) / 2 + margin;
-        const headerY = height - 160;
+        const vsSize = 22;
+        const vsW = fontBold.widthOfTextAtSize(vsText, vsSize);
 
-        // logo 1
+        const centerX = margin + leftWidth / 2;
+        const vsX = centerX - vsW / 2;
+        const headerY = height - 165;
+
+        // Draw " VS " in the center
+        page.drawText(vsText, {
+          x: vsX,
+          y: headerY - 5,
+          size: vsSize,
+          font: fontBold,
+          color: rgb(0, 0, 0),
+        });
+
+        // Compute equal fixed block widths
+        const leftBlockMinX = margin + 15;
+        const leftBlockMaxX = vsX - 10;
+        const blockWidth = leftBlockMaxX - leftBlockMinX;
+
+        const rightBlockMinX = vsX + vsW + 10;
+        const rightBlockMaxX = separatorX - margin - 15;
+
+        // Scale logos to max 55x55 maintaining aspect ratio
+        const fitLogo = (img, maxW = 55, maxH = 55) => {
+          const s = Math.min(maxW / img.width, maxH / img.height);
+          return { width: img.width * s, height: img.height * s };
+        };
+
+        const team1Dims = fitLogo(team1LogoImage);
+        const team2Dims = fitLogo(team2LogoImage);
+
+        // Helper to wrap & scale team name to fit inside remaining text width (1 or 2 lines)
+        const wrapAndScaleTeamName = (text, maxWidth) => {
+          let fSize = 16;
+          const minFSize = 10;
+
+          while (fSize >= minFSize) {
+            const singleW = fontBold.widthOfTextAtSize(text, fSize);
+            if (singleW <= maxWidth) {
+              return { lines: [text], fontSize: fSize, lineHeight: fSize * 1.15 };
+            }
+
+            const words = text.split(" ");
+            if (words.length > 1) {
+              let bestLines = null;
+              let minDiff = Infinity;
+
+              for (let i = 1; i < words.length; i++) {
+                const l1 = words.slice(0, i).join(" ");
+                const l2 = words.slice(i).join(" ");
+                const w1 = fontBold.widthOfTextAtSize(l1, fSize);
+                const w2 = fontBold.widthOfTextAtSize(l2, fSize);
+
+                if (w1 <= maxWidth && w2 <= maxWidth) {
+                  const diff = Math.abs(w1 - w2);
+                  if (diff < minDiff) {
+                    minDiff = diff;
+                    bestLines = [l1, l2];
+                  }
+                }
+              }
+
+              if (bestLines) {
+                return { lines: bestLines, fontSize: fSize, lineHeight: fSize * 1.15 };
+              }
+            }
+
+            fSize -= 1;
+          }
+
+          const words = text.split(" ");
+          const mid = Math.ceil(words.length / 2);
+          return {
+            lines: [words.slice(0, mid).join(" "), words.slice(mid).join(" ")],
+            fontSize: minFSize,
+            lineHeight: minFSize * 1.15,
+          };
+        };
+
+        // --- Team 1 Block (Left): [Logo 1] [Name 1] ---
         page.drawImage(team1LogoImage, {
-          x: startX,
-          y: headerY - team1Dims.height / 2 + headerSize / 2 - 20,
+          x: leftBlockMinX,
+          y: headerY - team1Dims.height / 2,
           width: team1Dims.width,
           height: team1Dims.height,
         });
-        // texte « Megatoit »
-        let cursorX = startX + team1Dims.width + spacing;
-        page.drawText(team1Name, {
-          x: cursorX,
-          y: headerY - 20,
-          size: headerSize,
-          font: fontBold,
-        });
-        // texte « VS »
-        cursorX += team1W + spacing;
-        page.drawText(vsText, {
-          x: cursorX,
-          y: headerY - 20,
-          size: headerSize,
-          font: fontBold,
-        });
-        // texte « Opponent »
-        cursorX += vsW + spacing;
-        page.drawText(team2Name, {
-          x: cursorX,
-          y: headerY - 20,
-          size: headerSize,
-          font: fontBold,
-        });
-        // logo 2
-        cursorX += team2W + spacing;
+
+        const text1AvailableW = blockWidth - team1Dims.width - 8;
+        const wrapped1 = wrapAndScaleTeamName(team1Name, text1AvailableW);
+        const text1X = leftBlockMinX + team1Dims.width + 8;
+
+        if (wrapped1.lines.length === 1) {
+          page.drawText(wrapped1.lines[0], {
+            x: text1X,
+            y: headerY - wrapped1.fontSize / 3,
+            size: wrapped1.fontSize,
+            font: fontBold,
+            color: rgb(0, 0, 0),
+          });
+        } else {
+          page.drawText(wrapped1.lines[0], {
+            x: text1X,
+            y: headerY + wrapped1.lineHeight / 2 - 3,
+            size: wrapped1.fontSize,
+            font: fontBold,
+            color: rgb(0, 0, 0),
+          });
+          page.drawText(wrapped1.lines[1], {
+            x: text1X,
+            y: headerY - wrapped1.lineHeight / 2 - 3,
+            size: wrapped1.fontSize,
+            font: fontBold,
+            color: rgb(0, 0, 0),
+          });
+        }
+
+        // --- Team 2 Block (Right): [Name 2] [Logo 2] ---
+        const logo2X = rightBlockMaxX - team2Dims.width;
         page.drawImage(team2LogoImage, {
-          x: cursorX,
-          y: headerY - team2Dims.height / 2 + headerSize / 2 - 20,
+          x: logo2X,
+          y: headerY - team2Dims.height / 2,
           width: team2Dims.width,
           height: team2Dims.height,
         });
 
+        const text2AvailableW = blockWidth - team2Dims.width - 8;
+        const wrapped2 = wrapAndScaleTeamName(team2Name, text2AvailableW);
+        const text2RightX = logo2X - 8;
+
+        if (wrapped2.lines.length === 1) {
+          const w = fontBold.widthOfTextAtSize(wrapped2.lines[0], wrapped2.fontSize);
+          page.drawText(wrapped2.lines[0], {
+            x: text2RightX - w,
+            y: headerY - wrapped2.fontSize / 3,
+            size: wrapped2.fontSize,
+            font: fontBold,
+            color: rgb(0, 0, 0),
+          });
+        } else {
+          const w1 = fontBold.widthOfTextAtSize(wrapped2.lines[0], wrapped2.fontSize);
+          const w2 = fontBold.widthOfTextAtSize(wrapped2.lines[1], wrapped2.fontSize);
+
+          page.drawText(wrapped2.lines[0], {
+            x: text2RightX - w1,
+            y: headerY + wrapped2.lineHeight / 2 - 3,
+            size: wrapped2.fontSize,
+            font: fontBold,
+            color: rgb(0, 0, 0),
+          });
+          page.drawText(wrapped2.lines[1], {
+            x: text2RightX - w2,
+            y: headerY - wrapped2.lineHeight / 2 - 3,
+            size: wrapped2.fontSize,
+            font: fontBold,
+            color: rgb(0, 0, 0),
+          });
+        }
+
         // 10) Texte du lieu
+        const logoH = 55;
         const placeSize = 16;
         const placeW = fontRegular.widthOfTextAtSize(placeText, placeSize);
         const placeY = headerY - logoH + 20; // 20px sous le header
@@ -305,16 +435,34 @@ export async function generateAndSendTicketPDF(
 
       const port = Number(process.env.SMTP_PORT) || 465;
 
+      console.log("📧 [EMAIL TICKET] Configuration SMTP :", {
+        host: process.env.SMTP_HOST,
+        port,
+        user: process.env.EMAIL_USER,
+        to: user.email,
+        ticketsCount: tickets.length,
+      });
+
       const transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST,
         port,
-        secure: true, // true for 465, false for 587
+        secure: port === 465, // true for 465, false for 587
         requireTLS: false, // only require STARTTLS on ports like 587
         auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
         tls: { minVersion: "TLSv1.2" },
       });
+
+      try {
+        console.log("⏳ [EMAIL TICKET] Vérification connexion SMTP...");
+        await transporter.verify();
+        console.log("✅ [EMAIL TICKET] Connexion SMTP vérifiée avec succès !");
+      } catch (verifyError) {
+        console.error("❌ [EMAIL TICKET] ÉCHEC VÉRIFICATION SMTP :", verifyError);
+        throw verifyError;
+      }
+
       const subjectTickets = ` ${tickets.length > 1 ? "Vos billets" : "Votre billet"
-        } - BSR DE TROIS-RIVIÈRES vs ${match.opponent.name}`;
+        } - ${team1Name} vs ${team2Name}`;
       const textTickets =
         `Commande confirmée (N°${order.code}).\n` +
         `${tickets.length > 1 ? "Billets" : "Billet"
@@ -335,29 +483,36 @@ export async function generateAndSendTicketPDF(
   </p>
 `;
 
-      await transporter.sendMail({
-        from: `${process.env.EMAIL_USER}`,
-        to: user.email,
-        subject: subjectTickets,
-        text: textTickets, // << ajoute la version texte
-        html: htmlTickets,
-        envelope: {
-          from: process.env.EMAIL_USER, // MAIL FROM / Return-Path = billets@bsr3r.com
+      try {
+        console.log(`⏳ [EMAIL TICKET] Envoi de l'email à ${user.email}...`);
+        const mailInfo = await transporter.sendMail({
+          from: `${process.env.EMAIL_USER}`,
           to: user.email,
-        },
-        headers: {
-          "List-Unsubscribe": `<mailto:support@bsr3r.com>`,
-          "X-Entity-Type": "Transactional", // indicatif, certains filtres aiment
-        },
-        attachments: [
-          ...attachments,
-          {
-            filename: "logo-big.png",
-            path: path.join(process.cwd(), "public", "logo-big.png"),
-            cid: "logo-big",
+          subject: subjectTickets,
+          text: textTickets, // << ajoute la version texte
+          html: htmlTickets,
+          envelope: {
+            from: process.env.EMAIL_USER, // MAIL FROM / Return-Path = billets@bsr3r.com
+            to: user.email,
           },
-        ],
-      });
+          headers: {
+            "List-Unsubscribe": `<mailto:support@bsr3r.com>`,
+            "X-Entity-Type": "Transactional", // indicatif, certains filtres aiment
+          },
+          attachments: [
+            ...attachments,
+            {
+              filename: "logo-big.jpeg",
+              path: path.join(process.cwd(), "public", "logo-big.jpeg"),
+              cid: "logo-big",
+            },
+          ],
+        });
+        console.log("✅ [EMAIL TICKET] Email envoyé avec succès !", mailInfo.messageId || mailInfo);
+      } catch (sendError) {
+        console.error("❌ [EMAIL TICKET] ÉCHEC DE L'ENVOI PAR NODEMAILER :", sendError);
+        throw sendError;
+      }
     }
 
     // Subscription PDF (unchanged except logo size/position)
@@ -379,7 +534,12 @@ export async function generateAndSendTicketPDF(
 
       // 4) embeds
       const logoBytes = fs.readFileSync(logoPath);
-      const team1LogoImage = await pdfDoc.embedPng(logoBytes);
+      let team1LogoImage;
+      try {
+        team1LogoImage = await pdfDoc.embedPng(logoBytes);
+      } catch {
+        team1LogoImage = await pdfDoc.embedJpg(logoBytes);
+      }
       const qrImage = await pdfDoc.embedPng(subscription.qrCodeImage);
 
       const titleWithSeason = `${abonnement.data.title} (${abonnement.data.season})`;
@@ -544,64 +704,86 @@ export async function generateAndSendTicketPDF(
       await updateSubscriptionDownloadUrl(subscription.code, downloadURL);
       const port = Number(process.env.SMTP_PORT) || 465;
 
+      console.log("📧 [EMAIL ABONNEMENT] Configuration SMTP :", {
+        host: process.env.SMTP_HOST,
+        port,
+        user: process.env.EMAIL_USER,
+        to: user.email,
+      });
+
       const transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST,
         port,
-        secure: true, // true for 465, false for 587
-        requireTLS: false, // only require STARTTLS on ports like 587
+        secure: port === 465,
+        requireTLS: false,
         auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
         tls: { minVersion: "TLSv1.2" },
       });
-      await transporter.verify();
 
-      await transporter.sendMail({
-        from: `${process.env.EMAIL_USER}`,
-        to: user.email,
-        subject: `Votre abonnement BSR DE TROIS-RIVIÈRES pour la saison ${abonnement.data.season}`,
-        text:
-          `Votre abonnement pour la saison ${abonnement.data.season} est prêt !\n\n` +
-          `Téléchargez-le en pièce jointe.\n\n` +
-          `Émetteur : Billetterie BSR DE TROIS-RIVIÈRES <${process.env.EMAIL_USER}>`,
-        html: `
-          <div style="text-align:center">
-        <img src="cid:logo-big" alt="BSR DE TROIS-RIVIÈRES" style="width:150px;height:auto" />
-          </div>
-          <p style="text-align:center;font-weight:bold;font-size:22px">
-        Commande confirmée !
-          </p>
-          <p style="text-align:center;font-size:16px">
-        Votre commande <strong>N° ${order.code}</strong> est confirmée.
-        Vous trouverez en pièce jointe votre abonnement.
-          </p>
-          <p style="background:#f7f7f7;border-radius:8px;padding:16px 20px;margin:24px auto 16px auto;max-width:500px;font-size:15px;color:#333;text-align:center;border:1px solid #e0e0e0;">
-        <strong style="color:#1976d2;">Note :</strong>
-        Ce billet de saison donne droit à l’accès à tous les matchs de
-        la saison régulière du BSR DE TROIS-RIVIÈRES.<br>
-        Il est <b>unique</b> et <b>incessible</b>.<br>
-        Sa présentation est <u>obligatoire</u> à chaque entrée au Colisée Jean-Guy Talbot.
-          </p>
-        `,
-        envelope: {
-          from: process.env.EMAIL_USER, // MAIL FROM / Return-Path = billets@bsr3r.com
+      try {
+        console.log("⏳ [EMAIL ABONNEMENT] Vérification connexion SMTP...");
+        await transporter.verify();
+        console.log("✅ [EMAIL ABONNEMENT] Connexion SMTP vérifiée avec succès !");
+      } catch (verifyError) {
+        console.error("❌ [EMAIL ABONNEMENT] ÉCHEC VÉRIFICATION SMTP :", verifyError);
+        throw verifyError;
+      }
+
+      try {
+        console.log(`⏳ [EMAIL ABONNEMENT] Envoi de l'email d'abonnement à ${user.email}...`);
+        const mailInfo = await transporter.sendMail({
+          from: `${process.env.EMAIL_USER}`,
           to: user.email,
-        },
-        headers: {
-          "List-Unsubscribe": `<mailto:support@bsr3r.com>`,
-          "X-Entity-Type": "Transactional", // indicatif, certains filtres aiment
-        },
-        attachments: [
-          {
-            filename: `abonnement-${subscription.code}.pdf`,
-            content: pdfBytes,
-            contentType: "application/pdf",
+          subject: `Votre abonnement BSR DE TROIS-RIVIÈRES pour la saison ${abonnement.data.season}`,
+          text:
+            `Votre abonnement pour la saison ${abonnement.data.season} est prêt !\n\n` +
+            `Téléchargez-le en pièce jointe.\n\n` +
+            `Émetteur : Billetterie BSR DE TROIS-RIVIÈRES <${process.env.EMAIL_USER}>`,
+          html: `
+            <div style="text-align:center">
+          <img src="cid:logo-big" alt="BSR DE TROIS-RIVIÈRES" style="width:150px;height:auto" />
+            </div>
+            <p style="text-align:center;font-weight:bold;font-size:22px">
+          Commande confirmée !
+            </p>
+            <p style="text-align:center;font-size:16px">
+          Votre commande <strong>N° ${order.code}</strong> est confirmée.
+          Vous trouverez en pièce jointe votre abonnement.
+            </p>
+            <p style="background:#f7f7f7;border-radius:8px;padding:16px 20px;margin:24px auto 16px auto;max-width:500px;font-size:15px;color:#333;text-align:center;border:1px solid #e0e0e0;">
+          <strong style="color:#1976d2;">Note :</strong>
+          Ce billet de saison donne droit à l’accès à tous les matchs de
+          la saison régulière du BSR DE TROIS-RIVIÈRES.<br>
+          Il est <b>unique</b> et <b>incessible</b>.<br>
+          Sa présentation est <u>obligatoire</u> à chaque entrée au Colisée Jean-Guy Talbot.
+            </p>
+          `,
+          envelope: {
+            from: process.env.EMAIL_USER,
+            to: user.email,
           },
-          {
-            filename: "logo-big.png",
-            content: logoBytes,
-            cid: "logo-big",
+          headers: {
+            "List-Unsubscribe": `<mailto:support@bsr3r.com>`,
+            "X-Entity-Type": "Transactional",
           },
-        ],
-      });
+          attachments: [
+            {
+              filename: `abonnement-${subscription.code}.pdf`,
+              content: pdfBytes,
+              contentType: "application/pdf",
+            },
+            {
+              filename: "logo-big.jpeg",
+              content: logoBytes,
+              cid: "logo-big",
+            },
+          ],
+        });
+        console.log("✅ [EMAIL ABONNEMENT] Email d'abonnement envoyé avec succès !", mailInfo.messageId || mailInfo);
+      } catch (sendError) {
+        console.error("❌ [EMAIL ABONNEMENT] ÉCHEC DE L'ENVOI PAR NODEMAILER :", sendError);
+        throw sendError;
+      }
     }
 
     return { success: true };

@@ -118,7 +118,7 @@ const SuccessContent = ({ paymentIntentId, orderId }) => {
                 <span className="font-bold mr-2">Note:</span>
                 <span>
                   Ce billet de saison donne droit à l’accès à tous les matchs de
-                  la saison régulière du BSR DE TROIS-RIVIÈRES. Il est
+                  la saison régulière de BSR DE TROIS-RIVIÈRES. Il est
                   unique et incessible. Sa présentation est obligatoire à chaque
                   entrée au Colisée Jean-Guy Talbot.
                 </span>

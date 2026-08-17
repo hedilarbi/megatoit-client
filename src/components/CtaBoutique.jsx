@@ -3,7 +3,7 @@ import React from "react";
 
 const CtaBoutique = () => {
   return (
-    <section className="w-[95%] mx-auto p-8 bg-black border-l-4 border-brand rounded-md flex md:flex-row flex-col gap-8 justify-between items-center">
+    <section className="w-[95%] mx-auto p-8 bg-black border-l-4 border-brand rounded-md flex md:flex-row flex-col gap-8 justify-between items-center mt-12">
       <div>
         <h2 className="text-white font-bebas-neue text-2xl text-center md:text-left">
           Montre tes couleurs, vis la passion !
