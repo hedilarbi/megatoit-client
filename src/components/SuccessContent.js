@@ -118,7 +118,7 @@ const SuccessContent = ({ paymentIntentId, orderId }) => {
                 <span className="font-bold mr-2">Note:</span>
                 <span>
                   Ce billet de saison donne droit à l’accès à tous les matchs de
-                  la saison régulière du MégaToit de Trois-Rivières. Il est
+                  la saison régulière du BSR DE TROIS-RIVIÈRES. Il est
                   unique et incessible. Sa présentation est obligatoire à chaque
                   entrée au Colisée Jean-Guy Talbot.
                 </span>
@@ -135,7 +135,7 @@ const SuccessContent = ({ paymentIntentId, orderId }) => {
                 <div className="flex justify-between items-center pb-4 border-b border-gray-300">
                   <p className="font-lato text-base text-[#414A5A]">Match</p>
                   <p>
-                    Mégatoit vs{" "}
+                    BSR DE TROIS-RIVIÈRES vs{" "}
                     {order.match?.opponent?.name || "Adversaire inconnu"}
                   </p>
                 </div>
@@ -171,7 +171,14 @@ const SuccessContent = ({ paymentIntentId, orderId }) => {
               )}
               <div className="flex justify-between items-center mb-4 mt-4">
                 <p className="font-lato text-base text-[#414A5A]">Total payé</p>
-                <p>${(order.amount / 100).toFixed(2)}</p>
+                <p>
+                  {/* BUG FIX: Stripe stores amount in cents (divide by 100).
+                      Free orders (process-free-order) store amount in dollars directly.
+                      If amount >= 100 and looks like cents, divide; otherwise treat as dollars. */}
+                  ${order.paymentIntentId
+                    ? (order.amount / 100).toFixed(2)
+                    : parseFloat(order.amount || 0).toFixed(2)}
+                </p>
               </div>
             </div>
           </div>
@@ -236,7 +243,7 @@ const SuccessContent = ({ paymentIntentId, orderId }) => {
         <div className="flex justify-center items-center gap-10 mt-8 ">
           <div className="flex gap-2 items-center text-[#0CA5E9]">
             <IoMail size={20} />
-            <p className="font-lato font-semibold">support@lemegatoit.com</p>
+            <p className="font-lato font-semibold">support@bsr3r.com</p>
           </div>
           {/* <div className="flex gap-2 items-center text-[#0CA5E9]">
             <FaPhoneAlt size={20} />

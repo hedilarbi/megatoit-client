@@ -145,7 +145,7 @@ const MatchsList = () => {
                   key={match.id}
                   className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 pb-6"
                 >
-                  <div className="bg-black py-4 rounded-t-md">
+                  <div className="bg-black border-b-4 border-brand py-4 rounded-t-md">
                     <p className="font-lato text-center text-white font-semibold capitalize">
                       {dayName}, {date} {/* Always Québec time */}
                     </p>
@@ -162,9 +162,19 @@ const MatchsList = () => {
                           match.type === "Domicile" ? "flex-row-reverse" : ""
                         }`}
                       >
-                        <Image src={Logo} alt="Logo" className="h-12 w-12" />
+                        {match?.homeTeam?.imageUrl ? (
+                          <Image
+                            src={match.homeTeam.imageUrl}
+                            alt="Logo"
+                            className="h-12 w-12"
+                            width={48}
+                            height={48}
+                          />
+                        ) : (
+                          <Image src={Logo} alt="Logo" className="h-12 w-12" />
+                        )}
                         <h3 className="font-bebas-neue text-xl text-black">
-                          Mégatoit
+                          {match?.homeTeam?.name || "BSR DE TROIS-RIVIÈRES"}
                         </h3>
                       </div>
                       <p className="font-bebas-neue text-xl text-black">VS</p>
@@ -208,7 +218,7 @@ const MatchsList = () => {
                   {match.type === "Domicile" && (
                     <Link
                       href={`/calendrier/${match.id}`}
-                      className="block text-center bg-black text-white font-bebas-neue py-2 rounded-md mx-4 hover:bg-gray-800 transition-colors duration-300 mt-4 "
+                      className="block text-center bg-brand text-black font-bebas-neue py-2 rounded-md mx-4 hover:bg-brand-dark transition-colors duration-300 mt-4"
                     >
                       Achetez vos billets
                     </Link>
@@ -221,7 +231,7 @@ const MatchsList = () => {
           <div className="flex justify-center mt-8">
             <Link
               href={"/calendrier"}
-              className="text-center font-bebas-neue text-xl py-3 px-12 text-black border-black border rounded-md"
+              className="text-center font-bebas-neue text-xl py-3 px-12 text-black border-black border rounded-md hover:bg-brand transition-colors"
             >
               <span>Voir le calendrier complet</span>
             </Link>

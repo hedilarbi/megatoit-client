@@ -80,11 +80,6 @@ const InscriptionPage = () => {
   const router = useRouter();
 
   useEffect(() => {
-    // Met les e-mails d’auth Firebase (vérif, reset) en français
-    auth.languageCode = "fr";
-  }, []);
-
-  useEffect(() => {
     if (user) {
       router.replace("/"); // déjà connecté -> on renvoie vers l'accueil
     }
@@ -153,7 +148,8 @@ const InscriptionPage = () => {
         createdAt: new Date(),
       });
 
-      router.back();
+      // BUG FIX: use replace("/") instead of back() to avoid empty-history loop
+      router.replace("/");
     } catch (err) {
       console.error(err);
       setError(getAuthErrorMessageFr(err));
@@ -171,7 +167,7 @@ const InscriptionPage = () => {
         </div>
       )}
 
-      <div className="hidden w-1/2 md:flex justify-center items-center bg-white shadow-2xl h-screen">
+      <div className="hidden w-1/2 md:flex justify-center items-center bg-black shadow-2xl h-screen">
         <Image src={Logo} alt="Logo" className="h-48 w-auto" />
       </div>
 
@@ -281,7 +277,7 @@ const InscriptionPage = () => {
 
             <button
               type="submit"
-              className="w-full bg-black text-white py-2 px-4 rounded font-bebas-neue text-2xl cursor-pointer"
+              className="w-full bg-brand hover:bg-brand-dark text-black py-2 px-4 rounded font-bebas-neue text-2xl cursor-pointer transition-colors"
             >
               S&apos;inscrire
             </button>

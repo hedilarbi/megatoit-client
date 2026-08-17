@@ -14,7 +14,9 @@ const CommandeEnCours = ({ paymentIntent }) => {
     const interval = setInterval(async () => {
       if (attempts >= 5) {
         clearInterval(interval);
-        router.back(); // Navigate back after 3 attempts
+        // BUG FIX: router.back() left paid users stranded if polling timed out.
+        // Redirect to failure page instead so they see instructions and can contact support.
+        router.replace(`/commande-echoue?payment_intent=${paymentIntent}`);
         return;
       }
 

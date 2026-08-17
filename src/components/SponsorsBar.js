@@ -7,7 +7,7 @@ const LOGOS = [
   { src: "/commenditaires/immo3r.jpg", alt: "Immo3R" },
   { src: "/commenditaires/MaisonDebauche.jpg", alt: "Maison Debauche" },
   { src: "/commenditaires/HE.jpg", alt: "HE" },
-  { src: "/commenditaires/MegaToit.jpg", alt: "Mega Toit" },
+  { src: "/commenditaires/MegaToit.jpg", alt: "BSR DE TROIS-RIVIÈRES" },
   { src: "/commenditaires/SphereExtermination.jpg", alt: "Sphere" },
 ];
 
@@ -148,13 +148,13 @@ export default function SponsorsBar() {
       </div>
 
       {/* Desktop: 6 logos fixed */}
-      <div className="hidden md:flex justify-between items-center px-10 py-4">
+      <div className="hidden md:flex justify-between items-center px-10 py-2">
         {LOGOS.map((logo) => (
           <Image
             key={logo.src}
             src={logo.src}
             alt={logo.alt}
-            className="h-14 w-auto"
+            className="h-9 w-auto object-contain"
             width={200}
             height={100}
             priority

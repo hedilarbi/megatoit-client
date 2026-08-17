@@ -8,13 +8,13 @@ import CtaBoutique from "@/components/CtaBoutique";
 export const metadata = {
   title: "Accueil",
   description:
-    "Bienvenue sur la page d'accueil de notre application de billetterie de Le Mégatoit Hockey. Découvrez les derniers matchs, abonnez-vous pour la saison et restez informé des événements à venir.",
-  keywords: "billetterie, hockey, LE MÉGATOIT, abonnements, matchs",
+    "Bienvenue sur la page d'accueil de notre application de billetterie de BSR DE TROIS-RIVIÈRES Hockey. Découvrez les derniers matchs, abonnez-vous pour la saison et restez informé des événements à venir.",
+  keywords: "billetterie, hockey, BSR DE TROIS-RIVIÈRES, abonnements, matchs",
   openGraph: {
-    title: "Accueil - LE MÉGATOIT HOCKEY",
+    title: "Accueil - BSR DE TROIS-RIVIÈRES HOCKEY",
     description:
-      "Découvrez les derniers matchs et abonnements de LE MÉGATOIT HOCKEY.",
-    url: "https://lemegatoit.com",
+      "Découvrez les derniers matchs et abonnements de BSR DE TROIS-RIVIÈRES HOCKEY.",
+    url: "https://bsr3r.com",
   },
 };
 

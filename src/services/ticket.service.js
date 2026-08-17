@@ -57,6 +57,21 @@ export const createTicketAndOrder = async ({
 
     let tickets = [];
     if (matchId) {
+      // BUG FIX #1: verify seat availability BEFORE creating any tickets or uploading QR codes
+      // Previously, tickets were created first then the check happened — causing orphaned Firestore
+      // docs and Storage files on concurrent purchases of the last available seats.
+      const matchRef = admin.firestore().collection("matchs").doc(matchId);
+      const matchDoc = await matchRef.get();
+
+      if (!matchDoc.exists) {
+        throw new Error("Match not found");
+      }
+
+      const matchData = matchDoc.data();
+      if (matchData.availableSeats < quantity) {
+        throw new Error("Not enough available seats");
+      }
+
       for (let i = 0; i < quantity; i++) {
         const ticketRef = admin.firestore().collection("tickets").doc();
         const ticketId = ticketRef.id;
@@ -96,17 +111,6 @@ export const createTicketAndOrder = async ({
           ...ticket,
           qrCodeImage: qrImageBuffer,
         });
-      }
-      const matchRef = admin.firestore().collection("matchs").doc(matchId);
-      const matchDoc = await matchRef.get();
-
-      if (!matchDoc.exists) {
-        throw new Error("Match not found");
-      }
-
-      const matchData = matchDoc.data();
-      if (matchData.availableSeats < quantity) {
-        throw new Error("Not enough available seats");
       }
 
       await matchRef.update({

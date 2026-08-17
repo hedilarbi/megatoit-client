@@ -72,7 +72,7 @@ const AbonnementContent = () => {
                 </p>
               </div>
               <button
-                className="font-bebas-neue rounded-md bg-black text-white py-1 px-6 text-xl text-center cursor-pointer"
+                className="font-bebas-neue rounded-md bg-brand hover:bg-brand-dark text-black py-1 px-6 text-xl text-center cursor-pointer transition-colors"
                 onClick={() => handleBuy(abonnement.id)}
               >
                 Achetez l&apos;abonnement

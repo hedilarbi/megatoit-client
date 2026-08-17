@@ -19,7 +19,7 @@ const page = () => {
       <div className="flex gap-3">
         <Link
           href="/"
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+          className="px-4 py-2 bg-brand text-black rounded-md hover:bg-brand-dark transition"
         >
           Accueil
         </Link>

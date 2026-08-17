@@ -9,25 +9,25 @@ const AbonnementSection = () => {
         Abonnement de saison 2025-26
       </h2>
 
-      <div className="bg-[#101827] border-2 border-white mt-8 mx-auto md:w-1/3 w-full rounded-md py-6 px-8 ">
-        <h4 className="text-white text-2xl mt-10 font-semibold ">
+      <div className="bg-black border-2 border-brand mt-8 mx-auto md:w-1/3 w-full rounded-md py-6 px-8 shadow-[0_12px_40px_rgba(123,253,72,0.18)]">
+        <h4 className="text-brand text-2xl mt-10 font-semibold">
           $160 / Saison
         </h4>
 
         <p className="font-lato text-white text-lg mt-4">
-          <FaCheck className="inline text-white mr-2" />
+          <FaCheck className="inline text-brand mr-2" />
           13 matchs de saison régulière
         </p>
         <p className="font-lato text-white text-lg mt-4">
-          <FaCheck className="inline text-white mr-2" />1 match présaison
+          <FaCheck className="inline text-brand mr-2" />1 match présaison
         </p>
         <p className="font-lato text-white text-lg mt-4">
-          <FaCheck className="inline text-white mr-2" />1 consommation gratuite
+          <FaCheck className="inline text-brand mr-2" />1 consommation gratuite
           par match
         </p>
         <Link
           href="/abonnement-saison"
-          className="mt-20 block text-center bg-white text-black text-xl  px-6 py-2 rounded-md hover:bg-gray-200 transition-colors"
+          className="mt-20 block text-center bg-brand text-black text-xl px-6 py-2 rounded-md hover:bg-brand-dark transition-colors"
         >
           <span className="font-bebas-neue">Achetez maintenant</span>
         </Link>

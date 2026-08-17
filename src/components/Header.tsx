@@ -27,28 +27,28 @@ const Header = () => {
     setShowSidebar(!showSidebar);
   };
   return (
-    <div className="h-20 bg-white fixed top-0 left-0 w-full flex items-center px-4 md:px-16 z-50  justify-between shadow-md border-b border-gray-200">
+    <div className="h-20 md:h-24 bg-black fixed top-0 left-0 w-full flex items-center px-4 md:px-16 z-50 justify-between shadow-md border-b-4 border-brand">
       {/* Logo */}
       <div className="flex-shrink-0">
         <Link href="/">
-          <Image src={Logo} alt="Logo" className="h-12 w-auto" />
+          <Image src={Logo} alt="Logo" className="h-16 md:h-20 w-auto" />
         </Link>
       </div>
 
       {/* Links for desktop */}
-      <div className="hidden md:flex flex-grow justify-center gap-8  font-bebas-neue text-lg">
+      <div className="hidden md:flex flex-grow justify-center gap-8 font-bebas-neue text-lg">
         <Link
           href="/"
-          className={`text-black hover:underline  ${
-            pathname === "/" && "underline"
+          className={`text-white hover:text-brand transition-colors ${
+            pathname === "/" && "text-brand underline decoration-2 underline-offset-4"
           } `}
         >
           Accueil
         </Link>
         <Link
           href="/calendrier"
-          className={`text-black hover:underline ${
-            pathname === "/calendrier" && "underline"
+          className={`text-white hover:text-brand transition-colors ${
+            pathname === "/calendrier" && "text-brand underline decoration-2 underline-offset-4"
           } `}
         >
           Calendrier
@@ -56,30 +56,30 @@ const Header = () => {
         <Link
           href="https://megatoit.atelierqg.com/"
           target="_blank"
-          className={`text-black hover:underline `}
+          className="text-white hover:text-brand transition-colors"
         >
           Boutique en ligne
         </Link>
         <Link
           href="/partenaires"
-          className={`text-black hover:underline ${
-            pathname === "/partenaires" && "underline"
+          className={`text-white hover:text-brand transition-colors ${
+            pathname === "/partenaires" && "text-brand underline decoration-2 underline-offset-4"
           } `}
         >
           Nos partenaires
         </Link>
         <Link
           href="/notre-mission"
-          className={`text-black hover:underline ${
-            pathname === "/notre-mission" && "underline"
+          className={`text-white hover:text-brand transition-colors ${
+            pathname === "/notre-mission" && "text-brand underline decoration-2 underline-offset-4"
           } `}
         >
           Notre mission
         </Link>
         <Link
           href="/contact"
-          className={`text-black hover:underline ${
-            pathname === "/contact" && "underline"
+          className={`text-white hover:text-brand transition-colors ${
+            pathname === "/contact" && "text-brand underline decoration-2 underline-offset-4"
           } `}
         >
           Contact
@@ -92,34 +92,34 @@ const Header = () => {
           <div className="hidden md:flex items-center gap-4">
             <button
               onClick={handleLogout}
-              className="   text-center px-10 bg-black border border-black hover:text-black hover:bg-white text-white rounded-md cursor-pointer"
+              className="text-center px-10 py-1 bg-brand border border-brand hover:bg-brand-dark text-black rounded-md cursor-pointer transition-colors"
             >
-              <span className="font-bebas-neue  text-center   ">
+              <span className="font-bebas-neue text-center">
                 se déconnecter
               </span>
             </button>
             <Link
               href="/profil"
-              className={`text-black hover:underline ${
-                pathname === "/profil" && "underline"
+              className={`text-white hover:text-brand transition-colors ${
+                pathname === "/profil" && "text-brand"
               } `}
             >
-              <FaUserAlt size={28} />
+              <FaUserAlt size={24} />
             </Link>
           </div>
         ) : (
           <div className="hidden md:flex items-center gap-4">
             <Link
               href="/connexion"
-              className=" border border-black text-black hover:text-white px-10  rounded-md bg-white hover:bg-black  transition-colors  "
+              className="border border-white text-white px-10 py-1 rounded-md bg-transparent hover:bg-brand hover:text-black hover:border-brand transition-colors"
             >
               <span className="font-bebas-neue text-center">Se connecter</span>
             </Link>
             <Link
               href="/inscription"
-              className="   text-center px-10 bg-black border border-black hover:text-black hover:bg-white text-white rounded-md  "
+              className="text-center px-10 py-1 bg-brand border border-brand hover:bg-brand-dark text-black rounded-md transition-colors"
             >
-              <span className="font-bebas-neue  text-center   ">
+              <span className="font-bebas-neue text-center">
                 s&apos;inscrire
               </span>
             </Link>
@@ -127,8 +127,8 @@ const Header = () => {
         )}
         {/* Hamburger Menu for mobile/tablet */}
         <div className="md:hidden block">
-          <button className="text-black" onClick={toggleSidebar}>
-            <RiMenu3Fill size={32} color="black" />
+          <button className="text-white" onClick={toggleSidebar}>
+            <RiMenu3Fill size={32} className="text-white" />
           </button>
         </div>
       </div>

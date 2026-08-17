@@ -26,13 +26,13 @@ const AuthRequiredModal = ({ setShowModal }) => {
         <div className="flex flex-col space-y-4">
           <button
             onClick={() => router.push("/connexion")}
-            className="px-4 py-2 text-white bg-black rounded-md font-bebas-neue text-xl cursor-pointer"
+            className="px-4 py-2 text-black bg-brand hover:bg-brand-dark transition-colors rounded-md font-bebas-neue text-xl cursor-pointer"
           >
             Se connecter
           </button>
           <button
             onClick={() => router.push("/inscription")}
-            className="px-4 py-2 text-black border border-black bg-white rounded-md font-bebas-neue text-xl cursor-pointer"
+            className="px-4 py-2 text-black border border-black bg-white hover:bg-brand rounded-md font-bebas-neue text-xl cursor-pointer transition-colors"
           >
             Pas un compte ? Créez un compte
           </button>

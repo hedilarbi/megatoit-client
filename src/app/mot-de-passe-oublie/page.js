@@ -56,14 +56,14 @@ export default function ForgotPasswordPage() {
         <button
           type="submit"
           disabled={loading}
-          className="mt-4 w-full py-2 rounded bg-black text-white  disabled:opacity-50"
+          className="mt-4 w-full py-2 rounded bg-brand hover:bg-brand-dark text-black disabled:opacity-50 transition-colors"
         >
           {loading ? "Envoi en cours…" : "Envoyer le lien de réinitialisation"}
         </button>
       </form>
       <Link
         href="/connexion"
-        className="block mt-4 text-center text-blue-600 hover:underline"
+        className="block mt-4 text-center text-black hover:text-brand-dark hover:underline"
       >
         Retour à la connexion
       </Link>

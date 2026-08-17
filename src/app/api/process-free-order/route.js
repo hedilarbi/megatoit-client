@@ -13,6 +13,22 @@ export const config = {
 
 export async function POST(request) {
   try {
+    // SECURITY FIX #4: verify Firebase ID token so only the authenticated user
+    // can place an order under their own userId. Previously any userId was accepted.
+    const authHeader = request.headers.get("authorization") || "";
+    const idToken = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
+
+    if (!idToken) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+    }
+
+    let decodedToken;
+    try {
+      decodedToken = await admin.auth().verifyIdToken(idToken);
+    } catch {
+      return new Response(JSON.stringify({ error: "Invalid token" }), { status: 401 });
+    }
+
     const body = await request.json();
     const {
       userId,
@@ -24,6 +40,22 @@ export async function POST(request) {
       abonnementPrice,
       amount,
     } = body;
+
+    // Ensure the token UID matches the requested userId
+    if (decodedToken.uid !== userId) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403 });
+    }
+
+    // BUG FIX #2: validate that at least one valid purchase type is present
+    // to avoid a TypeError crash when response stays null
+    const hasMatchPurchase = Boolean(matchId && quantity && ticketPrice);
+    const hasAbonnementPurchase = Boolean(abonnementId && abonnementPrice);
+    if (!hasMatchPurchase && !hasAbonnementPurchase) {
+      return new Response(
+        JSON.stringify({ error: "Invalid purchase payload: matchId or abonnementId required" }),
+        { status: 400 }
+      );
+    }
 
     const userRef = admin.firestore().collection("users").doc(userId);
     const userDoc = await userRef.get();
@@ -63,7 +95,7 @@ export async function POST(request) {
     }
 
     let response = null;
-    if (matchId && quantity && ticketPrice) {
+    if (hasMatchPurchase) {
       response = await createTicketAndOrder({
         userId,
         matchId,
@@ -74,7 +106,7 @@ export async function POST(request) {
         promoCodeId,
       });
     }
-    if (abonnementId && abonnementPrice) {
+    if (hasAbonnementPurchase) {
       response = await createTicketAndOrder({
         userId,
         abonnementId,
@@ -86,23 +118,29 @@ export async function POST(request) {
       });
     }
 
-    if (response.success) {
-      const userData = await getUserDocument(userId);
-      if (response.data.tickets.length) {
-        await generateAndSendTicketPDF(
-          userData,
-          response.data.tickets,
-          response.data.order
-        );
-      }
-      if (response.data.abonnement) {
-        await generateAndSendTicketPDF(
-          userData,
-          [],
-          response.data.order,
-          response.data.abonnement
-        );
-      }
+    // BUG FIX #2: guard against null response (should not happen after validation above)
+    if (!response || !response.success) {
+      return new Response(
+        JSON.stringify({ error: "Failed to process order" }),
+        { status: 500 }
+      );
+    }
+
+    const userData = await getUserDocument(userId);
+    if (response.data.tickets.length) {
+      await generateAndSendTicketPDF(
+        userData,
+        response.data.tickets,
+        response.data.order
+      );
+    }
+    if (response.data.abonnement) {
+      await generateAndSendTicketPDF(
+        userData,
+        [],
+        response.data.order,
+        response.data.abonnement
+      );
     }
 
     return new Response(JSON.stringify({ data: response.data.orderId }), {

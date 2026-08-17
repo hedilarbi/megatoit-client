@@ -15,12 +15,12 @@ const page = () => {
       <div className="mt-14 flex md:flex-row flex-col items-center justify-between gap-4 w-full md:w-[95%] mx-auto px-4">
         <div className="md:w-1/2 w-full">
           <h2 className="font-bebas-neue md:text-5xl text-3xl text-black ">
-            Mission de l’équipe – Le Mégatoit de Trois-Rivières
+            Mission de l’équipe – BSR DE TROIS-RIVIÈRES
           </h2>
           <p className="mt-4 text-gray-700 font-lato text-lg font-semibold">
             Offrir un hockey compétitif, robuste, spectaculaire et passionnant
             au sein de la LHSAAAQ, en représentant fièrement la ville de
-            Trois-Rivières et ses partisans. Soutenus par nos précieux
+            TROIS-RIVIÈRES et ses partisans. Soutenus par nos précieux
             partenaires et commanditaires, nous créons un environnement où
             l’excellence sportive et le respect se traduisent autant sur la
             glace que dans la communauté. Ensemble, faisons rayonner notre
@@ -71,7 +71,7 @@ const page = () => {
           Notre Équipe
         </h2> */}
         {/* <p className="font-semibold font-lato text-lg mt-4 text-center">
-          Rencontrez les personnes qui font battre le cœur de Megatoit
+          Rencontrez les personnes qui font battre le cœur de BSR DE TROIS-RIVIÈRES
         </p> */}
         {/* <div className="mt-10 flex md:flex-row flex-col md:px-20 justify-center items-center gap-8">
           <div className="flex-1 flex flex-col items-center bg-[#f3f4f6] px-4 py-8 rounded-md">
@@ -140,7 +140,7 @@ const page = () => {
         </div> */}
         <div className="mt-14 bg-black text-white py-8 px-6  w-full md:w-[95%] mx-auto">
           <h2 className="font-bebas-neue md:text-5xl text-3xl text-center ">
-            Rejoignez l&apos;Aventure Mégatoit
+            Rejoignez l&apos;Aventure BSR DE TROIS-RIVIÈRES
           </h2>
           <p className="font-semibold font-lato text-lg mt-4 text-center">
             Venez encourager notre équipe et vivez l&apos;émotion du hockey

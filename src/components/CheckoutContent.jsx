@@ -4,6 +4,7 @@ import { getMatchByUid, verifyPromoCode } from "@/services/match.service";
 import { getAllTaxes } from "@/services/taxes.service";
 import { getUserDocument } from "@/services/user.service";
 import { getAbonementById } from "@/services/abonement.service";
+import { getAuth } from "firebase/auth";
 
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
@@ -32,7 +33,9 @@ const formatDate = (timestamp) => {
   return { dayName, date: str };
 };
 
-const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
+const CheckoutContent = ({ matchId, quantity: rawQuantity, abonnementId }) => {
+  // BUG FIX: parse quantity to number — URL params are strings, and "0" is truthy
+  const quantity = rawQuantity ? parseInt(rawQuantity, 10) : null;
   const [match, setMatch] = useState(null);
   const [abonnement, setAbonnement] = useState(null);
 
@@ -237,16 +240,22 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
   const processOrder = async () => {
     try {
       setTreatingOrder(true);
-      const response = await axios.post("/api/process-free-order", {
-        userId: user.uid,
-        matchId: match ? matchId : null,
-        quantity: match ? quantity : null,
-        ticketPrice: match ? match.price : null,
-        abonnementId: abonnement ? abonnementId : null,
-        abonnementPrice: abonnement ? abonnement.price : null,
-        amount: total,
-        promoCodeId: codeData ? codeData.id : null,
-      });
+      // SECURITY FIX: send Firebase ID token so the server can verify the caller's identity
+      const idToken = await getAuth().currentUser?.getIdToken();
+      const response = await axios.post(
+        "/api/process-free-order",
+        {
+          userId: user.uid,
+          matchId: match ? matchId : null,
+          quantity: match ? quantity : null,
+          ticketPrice: match ? match.price : null,
+          abonnementId: abonnement ? abonnementId : null,
+          abonnementPrice: abonnement ? abonnement.price : null,
+          amount: total,
+          promoCodeId: codeData ? codeData.id : null,
+        },
+        { headers: { Authorization: `Bearer ${idToken}` } }
+      );
       if (response.status === 200) {
         const orderId = response.data.data;
         router.push(`/commande-reussi?orderId=${orderId}`);
@@ -288,70 +297,99 @@ const CheckoutContent = ({ matchId, quantity, abonnementId }) => {
     <div className="pt-16 md:px-24 px-4 w-full">
       {match && (
         <div>
-          <div className="border-b border-black pb-10">
-            <h1 className="flex md:text-2xl text-lg justify-center md:justify-start font-bold text-gray-800 items-center font-bebas-neue">
-              <Image
-                src={Logo}
-                alt="logo"
-                width={64}
-                height={64}
-                className="md:h-16 h-12 md:w-16 w-12"
-              />
-              <span className="ml-4 uppercase">Mégatoit</span>
-              <span className="mx-4 font-bold">VS</span>
-              <span className="mr-4 uppercase">{match.opponent.name}</span>
-              <Image
-                src={match.opponent.imageUrl}
-                alt="logo"
-                width={64}
-                height={64}
-                className="md:h-16 h-12 md:w-16 w-12"
-              />
-            </h1>
+          {(() => {
+            const homeTeamFullName =
+              match?.homeTeam?.["full-name"] ||
+              match?.homeTeam?.fullName ||
+              match?.homeTeam?.name ||
+              "BSR DE TROIS-RIVIÈRES";
+            const opponentFullName =
+              match?.opponent?.["full-name"] ||
+              match?.opponent?.fullName ||
+              match?.opponent?.name ||
+              "";
 
-            <div className="mt-8">
-              <div className="flex items-center">
-                <FaCalendarAlt
-                  className="inline mr-2"
-                  color="#585858"
-                  size={20}
-                />
-                <p className="text-[#585858] md:text-lg text-base font-lato">
-                  {(() => {
-                    const d = formatDate(match.date);
-                    return (
-                      <>
-                        <span className="uppercase">{d.dayName},</span>{" "}
-                        <span className="uppercase">{d.date}</span>
-                      </>
-                    );
-                  })()}
-                </p>
-              </div>
+            return (
+              <>
+                <div className="border-b border-black pb-10">
+                  <h1 className="flex md:text-2xl text-lg justify-center md:justify-start font-bold text-gray-800 items-center font-bebas-neue">
+                    {match?.homeTeam?.imageUrl ? (
+                      <Image
+                        src={match.homeTeam.imageUrl}
+                        alt="logo"
+                        width={64}
+                        height={64}
+                        className="md:h-16 h-12 md:w-16 w-12"
+                      />
+                    ) : (
+                      <Image
+                        src={Logo}
+                        alt="logo"
+                        width={64}
+                        height={64}
+                        className="md:h-16 h-12 md:w-16 w-12"
+                      />
+                    )}
+                    <span className="ml-4 uppercase">{homeTeamFullName}</span>
+                    <span className="mx-4 font-bold">VS</span>
+                    <span className="mr-4 uppercase">{opponentFullName}</span>
+                    {match?.opponent?.imageUrl && (
+                      <Image
+                        src={match.opponent.imageUrl}
+                        alt="logo"
+                        width={64}
+                        height={64}
+                        className="md:h-16 h-12 md:w-16 w-12"
+                      />
+                    )}
+                  </h1>
 
-              <div className="flex items-center mt-4">
-                <IoMdPin className="inline mr-2" color="#585858" size={20} />
-                <p className="text-[#585858] text-capitalize md:text-lg text-base font-lato uppercase">
-                  {match.place}
-                </p>
-              </div>
-            </div>
-          </div>
+                  <div className="mt-8">
+                    <div className="flex items-center">
+                      <FaCalendarAlt
+                        className="inline mr-2"
+                        color="#585858"
+                        size={20}
+                      />
+                      <p className="text-[#585858] md:text-lg text-base font-lato">
+                        {(() => {
+                          const d = formatDate(match.date);
+                          return (
+                            <>
+                              <span className="uppercase">{d.dayName},</span>{" "}
+                              <span className="uppercase">{d.date}</span>
+                            </>
+                          );
+                        })()}
+                      </p>
+                    </div>
 
-          <div className="py-10 border-b border-black">
-            <h2 className="md:text-2xl text-lg font-bold text-gray-800 font-bebas-neue">
-              Résumé de la commande
-            </h2>
-            <div className="border border-gray-300 rounded-md p-4 mt-4 bg-white flex justify-between">
-              <p className="font-lato text-gray-600 font-semibold uppercase">
-                {quantity} x billet(s) Mégatoit vs {match.opponent.name}
-              </p>
-              <p className="font-lato text-gray-800 font-semibold">
-                ${match.price.toFixed(2)} x {quantity} = $
-                {(match.price * quantity).toFixed(2)}
-              </p>
-            </div>
-          </div>
+                    <div className="flex items-center mt-4">
+                      <IoMdPin className="inline mr-2" color="#585858" size={20} />
+                      <p className="text-[#585858] text-capitalize md:text-lg text-base font-lato uppercase">
+                        {match.place}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="py-10 border-b border-black">
+                  <h2 className="md:text-2xl text-lg font-bold text-gray-800 font-bebas-neue">
+                    Résumé de la commande
+                  </h2>
+                  <div className="border border-gray-300 rounded-md p-4 mt-4 bg-white flex justify-between">
+                    <p className="font-lato text-gray-600 font-semibold uppercase">
+                      {quantity} x billet(s) {homeTeamFullName} vs {opponentFullName}
+                    </p>
+                    <p className="font-lato text-gray-800 font-semibold">
+                      ${match.price.toFixed(2)} x {quantity} = $
+                      {(match.price * quantity).toFixed(2)}
+                    </p>
+                  </div>
+                </div>
+              </>
+            );
+          })()}
 
           <div className="py-10 border-b border-black">
             <h2 className="md:text-2xl text-lg font-bold text-gray-800 font-bebas-neue">

@@ -26,14 +26,17 @@ export const getUserDocument = async (uid) => {
 
 export const createUserDocument = async (uid, userData) => {
   try {
-    const usersRef = collection(db, "users");
-    const emailQuery = query(usersRef, where("email", "==", userData.email));
-    const querySnapshot = await getDocs(emailQuery);
-
-    if (!querySnapshot.empty) {
+    // BUG FIX: check by UID (primary key), not by email.
+    // Checking by email caused two issues:
+    // 1. Google re-logins could leave a mismatched doc if email matched another UID.
+    // 2. Email/password signup with an email already used by Google would skip
+    //    doc creation, leaving the Auth account with no Firestore document.
+    const userDocRef = doc(db, "users", uid);
+    const existingSnap = await getDoc(userDocRef);
+    if (existingSnap.exists()) {
       return;
     }
-    await setDoc(doc(db, "users", uid), { ...userData, uid });
+    await setDoc(userDocRef, { ...userData, uid });
   } catch (error) {
     console.error("Error creating user document:", error);
     throw error;

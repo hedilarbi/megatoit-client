@@ -16,4 +16,6 @@ const firebaseApp = getApps().length
   : initializeApp(firebaseConfig);
 
 export const auth = getAuth(firebaseApp);
+// FIX: set FR globally so ALL Firebase emails (verification, reset) are in French
+auth.languageCode = 'fr';
 export const db = getFirestore(firebaseApp);

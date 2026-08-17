@@ -64,7 +64,7 @@ export async function generateAndSendTicketPDF(
         const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
         // 3) données
-        const team1Name = "Mégatoit";
+        const team1Name = "BSR DE TROIS-RIVIÈRES";
         const team2Name = match.opponent.name;
 
         const placeText = match.place;
@@ -313,28 +313,25 @@ export async function generateAndSendTicketPDF(
         auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
         tls: { minVersion: "TLSv1.2" },
       });
-      const subjectTickets = ` ${
-        tickets.length > 1 ? "Vos billets" : "Votre billet"
-      } - Mégatoit vs ${match.opponent.name}`;
+      const subjectTickets = ` ${tickets.length > 1 ? "Vos billets" : "Votre billet"
+        } - BSR DE TROIS-RIVIÈRES vs ${match.opponent.name}`;
       const textTickets =
         `Commande confirmée (N°${order.code}).\n` +
-        `${
-          tickets.length > 1 ? "Billets" : "Billet"
+        `${tickets.length > 1 ? "Billets" : "Billet"
         } en pièce jointe (PDF).\n` +
-        `Émetteur : Billetterie Mégatoit <billets@lemegatoit.com>\n` +
-        `Si vous n'êtes pas à l'origine de cet achat, contactez support@lemegatoit.com.`;
+        `Émetteur : Billetterie BSR DE TROIS-RIVIÈRES <billets@bsr3r.com>\n` +
+        `Si vous n'êtes pas à l'origine de cet achat, contactez support@bsr3r.com.`;
 
       // ton HTML existant:
       const htmlTickets = `
   <div style="text-align:center">
-    <img src="cid:logo-big" alt="Le Mégatoit" style="width:150px;height:auto" />
+    <img src="cid:logo-big" alt="BSR DE TROIS-RIVIÈRES" style="width:150px;height:auto" />
   </div>
   <p style="text-align:center;font-weight:bold;font-size:22px">Commande confirmée !</p>
   <p style="text-align:center;font-size:16px">
     Votre commande <strong>N° ${order.code}</strong> est confirmée.
-    Vous trouverez en pièce jointe ${
-      tickets.length > 1 ? "vos billets" : "votre billet"
-    }.
+    Vous trouverez en pièce jointe ${tickets.length > 1 ? "vos billets" : "votre billet"
+        }.
   </p>
 `;
 
@@ -345,11 +342,11 @@ export async function generateAndSendTicketPDF(
         text: textTickets, // << ajoute la version texte
         html: htmlTickets,
         envelope: {
-          from: process.env.EMAIL_USER, // MAIL FROM / Return-Path = billets@lemegatoit.com
+          from: process.env.EMAIL_USER, // MAIL FROM / Return-Path = billets@bsr3r.com
           to: user.email,
         },
         headers: {
-          "List-Unsubscribe": `<mailto:support@lemegatoit.com>`,
+          "List-Unsubscribe": `<mailto:support@bsr3r.com>`,
           "X-Entity-Type": "Transactional", // indicatif, certains filtres aiment
         },
         attachments: [
@@ -560,14 +557,14 @@ export async function generateAndSendTicketPDF(
       await transporter.sendMail({
         from: `${process.env.EMAIL_USER}`,
         to: user.email,
-        subject: `Votre abonnement Mégatoit pour la saison ${abonnement.data.season}`,
+        subject: `Votre abonnement BSR DE TROIS-RIVIÈRES pour la saison ${abonnement.data.season}`,
         text:
           `Votre abonnement pour la saison ${abonnement.data.season} est prêt !\n\n` +
           `Téléchargez-le en pièce jointe.\n\n` +
-          `Émetteur : Billetterie Mégatoit <${process.env.EMAIL_USER}>`,
+          `Émetteur : Billetterie BSR DE TROIS-RIVIÈRES <${process.env.EMAIL_USER}>`,
         html: `
           <div style="text-align:center">
-        <img src="cid:logo-big" alt="Le Mégatoit" style="width:150px;height:auto" />
+        <img src="cid:logo-big" alt="BSR DE TROIS-RIVIÈRES" style="width:150px;height:auto" />
           </div>
           <p style="text-align:center;font-weight:bold;font-size:22px">
         Commande confirmée !
@@ -579,17 +576,17 @@ export async function generateAndSendTicketPDF(
           <p style="background:#f7f7f7;border-radius:8px;padding:16px 20px;margin:24px auto 16px auto;max-width:500px;font-size:15px;color:#333;text-align:center;border:1px solid #e0e0e0;">
         <strong style="color:#1976d2;">Note :</strong>
         Ce billet de saison donne droit à l’accès à tous les matchs de
-        la saison régulière du MégaToit de Trois-Rivières.<br>
+        la saison régulière du BSR DE TROIS-RIVIÈRES.<br>
         Il est <b>unique</b> et <b>incessible</b>.<br>
         Sa présentation est <u>obligatoire</u> à chaque entrée au Colisée Jean-Guy Talbot.
           </p>
         `,
         envelope: {
-          from: process.env.EMAIL_USER, // MAIL FROM / Return-Path = billets@lemegatoit.com
+          from: process.env.EMAIL_USER, // MAIL FROM / Return-Path = billets@bsr3r.com
           to: user.email,
         },
         headers: {
-          "List-Unsubscribe": `<mailto:support@lemegatoit.com>`,
+          "List-Unsubscribe": `<mailto:support@bsr3r.com>`,
           "X-Entity-Type": "Transactional", // indicatif, certains filtres aiment
         },
         attachments: [

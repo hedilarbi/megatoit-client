@@ -53,7 +53,7 @@ const TicketQuantityModal = ({
             onChange={(e) => setTicketQuantity(Number(e.target.value))}
             min="1"
             max="10"
-            className="w-20 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-20 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand"
           />
         </div>
 
@@ -61,7 +61,7 @@ const TicketQuantityModal = ({
         <div className="flex flex-col space-y-4">
           <button
             onClick={handlePassToCheckout}
-            className="px-4 py-2 text-white bg-blue-500 rounded-md hover:bg-blue-600"
+            className="px-4 py-2 text-black bg-brand rounded-md hover:bg-brand-dark transition-colors"
           >
             Passer à la caisse
           </button>

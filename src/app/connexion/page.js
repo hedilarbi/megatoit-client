@@ -6,6 +6,7 @@ import {
   signInWithPopup,
   GoogleAuthProvider,
 } from "firebase/auth";
+import { FirebaseError } from "firebase/app";
 import { auth } from "@/lib/firebase";
 import { createUserDocument } from "@/services/user.service";
 import Spinner from "@/components/spinner/Spinner";
@@ -15,6 +16,30 @@ import { FaGoogle } from "react-icons/fa";
 import Link from "next/link";
 import Header from "@/components/Header";
 import { useAuth } from "@/context/AuthContext";
+
+/** Conversion des codes d'erreur Firebase Auth -> messages FR */
+const getAuthErrorMessageFr = (error) => {
+  const code =
+    (error instanceof FirebaseError && error.code) || error?.code || "";
+  const M = {
+    "auth/user-not-found": "Aucun compte trouvé avec cet email.",
+    "auth/wrong-password": "Mot de passe incorrect.",
+    "auth/invalid-credential": "Identifiants invalides.",
+    "auth/invalid-email": "Adresse e-mail invalide.",
+    "auth/user-disabled": "Ce compte a été désactivé.",
+    "auth/too-many-requests": "Trop de tentatives. Veuillez réessayer plus tard.",
+    "auth/network-request-failed": "Problème de connexion réseau. Vérifiez votre internet.",
+    "auth/popup-closed-by-user": "La fenêtre a été fermée avant la fin de l'opération.",
+    "auth/popup-blocked": "La fenêtre contextuelle a été bloquée par le navigateur.",
+    "auth/cancelled-popup-request": "Une autre fenêtre d'authentification est déjà ouverte.",
+    "auth/account-exists-with-different-credential":
+      "Un compte existe déjà avec cet e-mail via un autre fournisseur.",
+  };
+  if (M[code]) return M[code];
+  if (typeof code === "string" && code.startsWith("auth/"))
+    return `Erreur d'authentification : ${code.replace("auth/", "").replaceAll("-", " ")}.`;
+  return "Une erreur s'est produite. Veuillez réessayer.";
+};
 export default function ConnexionPage() {
   const { user } = useAuth();
   const [email, setEmail] = useState("");
@@ -25,29 +50,19 @@ export default function ConnexionPage() {
 
   const handleEmailSignIn = async (e) => {
     e.preventDefault();
+    // BUG FIX: validate BEFORE setIsLoading(true) to avoid infinite spinner
+    if (!email || !password) {
+      setError("Veuillez remplir tous les champs.");
+      return;
+    }
     try {
-      setError(""); // Reset error message
+      setError("");
       setIsLoading(true);
-      if (!email || !password) {
-        setError("Veuillez remplir tous les champs.");
-        return;
-      }
       await signInWithEmailAndPassword(auth, email, password);
-
       router.replace("/");
     } catch (err) {
       console.error("Error signing in:", err.code);
-      if (err.code === "auth/user-not-found") {
-        setError("Aucun compte trouvé avec cet email.");
-      } else if (err.code === "auth/wrong-password") {
-        setError("Mot de passe incorrect.");
-      } else if (err.code === "auth/invalid-credential") {
-        setError("Identifiants invalides.");
-      } else if (err.code === "auth/invalid-email") {
-        setError("Email invalide.");
-      } else {
-        setError("Une erreur s'est produite. Veuillez réessayer.");
-      }
+      setError(getAuthErrorMessageFr(err));
     } finally {
       setIsLoading(false);
     }
@@ -57,19 +72,20 @@ export default function ConnexionPage() {
     const provider = new GoogleAuthProvider();
     try {
       setIsLoading(true);
-      setError(""); // Reset error message
+      setError("");
       const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-      await createUserDocument(user.uid, {
-        email: user.email || "",
-        userName: user.displayName || "",
-
-        type: "client", // Default type, can be changed later
+      const gUser = result.user;
+      await createUserDocument(gUser.uid, {
+        email: gUser.email || "",
+        userName: gUser.displayName || "",
+        type: "client",
         createdAt: new Date(),
       });
-      router.back(); // Redirect to dashboard or another page
+      // BUG FIX: use replace("/") instead of back() to avoid empty-history loop
+      router.replace("/");
     } catch (err) {
-      setError(err.message);
+      // BUG FIX: use French error messages instead of raw Firebase English message
+      setError(getAuthErrorMessageFr(err));
     } finally {
       setIsLoading(false);
     }
@@ -89,7 +105,7 @@ export default function ConnexionPage() {
           <Spinner />
         </div>
       )}
-      <div className="hidden  w-1/2 md:flex justify-center items-center bg-white shadow-2xl h-screen ">
+      <div className="hidden  w-1/2 md:flex justify-center items-center bg-black shadow-2xl h-screen ">
         <Image src={Logo} alt="Logo" className="h-48 w-auto" />
       </div>
       <div className="flex items-center p-8 rounded   flex-1">
@@ -145,7 +161,7 @@ export default function ConnexionPage() {
             {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
             <button
               onClick={(e) => handleEmailSignIn(e)}
-              className="w-full bg-black text-white py-2 px-4 rounded font-bebas-neue text-2xl cursor-pointer"
+              className="w-full bg-brand hover:bg-brand-dark text-black py-2 px-4 rounded font-bebas-neue text-2xl cursor-pointer transition-colors"
             >
               Se connecter
             </button>

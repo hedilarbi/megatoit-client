@@ -222,7 +222,7 @@ const Profil = () => {
                               height={48}
                             />
                             <h3 className="font-bebas-neue text-xl text-black">
-                              Mégatoit
+                              BSR DE TROIS-RIVIÈRES
                             </h3>
                           </div>
                           <p className="font-bebas-neue text-xl text-black mx-3">

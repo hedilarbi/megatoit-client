@@ -8,20 +8,20 @@ import { RiInstagramFill } from "react-icons/ri";
 const Footer = () => {
   return (
     <div>
-      <div className="bg-[#D7D7D7]  md:px-20 px-10 pt-8 pb-20 md:pb-30  ">
+      <div className="bg-black border-t-4 border-brand md:px-20 px-10 pt-8 pb-20 md:pb-30 text-white">
         <div className="md:flex justify-between flex flex-col md:flex-row gap-8">
           <Link href="/">
             <Image src={Logo} alt="Logo" className="h-20 w-auto mb-4" />
           </Link>
 
           <div>
-            <h3 className="font-bebas-neue text-black text-xl  mb-2">
+            <h3 className="font-bebas-neue text-white text-xl mb-2">
               Support
             </h3>
-            <ul className="font-lato text-black">
+            <ul className="font-lato text-gray-300">
               <li className="flex items-center gap-2 mb-2">
-                <IoMdMail />
-                <p>support@lemegatoit.com</p>
+                <IoMdMail className="text-brand" />
+                <p>support@bsr3r.com</p>
               </li>
               {/* <li className="flex items-center gap-2 mb-2">
                 <FaPhone />
@@ -30,37 +30,37 @@ const Footer = () => {
             </ul>
           </div>
           <div>
-            <h3 className="font-bebas-neue text-black text-xl  mb-2">
+            <h3 className="font-bebas-neue text-white text-xl mb-2">
               Suivez-nous
             </h3>
-            <div className="flex gap-4">
+            <div className="flex gap-4 text-white">
               <Link
                 href="https://www.facebook.com/profile.php?id=61574831637274&locale=fr_FR"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <FaFacebook size={24} color="black" />
+                <FaFacebook size={24} className="hover:text-brand transition-colors" />
               </Link>
               <Link
                 href="https://www.facebook.com/profile.php?id=61574831637274&locale=fr_FR"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <RiInstagramFill size={24} color="black" />
+                <RiInstagramFill size={24} className="hover:text-brand transition-colors" />
               </Link>
               <Link
                 href="https://www.facebook.com/profile.php?id=61574831637274&locale=fr_FR"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <FaTiktok size={24} color="black" />
+                <FaTiktok size={24} className="hover:text-brand transition-colors" />
               </Link>
             </div>
           </div>
         </div>
-        <div className="mt-8 border-t pt-4">
-          <p className="font-lato text-black text-center">
-            © {new Date().getFullYear()} Le Mégatoit Hockey. Tous droits
+        <div className="mt-8 border-t border-gray-800 pt-4">
+          <p className="font-lato text-gray-400 text-center">
+            © {new Date().getFullYear()} BSR DE TROIS-RIVIÈRES Hockey. Tous droits
             réservés.
           </p>
         </div>

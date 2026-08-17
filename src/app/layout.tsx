@@ -17,8 +17,8 @@ const bebasNeue = Bebas_Neue({
 });
 
 export const metadata: Metadata = {
-  title: "LE MÉGATOIT HOCKEY",
-  description: "Réservez vos billets pour les matchs de Le Mégatoit Hockey",
+  title: "BSR DE TROIS-RIVIÈRES HOCKEY",
+  description: "Réservez vos billets pour les matchs de BSR DE TROIS-RIVIÈRES Hockey",
 };
 
 export default function RootLayout({

@@ -164,6 +164,17 @@ const MatchContent = ({ id }) => {
         {!loading && match ? (
           (() => {
             const { dayName, date } = formatDate(match.date);
+            const homeTeamFullName =
+              match?.homeTeam?.["full-name"] ||
+              match?.homeTeam?.fullName ||
+              match?.homeTeam?.name ||
+              "BSR DE TROIS-RIVIÈRES";
+            const opponentFullName =
+              match?.opponent?.["full-name"] ||
+              match?.opponent?.fullName ||
+              match?.opponent?.name ||
+              "";
+
             return (
               <div className="py-16 md:px-24 px-4 w-full ">
                 {match.availableSeats <= 0 && (
@@ -173,23 +184,35 @@ const MatchContent = ({ id }) => {
                 )}
 
                 <h1 className="flex md:text-2xl text-lg justify-center md:justify-start font-bold text-gray-800 items-center">
-                  <Image
-                    src={Logo}
-                    alt="logo"
-                    width={64}
-                    height={64}
-                    className="md:h-16 h-12 md:w-16 w-12"
-                  />
-                  <span className="ml-4">Mégatoit</span>
+                  {match?.homeTeam?.imageUrl ? (
+                    <Image
+                      src={match.homeTeam.imageUrl}
+                      alt="logo"
+                      width={64}
+                      height={64}
+                      className="md:h-16 h-12 md:w-16 w-12"
+                    />
+                  ) : (
+                    <Image
+                      src={Logo}
+                      alt="logo"
+                      width={64}
+                      height={64}
+                      className="md:h-16 h-12 md:w-16 w-12"
+                    />
+                  )}
+                  <span className="ml-4">{homeTeamFullName}</span>
                   <span className="mx-4 font-bold ">VS</span>
-                  <span className="mr-4">{match.opponent.name}</span>
-                  <Image
-                    src={match.opponent.imageUrl}
-                    alt="logo"
-                    width={64}
-                    height={64}
-                    className="md:h-16 h-12 md:w-16 w-12"
-                  />
+                  <span className="mr-4">{opponentFullName}</span>
+                  {match?.opponent?.imageUrl && (
+                    <Image
+                      src={match.opponent.imageUrl}
+                      alt="logo"
+                      width={64}
+                      height={64}
+                      className="md:h-16 h-12 md:w-16 w-12"
+                    />
+                  )}
                 </h1>
 
                 <div className="mt-8">
@@ -218,8 +241,8 @@ const MatchContent = ({ id }) => {
 
                   <div className="md:w-1/2 w-full bg-[#D9D9D9] p-3 rounded-md mt-4">
                     <p className="text-black md:text-lg text-base font-lato">
-                      Ne manquez pas ce match explosif entre Le Mégatoit et{" "}
-                      {match.opponent.name} ! Vivez l&apos;intensité du hockey
+                      Ne manquez pas ce match explosif entre {homeTeamFullName} et{" "}
+                      {opponentFullName} ! Vivez l&apos;intensité du hockey
                       LHSAAAQ en direct au {match.place} !
                     </p>
                   </div>
@@ -234,7 +257,7 @@ const MatchContent = ({ id }) => {
                     <div className="flex justify-between flex-col md:flex-row gap-4 items-start ">
                       <div>
                         <h3 className="font-bebas-neue text-2xl">
-                          Mégatoit vs {match.opponent.name}
+                          {homeTeamFullName} vs {opponentFullName}
                         </h3>
                         <p className="text-[#2E2E2E] font-lato text-lg mt-2 font-semibold">
                           ${match.price.toFixed(2)} par billet

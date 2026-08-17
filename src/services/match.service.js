@@ -55,7 +55,11 @@ export const getAllMatchsList = async () => {
 export const getMatchByUid = async (uid) => {
   try {
     const matchDoc = await getDoc(doc(db, "matchs", uid));
-
+    // BUG FIX #3: was missing .exists() check — returned { success: true, data: undefined }
+    // which caused downstream crashes reading .availableSeats, .price, .date on undefined.
+    if (!matchDoc.exists()) {
+      return { success: false, error: "Match introuvable" };
+    }
     return { success: true, data: matchDoc.data() };
   } catch (error) {
     console.error("Erreur lors de la récupération du match par UID :", error);

@@ -17,7 +17,7 @@ const RemboursementPage = () => {
             1. Billets non remboursables
           </h2>
           <p>
-            Tous les billets vendus pour les matchs de <strong>Megatoit</strong>{" "}
+            Tous les billets vendus pour les matchs de <strong>BSR DE TROIS-RIVIÈRES</strong>{" "}
             à Trois-Rivières sont <strong>non remboursables</strong> et{" "}
             <strong>non échangeables</strong>, sauf cas spécifiques mentionnés
             ci-dessous.
@@ -62,7 +62,7 @@ const RemboursementPage = () => {
           </p>
           <ul className="list-disc list-inside mt-2">
             <li>
-              📧 <strong>support@lemegatoit.com</strong>
+              📧 <strong>support@bsr3r.com</strong>
             </li>
             <li>
               📞 <strong>1 (819) 123-4567</strong>
@@ -97,7 +97,7 @@ const RemboursementPage = () => {
             <li>
               📍 1740 Av. Gilles-Villeneuve, Trois-Rivières, QC G8Y 7B6, Canada
             </li>
-            <li>📧 support@lemegatoit.com</li>
+            <li>📧 support@bsr3r.com</li>
             <li>📞 1 (819) 123-4567</li>
           </ul>
         </div>

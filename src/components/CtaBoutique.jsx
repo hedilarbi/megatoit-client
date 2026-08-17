@@ -3,7 +3,7 @@ import React from "react";
 
 const CtaBoutique = () => {
   return (
-    <section className="w-[95%] mx-auto p-8 bg-black rounded-md flex md:flex-row flex-col gap-8 justify-between items-center  ">
+    <section className="w-[95%] mx-auto p-8 bg-black border-l-4 border-brand rounded-md flex md:flex-row flex-col gap-8 justify-between items-center">
       <div>
         <h2 className="text-white font-bebas-neue text-2xl text-center md:text-left">
           Montre tes couleurs, vis la passion !
@@ -16,7 +16,7 @@ const CtaBoutique = () => {
       <Link
         href="https://megatoit.atelierqg.com/"
         target="_blank"
-        className="bg-white rounded-md text-black px-12 py-2  font-bebas-neue text-lg text-center"
+        className="bg-brand hover:bg-brand-dark transition-colors rounded-md text-black px-12 py-2 font-bebas-neue text-lg text-center"
       >
         Aller à la boutique
       </Link>
