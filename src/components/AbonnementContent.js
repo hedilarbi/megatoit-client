@@ -46,7 +46,7 @@ const AbonnementContent = () => {
       {showAuthRequiredModal && (
         <AuthRequiredModal setShowModal={setShowAuthRequiredModal} />
       )}
-      <h2 className="font-bebas-neue text-3xl text-center">Nos abonnements</h2>
+
       {isLoading ? (
         <div className="h-screen w-screen flex justify-center items-center">
           <Spinner />
@@ -86,7 +86,7 @@ const AbonnementContent = () => {
                     </div>
                     {isPreSale && (
                       <span className="inline-block mt-1 text-xs font-semibold uppercase tracking-wider text-green-700 bg-green-100 px-2 py-0.5 rounded">
-                        Prix prévente réduit jusqu&apos;au 6 septembre 2026
+                        Offre valable jusqu&apos;au 6 septembre 2026
                       </span>
                     )}
                   </div>

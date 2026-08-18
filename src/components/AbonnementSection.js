@@ -41,13 +41,13 @@ const AbonnementSection = () => {
       {/* Decorative neon glow blob */}
       <div className="absolute -top-[20%] -right-[10%] w-[50%] h-[50%] bg-brand/20 blur-[120px] rounded-full pointer-events-none z-0"></div>
 
-      <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-12">
+      <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between md:gap-12 gap-0">
 
         {/* Left Column - Copy & CTA */}
         <div className="flex-1 text-left">
-          <h2 className="font-bebas-neue text-5xl md:text-7xl text-white leading-none mb-4 uppercase">
-            Vivez la <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand to-[#a3ff78]">saison {abonnement?.season || "2026-27"}</span>
-            <br />AU CŒUR DE L’ACTION
+          <h2 className="font-bebas-neue text-4xl md:text-7xl text-white leading-none mb-4 uppercase">
+            Saison <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand to-[#a3ff78]">2026-27</span>
+            <br />SOYEZ AU CŒUR DE L’ACTION
           </h2>
 
           <p className="font-lato text-gray-300 text-lg md:text-lg max-w-xl mb-8 leading-relaxed">
@@ -73,7 +73,7 @@ const AbonnementSection = () => {
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-brand to-transparent opacity-70"></div>
 
             <div className="text-center mb-8">
-              <h3 className="font-lato text-white uppercase tracking-widest text-sm font-bold mb-2">Passe de saison</h3>
+              <h3 className="font-lato text-white uppercase tracking-widest text-sm font-bold mb-2">Billet de saison</h3>
               <div className="flex items-center justify-center gap-3">
                 <h4 className="text-white text-6xl font-bold font-bebas-neue tracking-tight">
                   ${effectivePrice}
@@ -103,7 +103,7 @@ const AbonnementSection = () => {
                 </div>
                 <div>
                   <p className="font-lato text-white font-medium">13 matchs de saison régulière</p>
-                  <p className="font-lato text-gray-400 text-sm">Place garantie à chaque rencontre.</p>
+                  <p className="font-lato text-gray-400 text-sm">Possibilité de réserver votre siège pour chaque match.</p>
                 </div>
               </div>
 
@@ -113,7 +113,7 @@ const AbonnementSection = () => {
                 </div>
                 <div>
                   <p className="font-lato text-white font-medium">1 match présaison</p>
-                  <p className="font-lato text-gray-400 text-sm">Découvrez l&apos;équipe en avant-première.</p>
+
                 </div>
               </div>
             </div>
