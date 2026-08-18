@@ -21,7 +21,7 @@ const Footer = () => {
             <ul className="font-lato text-gray-300">
               <li className="flex items-center gap-2 mb-2">
                 <IoMdMail className="text-brand" />
-                <p>support@bsr3r.com</p>
+                <p>info@bsr3r.com</p>
               </li>
               {/* <li className="flex items-center gap-2 mb-2">
                 <FaPhone />

@@ -9,7 +9,7 @@ const AbonnementsBanner = () => {
         </h1>
         <p className="text-white text-center  font-lato md:text-lg text-base mt-4 font-semibold w-[90%] mx-auto">
           Ne ratez pas l’intensité – Procurez-vous votre abonnement de saison
-          2025-26 dès aujourd’hui !
+          2026-27 dès aujourd’hui !
         </p>
       </div>
     </section>

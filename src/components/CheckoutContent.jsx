@@ -33,6 +33,8 @@ const formatDate = (timestamp) => {
   return { dayName, date: str };
 };
 
+import { getEffectiveSubscriptionPrice } from "@/utils/subscriptionUtils";
+
 const CheckoutContent = ({ matchId, quantity: rawQuantity, abonnementId }) => {
   // BUG FIX: parse quantity to number — URL params are strings, and "0" is truthy
   const quantity = rawQuantity ? parseInt(rawQuantity, 10) : null;
@@ -93,7 +95,7 @@ const CheckoutContent = ({ matchId, quantity: rawQuantity, abonnementId }) => {
             setTaxes(TaxesList);
             setTotal(
               quantity * m.price +
-                TaxesList.reduce((acc, tax) => acc + tax.value, 0)
+              TaxesList.reduce((acc, tax) => acc + tax.value, 0)
             );
           }
         } else {
@@ -115,15 +117,16 @@ const CheckoutContent = ({ matchId, quantity: rawQuantity, abonnementId }) => {
         if (abonnementResponse.success) {
           const a = abonnementResponse.data;
           setAbonnement(a);
+          const effectiveSubPrice = getEffectiveSubscriptionPrice(a);
 
           if (taxesResponse.success && taxesResponse.data) {
             const TaxesList = taxesResponse.data.map((tax) => ({
               name: tax.nom,
               percentage: tax.valeur,
-              value: (a.price * tax.valeur) / 100,
+              value: (effectiveSubPrice * tax.valeur) / 100,
             }));
             setTaxes(TaxesList);
-            setTotal(a.price + TaxesList.reduce((acc, t) => acc + t.value, 0));
+            setTotal(effectiveSubPrice + TaxesList.reduce((acc, t) => acc + t.value, 0));
           }
         } else {
           setError("Abonnement introuvable");
@@ -153,6 +156,32 @@ const CheckoutContent = ({ matchId, quantity: rawQuantity, abonnementId }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [matchId, abonnementId, user]);
 
+  const resetCode = () => {
+    setCodeData(null);
+    setCodeIsValid(true);
+    setCodeError(null);
+
+    if (abonnement) {
+      const subtotal = getEffectiveSubscriptionPrice(abonnement);
+      const newTaxes = taxes.map((tax) => ({
+        ...tax,
+        value: (subtotal * tax.percentage) / 100,
+      }));
+      setTaxes(newTaxes);
+      setTotal(subtotal + newTaxes.reduce((acc, tax) => acc + tax.value, 0));
+    }
+
+    if (match) {
+      const subtotal = match.price * quantity;
+      const newTaxes = taxes.map((tax) => ({
+        ...tax,
+        value: (subtotal * tax.percentage) / 100,
+      }));
+      setTaxes(newTaxes);
+      setTotal(subtotal + newTaxes.reduce((acc, tax) => acc + tax.value, 0));
+    }
+  };
+
   const verifyCode = async () => {
     setCodeError(null);
     try {
@@ -163,11 +192,12 @@ const CheckoutContent = ({ matchId, quantity: rawQuantity, abonnementId }) => {
         setCodeData(response.data);
 
         if (abonnement) {
-          let newSubtotal = abonnement.price;
+          const baseSubPrice = getEffectiveSubscriptionPrice(abonnement);
+          let newSubtotal = baseSubPrice;
           if (response.data.type === "percent") {
-            newSubtotal = abonnement.price * (1 - response.data.percent / 100);
+            newSubtotal = baseSubPrice * (1 - response.data.percent / 100);
           } else if (response.data.type === "amount") {
-            newSubtotal = Math.max(0, abonnement.price - response.data.amount);
+            newSubtotal = Math.max(0, baseSubPrice - response.data.amount);
           }
           const newTaxes = taxes.map((tax) => ({
             ...tax,
@@ -212,29 +242,7 @@ const CheckoutContent = ({ matchId, quantity: rawQuantity, abonnementId }) => {
 
   const removeCode = () => {
     setCode("");
-    setCodeData(null);
-    setCodeIsValid(true);
-    setCodeError(null);
-
-    if (abonnement) {
-      const subtotal = abonnement.price;
-      const newTaxes = taxes.map((tax) => ({
-        ...tax,
-        value: (subtotal * tax.percentage) / 100,
-      }));
-      setTaxes(newTaxes);
-      setTotal(subtotal + newTaxes.reduce((acc, tax) => acc + tax.value, 0));
-    }
-
-    if (match) {
-      const subtotal = match.price * quantity;
-      const newTaxes = taxes.map((tax) => ({
-        ...tax,
-        value: (subtotal * tax.percentage) / 100,
-      }));
-      setTaxes(newTaxes);
-      setTotal(subtotal + newTaxes.reduce((acc, tax) => acc + tax.value, 0));
-    }
+    resetCode();
   };
 
   const processOrder = async () => {
@@ -250,7 +258,7 @@ const CheckoutContent = ({ matchId, quantity: rawQuantity, abonnementId }) => {
           quantity: match ? quantity : null,
           ticketPrice: match ? match.price : null,
           abonnementId: abonnement ? abonnementId : null,
-          abonnementPrice: abonnement ? abonnement.price : null,
+          abonnementPrice: abonnement ? getEffectiveSubscriptionPrice(abonnement) : null,
           amount: total,
           promoCodeId: codeData ? codeData.id : null,
         },
@@ -298,11 +306,24 @@ const CheckoutContent = ({ matchId, quantity: rawQuantity, abonnementId }) => {
       {match && (
         <div>
           {(() => {
-            const homeTeamName = match?.homeTeam?.name || "BSR DE TROIS-RIVIÈRES";
-            const opponentName = match?.opponent?.name || "";
+            const isHome = match?.type === "Domicile";
 
-            const homeTeamImageUrl = match?.homeTeam?.imageUrl || Logo;
-            const opponentImageUrl = match?.opponent?.imageUrl;
+            const homeTeamName = match?.homeTeam?.name || "";
+            const homeTeamImageUrl = match?.homeTeam?.imageUrl || "";
+
+            const opponentName = match?.opponent?.name || "";
+            const opponentImageUrl = match?.opponent?.imageUrl || "";
+
+            const homeTeamFullName = homeTeamName;
+            const opponentFullName = opponentName;
+
+            // Domicile => Opponent on Left, Trois-Rivières on Right
+            // Non Domicile => Trois-Rivières on Left, Opponent on Right
+            const leftTeamName = isHome ? opponentName : homeTeamName;
+            const leftTeamLogo = isHome ? opponentImageUrl : homeTeamImageUrl;
+
+            const rightTeamName = isHome ? homeTeamName : opponentName;
+            const rightTeamLogo = isHome ? homeTeamImageUrl : opponentImageUrl;
 
             return (
               <>
@@ -310,15 +331,17 @@ const CheckoutContent = ({ matchId, quantity: rawQuantity, abonnementId }) => {
                   <div className="flex justify-between items-center w-full my-4">
                     {/* Équipe 1 (Gauche - 50% centré) */}
                     <div className="flex-1 min-w-0 flex items-center justify-center gap-3 text-center">
-                      <Image
-                        src={homeTeamImageUrl}
-                        alt="Logo Équipe 1"
-                        className="md:h-16 h-12 md:w-16 w-12 flex-shrink-0 object-contain"
-                        width={64}
-                        height={64}
-                      />
+                      {leftTeamLogo && (
+                        <Image
+                          src={leftTeamLogo}
+                          alt="Logo Équipe Gauche"
+                          className="md:h-16 h-12 md:w-16 w-12 flex-shrink-0 object-contain"
+                          width={64}
+                          height={64}
+                        />
+                      )}
                       <h1 className="font-bebas-neue md:text-3xl text-xl text-gray-800 line-clamp-2 break-words leading-tight text-center uppercase">
-                        {homeTeamName}
+                        {leftTeamName}
                       </h1>
                     </div>
 
@@ -330,12 +353,12 @@ const CheckoutContent = ({ matchId, quantity: rawQuantity, abonnementId }) => {
                     {/* Équipe 2 (Droite - 50% centré) */}
                     <div className="flex-1 min-w-0 flex items-center justify-center gap-3 text-center">
                       <h1 className="font-bebas-neue md:text-3xl text-xl text-gray-800 line-clamp-2 break-words leading-tight text-center uppercase">
-                        {opponentName}
+                        {rightTeamName}
                       </h1>
-                      {opponentImageUrl && (
+                      {rightTeamLogo && (
                         <Image
-                          src={opponentImageUrl}
-                          alt="Logo Équipe 2"
+                          src={rightTeamLogo}
+                          alt="Logo Équipe Droite"
                           className="md:h-16 h-12 md:w-16 w-12 flex-shrink-0 object-contain"
                           width={64}
                           height={64}
@@ -379,7 +402,7 @@ const CheckoutContent = ({ matchId, quantity: rawQuantity, abonnementId }) => {
                   </h2>
                   <div className="border border-gray-300 rounded-md p-4 mt-4 bg-white flex justify-between">
                     <p className="font-lato text-gray-600 font-semibold uppercase">
-                      {quantity} x billet(s) {homeTeamFullName} vs {opponentFullName}
+                      {quantity} x billet(s) {leftTeamName} vs {rightTeamName}
                     </p>
                     <p className="font-lato text-gray-800 font-semibold">
                       ${match.price.toFixed(2)} x {quantity} = $
@@ -403,9 +426,8 @@ const CheckoutContent = ({ matchId, quantity: rawQuantity, abonnementId }) => {
                   id="promoCode"
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
-                  className={`border border-gray-300 rounded-md p-2 flex-1 focus:outline-none focus:ring-2 focus:ring-black ${
-                    codeIsValid ? "" : "border-red-500"
-                  }`}
+                  className={`border border-gray-300 rounded-md p-2 flex-1 focus:outline-none focus:ring-2 focus:ring-black ${codeIsValid ? "" : "border-red-500"
+                    }`}
                   placeholder="Entrez votre code promo"
                 />
                 {!codeData && (
@@ -502,9 +524,9 @@ const CheckoutContent = ({ matchId, quantity: rawQuantity, abonnementId }) => {
                   <p>
                     {codeData.type === "percent"
                       ? `-$${(
-                          (match.price * quantity * codeData.percent) /
-                          100
-                        ).toFixed(2)}`
+                        (match.price * quantity * codeData.percent) /
+                        100
+                      ).toFixed(2)}`
                       : `-$${parseFloat(codeData.amount).toFixed(2)}`}
                   </p>
                 </div>
@@ -522,9 +544,9 @@ const CheckoutContent = ({ matchId, quantity: rawQuantity, abonnementId }) => {
                 </div>
               ))}
 
-              <div className="flex justify-between w-full font-lato text-base mt-4">
-                <p className="font-semibold uppercase">Total</p>
-                <p className="text-lg font-bold">${total.toFixed(2)}</p>
+              <div className="flex justify-between w-full font-lato text-xl border-t border-gray-300 pt-4 mt-4 text-black">
+                <p className="font-bold uppercase">Total</p>
+                <p className="text-xl font-bold text-black">${total.toFixed(2)}</p>
               </div>
             </div>
           </div>
@@ -585,10 +607,7 @@ const CheckoutContent = ({ matchId, quantity: rawQuantity, abonnementId }) => {
               <p className="font-lato text-black text-base mt-2 uppercase">
                 <FaCheck className="inline text-black mr-2" />1 match présaison
               </p>
-              <p className="font-lato text-black text-base mt-2 uppercase">
-                <FaCheck className="inline text-black mr-2" />1 consommation
-                gratuite par match
-              </p>
+
             </div>
 
             <div className="mt-8">
@@ -614,61 +633,62 @@ const CheckoutContent = ({ matchId, quantity: rawQuantity, abonnementId }) => {
                 1 x Abonnement de saison RÉGULIÈRE ({abonnement.season})
               </p>
               <p className="font-lato text-gray-800 font-semibold">
-                ${abonnement.price.toFixed(2)}
+                ${getEffectiveSubscriptionPrice(abonnement).toFixed(2)}
               </p>
             </div>
           </div>
 
-          <div className="py-10 border-b border-black">
-            <h2 className="md:text-2xl text-lg font-bold text-gray-800 font-bebas-neue">
-              Code Promo (optionnel)
-            </h2>
-            <div className="border border-gray-300 rounded-md p-4 mt-4 bg-white">
-              <div className="flex justify-between gap-4">
-                <input
-                  type="text"
-                  name="promoCode"
-                  id="promoCode"
-                  value={code}
-                  onChange={(e) => setCode(e.target.value)}
-                  className={`border border-gray-300 rounded-md p-2 flex-1 focus:outline-none focus:ring-2 focus:ring-black ${
-                    codeIsValid ? "" : "border-red-500"
-                  }`}
-                  placeholder="Entrez votre code promo"
-                />
-                {!codeData && (
-                  <button
-                    onClick={verifyCode}
-                    className="text-white py-2 px-6 bg-black rounded-md text-xl font-bebas-neue cursor-pointer"
-                  >
-                    Appliquer
-                  </button>
+          {!abonnement && (
+            <div className="py-10 border-b border-black">
+              <h2 className="md:text-2xl text-lg font-bold text-gray-800 font-bebas-neue">
+                Code Promo (optionnel)
+              </h2>
+              <div className="border border-gray-300 rounded-md p-4 mt-4 bg-white">
+                <div className="flex justify-between gap-4">
+                  <input
+                    type="text"
+                    name="promoCode"
+                    id="promoCode"
+                    value={code}
+                    onChange={(e) => setCode(e.target.value)}
+                    className={`border border-gray-300 rounded-md p-2 flex-1 focus:outline-none focus:ring-2 focus:ring-black ${codeIsValid ? "" : "border-red-500"
+                      }`}
+                    placeholder="Entrez votre code promo"
+                  />
+                  {!codeData && (
+                    <button
+                      onClick={verifyCode}
+                      className="text-white py-2 px-6 bg-black rounded-md text-xl font-bebas-neue cursor-pointer"
+                    >
+                      Appliquer
+                    </button>
+                  )}
+                  {codeData && (
+                    <button
+                      onClick={removeCode}
+                      className="text-white py-2 px-6 bg-red-500 rounded-md text-xl font-bebas-neue cursor-pointer"
+                    >
+                      Enlever
+                    </button>
+                  )}
+                </div>
+
+                {codeError && (
+                  <p className="text-red-500 mt-2 font-lato font-semibold">
+                    {codeError}
+                  </p>
                 )}
-                {codeData && (
-                  <button
-                    onClick={removeCode}
-                    className="text-white py-2 px-6 bg-red-500 rounded-md text-xl font-bebas-neue cursor-pointer"
-                  >
-                    Enlever
-                  </button>
+                {codeIsValid && codeData && (
+                  <p className="text-green-500 mt-2 font-lato font-semibold">
+                    Code promo appliqué:{" "}
+                    {codeData.type === "percent"
+                      ? `${codeData.percent}% de réduction`
+                      : `$${codeData.amount} de réduction`}
+                  </p>
                 )}
               </div>
-
-              {codeError && (
-                <p className="text-red-500 mt-2 font-lato font-semibold">
-                  {codeError}
-                </p>
-              )}
-              {codeIsValid && codeData && (
-                <p className="text-green-500 mt-2 font-lato font-semibold">
-                  Code promo appliqué:{" "}
-                  {codeData.type === "percent"
-                    ? `${codeData.percent}% de réduction`
-                    : `$${codeData.amount} de réduction`}
-                </p>
-              )}
             </div>
-          </div>
+          )}
 
           <div className="py-10 border-b border-black">
             <h2 className="md:text-2xl text-lg font-bold text-gray-800 font-bebas-neue">
@@ -721,7 +741,7 @@ const CheckoutContent = ({ matchId, quantity: rawQuantity, abonnementId }) => {
             <div className="border border-gray-300 rounded-md p-4 mt-4 bg-white">
               <div className="flex justify-between w-full font-lato text-base">
                 <p className="font-semibold uppercase">Sous-total</p>
-                <p>${abonnement.price.toFixed(2)}</p>
+                <p>${getEffectiveSubscriptionPrice(abonnement).toFixed(2)}</p>
               </div>
 
               {codeIsValid && codeData && (
@@ -730,9 +750,9 @@ const CheckoutContent = ({ matchId, quantity: rawQuantity, abonnementId }) => {
                   <p>
                     {codeData.type === "percent"
                       ? `-$${(
-                          (abonnement.price * codeData.percent) /
-                          100
-                        ).toFixed(2)}`
+                        (getEffectiveSubscriptionPrice(abonnement) * codeData.percent) /
+                        100
+                      ).toFixed(2)}`
                       : `-$${parseFloat(codeData.amount).toFixed(2)}`}
                   </p>
                 </div>
@@ -750,9 +770,9 @@ const CheckoutContent = ({ matchId, quantity: rawQuantity, abonnementId }) => {
                 </div>
               ))}
 
-              <div className="flex justify-between w-full font-lato text-base mt-4">
-                <p className="font-semibold uppercase">Total</p>
-                <p className="text-lg font-bold">${total.toFixed(2)}</p>
+              <div className="flex justify-between w-full font-lato text-xl border-t border-gray-300 pt-4 mt-4 text-black">
+                <p className="font-bold uppercase">Total</p>
+                <p className="font-bold text-black">${total.toFixed(2)}</p>
               </div>
             </div>
           </div>
@@ -760,9 +780,9 @@ const CheckoutContent = ({ matchId, quantity: rawQuantity, abonnementId }) => {
           {!confirmed && (
             <button
               onClick={() => setConfirmed(true)}
-              className="text-white mt-4 w-full p-5 bg-black rounded-md font-bold text-xl disabled:opacity-50 disabled:animate-pulse font-bebas-neue cursor-pointer"
+              className="text-white mt-4 w-full p-5 bg-black rounded-md font-bold text-xl font-bebas-neue cursor-pointer"
             >
-              Confirmer la commande
+              Procéder au paiement
             </button>
           )}
 
@@ -787,7 +807,7 @@ const CheckoutContent = ({ matchId, quantity: rawQuantity, abonnementId }) => {
                 quantity={quantity}
                 matchId={match ? matchId : ""}
                 abonnementId={abonnementId}
-                abonnementPrice={abonnement ? abonnement.price : 0}
+                abonnementPrice={abonnement ? getEffectiveSubscriptionPrice(abonnement) : 0}
                 ticketPrice={match ? match.price : 0}
                 userName={userData ? userData.userName : ""}
                 email={userData ? userData.email : ""}

@@ -28,8 +28,12 @@ export async function generateAndSendTicketPDF(
     if (tickets.length > 0) {
       match = await getMatchById(tickets[0].matchId);
 
-      const team1Name = match?.homeTeam?.name || "BSR DE TROIS-RIVIÈRES";
-      const team2Name = match?.opponent?.name || "Adversaire";
+      // By default for ticket creation, Opponent on Left (team1), Trois-Rivières on Right (team2)
+      const team1Name = match?.opponent?.name || "Adversaire";
+      const team1ImageUrl = match?.opponent?.imageUrl;
+
+      const team2Name = match?.homeTeam?.name || "BSR DE TROIS-RIVIÈRES";
+      const team2ImageUrl = match?.homeTeam?.imageUrl;
 
       const attachments = [];
       const downloadLinks = [];
@@ -96,8 +100,8 @@ export async function generateAndSendTicketPDF(
         };
 
         // 4) embeds
-        const team1LogoImage = await embedTeamLogo(match?.homeTeam?.imageUrl);
-        const team2LogoImage = await embedTeamLogo(match?.opponent?.imageUrl);
+        const team1LogoImage = await embedTeamLogo(team1ImageUrl);
+        const team2LogoImage = await embedTeamLogo(team2ImageUrl);
         const qrImage = await pdfDoc.embedPng(ticket.qrCodeImage);
 
         // 5) régions et dimensions
@@ -458,7 +462,7 @@ export async function generateAndSendTicketPDF(
         `${tickets.length > 1 ? "Billets" : "Billet"
         } en pièce jointe (PDF).\n` +
         `Émetteur : Billetterie BSR DE TROIS-RIVIÈRES <billets@bsr3r.com>\n` +
-        `Si vous n'êtes pas à l'origine de cet achat, contactez support@bsr3r.com.`;
+        `Si vous n'êtes pas à l'origine de cet achat, contactez info@bsr3r.com.`;
 
       // ton HTML existant:
       const htmlTickets = `
@@ -486,7 +490,7 @@ export async function generateAndSendTicketPDF(
             to: user.email,
           },
           headers: {
-            "List-Unsubscribe": `<mailto:support@bsr3r.com>`,
+            "List-Unsubscribe": `<mailto:info@bsr3r.com>`,
             "X-Entity-Type": "Transactional", // indicatif, certains filtres aiment
           },
           attachments: [
@@ -651,16 +655,7 @@ export async function generateAndSendTicketPDF(
         width: logoDims.width,
         height: logoDims.height,
       });
-      const noteSize = 16;
-      const noteText = "Valide pour (1) consommation gratuite par match";
-      const noteW = fontRegular.widthOfTextAtSize(noteText, noteSize);
-      const noteY = logoY - 90;
-      page.drawText(noteText, {
-        x: (leftWidth - noteW) / 2 + margin,
-        y: noteY,
-        size: noteSize,
-        font: fontRegular,
-      });
+
 
       // 11) Ligne horizontale inférieure
 
@@ -753,7 +748,7 @@ export async function generateAndSendTicketPDF(
             to: user.email,
           },
           headers: {
-            "List-Unsubscribe": `<mailto:support@bsr3r.com>`,
+            "List-Unsubscribe": `<mailto:info@bsr3r.com>`,
             "X-Entity-Type": "Transactional",
           },
           attachments: [

@@ -62,7 +62,7 @@ const RemboursementPage = () => {
           </p>
           <ul className="list-disc list-inside mt-2">
             <li>
-              📧 <strong>support@bsr3r.com</strong>
+              📧 <strong>info@bsr3r.com</strong>
             </li>
             <li>
               📞 <strong>1 (819) 123-4567</strong>
@@ -97,7 +97,7 @@ const RemboursementPage = () => {
             <li>
               📍 1740 Av. Gilles-Villeneuve, Trois-Rivières, QC G8Y 7B6, Canada
             </li>
-            <li>📧 support@bsr3r.com</li>
+            <li>📧 info@bsr3r.com</li>
             <li>📞 1 (819) 123-4567</li>
           </ul>
         </div>

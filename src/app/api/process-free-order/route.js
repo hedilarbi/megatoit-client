@@ -107,12 +107,40 @@ export async function POST(request) {
       });
     }
     if (hasAbonnementPurchase) {
+      let verifiedPrice = abonnementPrice;
+      try {
+        const abonnementDoc = await admin
+          .firestore()
+          .collection("abonements")
+          .doc(String(abonnementId))
+          .get();
+
+        if (abonnementDoc.exists) {
+          const abonnementData = abonnementDoc.data();
+          const SERVER_NOW = new Date();
+          const PRE_SALE_CUTOFF = new Date("2026-09-07T03:59:59.999Z");
+
+          let effectivePrice = Number(abonnementData.price || 0);
+          if (
+            SERVER_NOW <= PRE_SALE_CUTOFF &&
+            abonnementData.reducedPrice !== undefined &&
+            abonnementData.reducedPrice !== null &&
+            Number(abonnementData.reducedPrice) > 0
+          ) {
+            effectivePrice = Number(abonnementData.reducedPrice);
+          }
+          verifiedPrice = effectivePrice;
+        }
+      } catch (e) {
+        console.error("Error verifying abonnement price in process-free-order:", e);
+      }
+
       response = await createTicketAndOrder({
         userId,
         abonnementId,
         paymentIntentId: null,
-        abonnementPrice,
-        amount, // Convert from cents to dollars
+        abonnementPrice: verifiedPrice,
+        amount,
 
         promoCodeId,
       });

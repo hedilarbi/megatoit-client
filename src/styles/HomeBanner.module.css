@@ -7,11 +7,15 @@
   position: relative;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
+  padding-top: 1rem;
 }
 
 @media (max-width: 768px) {
   .heroBanner {
     background-image: url("/HeroBannerPhone.png");
+    background-position: center;
+    height: 75vh;
+    padding-top: 0.8rem;
   }
 }

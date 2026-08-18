@@ -101,19 +101,33 @@ const Profil = () => {
         setError("Aucun utilisateur trouvé.");
       }
       if (ordersResponse) {
-        setOrders(ordersResponse);
-        const totalAbonnements = ordersResponse.reduce((acc, order) => {
+        const sortOrders = (items) => {
+          return [...items].sort((a, b) => {
+            const dateA = toJSDate(a.createdAt)?.getTime() || 0;
+            const dateB = toJSDate(b.createdAt)?.getTime() || 0;
+            return dateB - dateA;
+          });
+        };
+
+        const sortedOrders = sortOrders(ordersResponse);
+        setOrders(sortedOrders);
+
+        const totalAbonnements = sortedOrders.reduce((acc, order) => {
           return acc + (order.abonnementId ? 1 : 0);
         }, 0);
         setAbonnementCount(totalAbonnements);
-        const totalTickets = ordersResponse.reduce((acc, order) => {
+
+        const totalTickets = sortedOrders.reduce((acc, order) => {
           return acc + (order.tickets?.length || 0);
         }, 0);
         setTicketsCount(totalTickets);
-        const tickets = ordersResponse.filter((order) => order.matchId);
 
         if (filterType === "tickets") {
+          const tickets = sortedOrders.filter((order) => order.matchId);
           setContent(tickets);
+        } else if (filterType === "abonnements") {
+          const abonnements = sortedOrders.filter((order) => order.abonnementId);
+          setContent(abonnements);
         }
       } else {
         setOrders([]);
@@ -131,11 +145,23 @@ const Profil = () => {
 
   const handleFilterChange = (type) => {
     setFilterType(type);
+    const sortOrders = (items) => {
+      return [...items].sort((a, b) => {
+        const dateA = toJSDate(a.createdAt)?.getTime() || 0;
+        const dateB = toJSDate(b.createdAt)?.getTime() || 0;
+        return dateB - dateA;
+      });
+    };
+
     if (type === "tickets") {
-      const tickets = orders.filter((order) => order.matchId);
+      const tickets = sortOrders(
+        orders.filter((order) => order.matchId)
+      );
       setContent(tickets);
     } else if (type === "abonnements") {
-      const abonnements = orders.filter((order) => order.abonnementId);
+      const abonnements = sortOrders(
+        orders.filter((order) => order.abonnementId)
+      );
       setContent(abonnements);
     }
   };
@@ -207,14 +233,23 @@ const Profil = () => {
                   content.map((order) => {
                     const matchD = formatDate(order?.match?.date); // <-- QUÉBEC-FIXED
                     const createdD = formatLocalDate(order.createdAt); // <-- local as before
+                    const isHome = order?.match?.type === "Domicile";
+
                     const homeTeamName =
                       order?.match?.homeTeam?.name || "BSR DE TROIS-RIVIÈRES";
                     const homeTeamImageUrl =
-                      order?.match?.homeTeam?.imageUrl || Logo;
-                    const opponentName =
-                      order?.match?.opponent?.name || "";
-                    const opponentImageUrl =
-                      order?.match?.opponent?.imageUrl;
+                      order?.match?.homeTeam?.imageUrl || "/logo-big.jpeg";
+
+                    const opponentName = order?.match?.opponent?.name || "";
+                    const opponentImageUrl = order?.match?.opponent?.imageUrl || "";
+
+                    // Domicile => Opponent on Left, Trois-Rivières on Right
+                    // Non Domicile => Trois-Rivières on Left, Opponent on Right
+                    const leftTeamName = isHome ? opponentName : homeTeamName;
+                    const leftTeamLogo = isHome ? opponentImageUrl : homeTeamImageUrl;
+
+                    const rightTeamName = isHome ? homeTeamName : opponentName;
+                    const rightTeamLogo = isHome ? homeTeamImageUrl : opponentImageUrl;
 
                     return (
                       <div
@@ -224,15 +259,17 @@ const Profil = () => {
                         <div className="flex justify-between items-center w-full">
                           {/* Équipe 1 (Gauche - 50% centré) */}
                           <div className="flex-1 min-w-0 flex items-center justify-center gap-2 text-center">
-                            <Image
-                              src={homeTeamImageUrl}
-                              alt="Logo Equipe 1"
-                              className="h-12 w-12 flex-shrink-0 object-contain"
-                              width={48}
-                              height={48}
-                            />
+                            {leftTeamLogo && (
+                              <Image
+                                src={leftTeamLogo}
+                                alt="Logo Equipe Gauche"
+                                className="h-12 w-12 flex-shrink-0 object-contain"
+                                width={48}
+                                height={48}
+                              />
+                            )}
                             <h3 className="font-bebas-neue text-lg md:text-xl text-black line-clamp-2 break-words leading-tight text-center">
-                              {homeTeamName}
+                              {leftTeamName}
                             </h3>
                           </div>
 
@@ -244,12 +281,12 @@ const Profil = () => {
                           {/* Équipe 2 (Droite - 50% centré) */}
                           <div className="flex-1 min-w-0 flex items-center justify-center gap-2 text-center">
                             <h3 className="font-bebas-neue text-lg md:text-xl text-black line-clamp-2 break-words leading-tight text-center">
-                              {opponentName}
+                              {rightTeamName}
                             </h3>
-                            {opponentImageUrl && (
+                            {rightTeamLogo && (
                               <Image
-                                src={opponentImageUrl}
-                                alt="Logo Equipe 2"
+                                src={rightTeamLogo}
+                                alt="Logo Equipe Droite"
                                 className="h-12 w-12 flex-shrink-0 object-contain"
                                 width={48}
                                 height={48}

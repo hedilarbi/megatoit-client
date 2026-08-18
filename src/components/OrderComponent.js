@@ -113,10 +113,23 @@ const OrderComponent = ({ id }) => {
     );
   }
 
-  const homeTeamName = order?.match?.homeTeam?.name || "BSR DE TROIS-RIVIÈRES";
-  const homeTeamImageUrl = order?.match?.homeTeam?.imageUrl || Logo;
+  const isHome = order?.match?.type === "Domicile";
+
+  const homeTeamName =
+    order?.match?.homeTeam?.name || "BSR DE TROIS-RIVIÈRES";
+  const homeTeamImageUrl =
+    order?.match?.homeTeam?.imageUrl || "/logo-big.jpeg";
+
   const opponentName = order?.match?.opponent?.name || "";
-  const opponentImageUrl = order?.match?.opponent?.imageUrl;
+  const opponentImageUrl = order?.match?.opponent?.imageUrl || "";
+
+  // Domicile => Opponent on Left, Trois-Rivières on Right
+  // Non Domicile => Trois-Rivières on Left, Opponent on Right
+  const leftTeamName = isHome ? opponentName : homeTeamName;
+  const leftTeamLogo = isHome ? opponentImageUrl : homeTeamImageUrl;
+
+  const rightTeamName = isHome ? homeTeamName : opponentName;
+  const rightTeamLogo = isHome ? homeTeamImageUrl : opponentImageUrl;
 
   return (
     <div className="bg-[#F7F7F7] font-lato ">
@@ -132,26 +145,28 @@ const OrderComponent = ({ id }) => {
           <div className="flex justify-center w-full px-4">
             <div className="flex justify-between items-center w-full max-w-xl">
               <div className="flex-1 min-w-0 flex items-center justify-center gap-2 text-center">
-                <Image
-                  src={homeTeamImageUrl}
-                  alt="Logo Equipe 1"
-                  className="h-16 w-20 flex-shrink-0 object-contain"
-                  width={80}
-                  height={64}
-                />
+                {leftTeamLogo && (
+                  <Image
+                    src={leftTeamLogo}
+                    alt="Logo Equipe Gauche"
+                    className="h-16 w-20 flex-shrink-0 object-contain"
+                    width={80}
+                    height={64}
+                  />
+                )}
                 <h3 className="font-bebas-neue text-xl text-black line-clamp-2 break-words leading-tight text-center">
-                  {homeTeamName}
+                  {leftTeamName}
                 </h3>
               </div>
               <p className="font-bebas-neue text-xl text-black mx-3 flex-shrink-0">VS</p>
               <div className="flex-1 min-w-0 flex items-center justify-center gap-2 text-center">
                 <h3 className="font-bebas-neue text-xl text-black line-clamp-2 break-words leading-tight text-center">
-                  {opponentName}
+                  {rightTeamName}
                 </h3>
-                {opponentImageUrl && (
+                {rightTeamLogo && (
                   <Image
-                    src={opponentImageUrl}
-                    alt="Logo Equipe 2"
+                    src={rightTeamLogo}
+                    alt="Logo Equipe Droite"
                     className="h-16 w-16 flex-shrink-0 object-contain"
                     width={64}
                     height={64}
@@ -164,7 +179,7 @@ const OrderComponent = ({ id }) => {
           <div className="mt-6 px-4 md:px-8">
             <p className="text-base text-gray-600 mt-1 md:text-lg">
               <span className="font-semibold">Match: </span>
-              {homeTeamName} vs {opponentName}
+              {leftTeamName} vs {rightTeamName}
             </p>
 
             {/* --- Match date (Québec-fixed) --- */}

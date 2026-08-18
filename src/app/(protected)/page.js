@@ -27,7 +27,7 @@ export default function Home() {
       <MatchsList />
       {/* <Commenditaires /> */}
       <AbonnementSection />
-      <CtaBoutique />
+      {/* <CtaBoutique /> */}
 
       <FacebookFeed />
     </div>

@@ -1,3 +1,4 @@
+import admin from "@/lib/firebaseAdmin";
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 
@@ -108,6 +109,37 @@ export async function POST(request) {
       );
     }
 
+    // SERVER-SIDE SUBSCRIPTION PRICE VERIFICATION (Anti-Fraud)
+    let verifiedAbonnementPrice = abonnementPrice;
+    if (hasAbonnementPurchase) {
+      try {
+        const abonnementDoc = await admin
+          .firestore()
+          .collection("abonements")
+          .doc(String(abonnementId))
+          .get();
+
+        if (abonnementDoc.exists) {
+          const abonnementData = abonnementDoc.data();
+          const SERVER_NOW = new Date();
+          const PRE_SALE_CUTOFF = new Date("2026-09-07T03:59:59.999Z");
+
+          let effectivePrice = Number(abonnementData.price || 0);
+          if (
+            SERVER_NOW <= PRE_SALE_CUTOFF &&
+            abonnementData.reducedPrice !== undefined &&
+            abonnementData.reducedPrice !== null &&
+            Number(abonnementData.reducedPrice) > 0
+          ) {
+            effectivePrice = Number(abonnementData.reducedPrice);
+          }
+          verifiedAbonnementPrice = effectivePrice;
+        }
+      } catch (err) {
+        console.error("Error verifying abonnement price server-side:", err);
+      }
+    }
+
     const customer = await getOrCreateCustomer(email, userName, userId);
     const idempotencyKey = buildIntentIdempotencyKey({
       checkoutSessionId,
@@ -118,7 +150,7 @@ export async function POST(request) {
       quantity,
       matchId,
       ticketPrice,
-      abonnementPrice,
+      abonnementPrice: verifiedAbonnementPrice,
       abonnementId,
       codeId,
     });
@@ -153,7 +185,7 @@ export async function POST(request) {
       const metadata = {
         userId: String(userId),
         abonnementId: String(abonnementId),
-        abonnementPrice: String(abonnementPrice),
+        abonnementPrice: String(verifiedAbonnementPrice),
       };
       if (codeId) metadata.codeId = String(codeId);
       if (checkoutSessionId) {

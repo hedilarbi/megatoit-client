@@ -140,10 +140,21 @@ const MatchsList = () => {
           <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {matchs.map((match) => {
               const { dayName, date } = formatDate(match.date);
-              const homeTeamName = match?.homeTeam?.name || "BSR DE TROIS-RIVIÈRES";
-              const homeTeamImageUrl = match?.homeTeam?.imageUrl || Logo;
+              const isHome = match?.type === "Domicile";
+
+              const homeTeamName = match?.homeTeam?.name || "";
+              const homeTeamImageUrl = match?.homeTeam?.imageUrl || "";
+
               const opponentName = match?.opponent?.name || "";
-              const opponentImageUrl = match?.opponent?.imageUrl;
+              const opponentImageUrl = match?.opponent?.imageUrl || "";
+
+              // Domicile => Opponent on Left, Trois-Rivières on Right
+              // Non Domicile => Trois-Rivières on Left, Opponent on Right
+              const leftTeamName = isHome ? opponentName : homeTeamName;
+              const leftTeamLogo = isHome ? opponentImageUrl : homeTeamImageUrl;
+
+              const rightTeamName = isHome ? homeTeamName : opponentName;
+              const rightTeamLogo = isHome ? homeTeamImageUrl : opponentImageUrl;
 
               return (
                 <div
@@ -160,15 +171,17 @@ const MatchsList = () => {
                     <div className="flex justify-between items-center w-full">
                       {/* Équipe 1 (Gauche - 50% centré) */}
                       <div className="flex-1 min-w-0 flex items-center justify-center gap-2 text-center">
-                        <Image
-                          src={homeTeamImageUrl}
-                          alt="Logo Équipe 1"
-                          className="h-12 w-12 flex-shrink-0 object-contain"
-                          width={48}
-                          height={48}
-                        />
+                        {leftTeamLogo && (
+                          <Image
+                            src={leftTeamLogo}
+                            alt="Logo Équipe Gauche"
+                            className="h-12 w-12 flex-shrink-0 object-contain"
+                            width={48}
+                            height={48}
+                          />
+                        )}
                         <h3 className="font-bebas-neue text-lg md:text-xl text-black line-clamp-2 break-words leading-tight text-center">
-                          {homeTeamName}
+                          {leftTeamName}
                         </h3>
                       </div>
 
@@ -180,12 +193,12 @@ const MatchsList = () => {
                       {/* Équipe 2 (Droite - 50% centré) */}
                       <div className="flex-1 min-w-0 flex items-center justify-center gap-2 text-center">
                         <h3 className="font-bebas-neue text-lg md:text-xl text-black line-clamp-2 break-words leading-tight text-center">
-                          {opponentName}
+                          {rightTeamName}
                         </h3>
-                        {opponentImageUrl && (
+                        {rightTeamLogo && (
                           <Image
-                            src={opponentImageUrl}
-                            alt="Logo Équipe 2"
+                            src={rightTeamLogo}
+                            alt="Logo Équipe Droite"
                             className="h-12 w-12 flex-shrink-0 object-contain"
                             width={48}
                             height={48}
