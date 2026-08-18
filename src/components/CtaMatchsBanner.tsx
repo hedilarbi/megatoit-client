@@ -16,7 +16,7 @@ const CtaMatchsBanner = () => {
             ABONNEZ-VOUS POUR LA <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand to-[#a3ff78]">SAISON</span>
           </h2>
           <p className="text-gray-300 font-lato text-lg md:text-xl max-w-2xl leading-relaxed">
-            Ne manquez aucune minute de l'action. Accédez à tous les matchs réguliers, profitez d'avantages exclusifs et vivez chaque rencontre intensément.
+            Ne manquez aucune minute de l&apos;action. Accédez à tous les matchs réguliers, profitez d&apos;avantages exclusifs et vivez chaque rencontre intensément.
           </p>
         </div>
         

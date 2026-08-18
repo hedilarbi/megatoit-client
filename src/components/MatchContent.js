@@ -173,8 +173,6 @@ const MatchContent = ({ id }) => {
             const opponentName = match?.opponent?.name || "";
             const opponentImageUrl = match?.opponent?.imageUrl || "";
 
-            const homeTeamFullName = homeTeamName;
-            const opponentFullName = opponentName;
 
             // Domicile => Opponent on Left, Trois-Rivières on Right
             // Non Domicile => Trois-Rivières on Left, Opponent on Right

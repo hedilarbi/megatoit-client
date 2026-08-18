@@ -40,7 +40,7 @@ const FacebookFeed = () => {
   return (
     <section className="mt-12 px-4 md:px-12 lg:px-20">
       <h2 className="font-bebas-neue md:text-6xl text-3xl text-center mb-8 uppercase">
-        AU COEUR DE L'ACTION
+        AU COEUR DE L&apos;ACTION
       </h2>
 
       {isLoading ? (

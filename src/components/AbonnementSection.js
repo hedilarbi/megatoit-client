@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import styles from "@/styles/HomeAbonnementSection.module.css";
-import { FaCheck, FaTicketAlt, FaFire } from "react-icons/fa";
+import { FaCheck, FaTicketAlt } from "react-icons/fa";
 import Link from "next/link";
 import { getAllAbonements } from "@/services/abonement.service";
 import {
@@ -47,11 +47,11 @@ const AbonnementSection = () => {
         <div className="flex-1 text-left">
           <h2 className="font-bebas-neue text-5xl md:text-7xl text-white leading-none mb-4 uppercase">
             Vivez la <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand to-[#a3ff78]">saison {abonnement?.season || "2026-27"}</span>
-            <br />de l'intérieur
+            <br />de l&apos;intérieur
           </h2>
           
           <p className="font-lato text-gray-300 text-lg md:text-xl max-w-xl mb-8 leading-relaxed">
-            Ne manquez aucune minute de l'action. Réservez votre place dès maintenant et profitez d'avantages exclusifs réservés à nos abonnés. L'ambiance n'attend que vous.
+            Ne manquez aucune minute de l&apos;action. Réservez votre place dès maintenant et profitez d&apos;avantages exclusifs réservés à nos abonnés. L&apos;ambiance n&apos;attend que vous.
           </p>
 
           <Link
@@ -89,7 +89,7 @@ const AbonnementSection = () => {
               </div>
               {isPreSale && (
                 <p className="text-sm text-gray-400 font-lato mt-4">
-                  Offre valable jusqu'au <strong className="text-white">6 septembre 2026</strong>.
+                  Offre valable jusqu&apos;au <strong className="text-white">6 septembre 2026</strong>.
                 </p>
               )}
             </div>
@@ -111,7 +111,7 @@ const AbonnementSection = () => {
                 </div>
                 <div>
                   <p className="font-lato text-white font-medium">1 match présaison</p>
-                  <p className="font-lato text-gray-400 text-sm">Découvrez l'équipe en avant-première.</p>
+                  <p className="font-lato text-gray-400 text-sm">Découvrez l&apos;équipe en avant-première.</p>
                 </div>
               </div>
             </div>
