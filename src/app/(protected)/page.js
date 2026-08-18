@@ -4,7 +4,7 @@ import HomeBanner from "@/components/HomeBanner";
 import MatchsList from "@/components/MatchsList";
 
 import FacebookFeed from "@/components/FacebookFeed";
-import CtaBoutique from "@/components/CtaBoutique";
+// import CtaBoutique from "@/components/CtaBoutique";
 import AbonnementSection from "@/components/AbonnementSection";
 export const metadata = {
   title: "Accueil",

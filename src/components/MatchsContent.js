@@ -3,7 +3,7 @@ import { getAllMatchsList } from "@/services/match.service";
 import React, { useEffect, useState } from "react";
 import Spinner from "./spinner/Spinner";
 import Image from "next/image";
-import Logo from "@/assets/logo-small.png";
+// import Logo from "@/assets/logo-small.png";
 import { MdPinDrop } from "react-icons/md";
 import Link from "next/link";
 import { DateTime } from "luxon";

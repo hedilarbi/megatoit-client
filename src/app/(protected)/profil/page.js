@@ -4,7 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import { getUserDocument, getUserOrders } from "@/services/user.service";
 import Image from "next/image";
 import React, { useEffect } from "react";
-import Logo from "@/assets/logo-small.png"; // Adjust the path as necessary
+// import Logo from "@/assets/logo-small.png"; // Adjust the path as necessary
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 

@@ -79,7 +79,7 @@ const SuccessContent = ({ paymentIntentId, orderId }) => {
 
   React.useEffect(() => {
     fetchOrder();
-  }, [paymentIntentId]);
+  }, [paymentIntentId, fetchOrder]);
 
   if (loading) {
     return (

@@ -44,7 +44,7 @@ const CommandeEnCours = ({ paymentIntent }) => {
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [paymentIntent]);
+  }, [paymentIntent, router]);
 
   return (
     <div className="text-center mt-20 flex h-screen w-screen justify-center items-center">

@@ -6,7 +6,7 @@ import AuthRequiredModal from "./AuthRequiredModal";
 import { useAuth } from "@/context/AuthContext";
 
 import Image from "next/image";
-import Logo from "@/assets/logo-small.png";
+// import Logo from "@/assets/logo-small.png";
 import { FaCalendarAlt } from "react-icons/fa";
 import { IoMdPin } from "react-icons/io";
 import { FiMinusCircle } from "react-icons/fi";
@@ -141,7 +141,7 @@ const MatchContent = ({ id }) => {
 
   useEffect(() => {
     fetchMatch();
-  }, [id]);
+  }, [id, fetchMatch]);
 
   const expired = match ? isExpiredAtEndOfDayQuebec(match.date) : false;
 

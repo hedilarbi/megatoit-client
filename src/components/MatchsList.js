@@ -2,7 +2,7 @@
 import { getAllMatches } from "@/services/match.service";
 import React, { useEffect, useState } from "react";
 import Spinner from "@/components/spinner/Spinner";
-import Logo from "@/assets/logo-small.png";
+// import Logo from "@/assets/logo-small.png";
 import Image from "next/image";
 import { MdPinDrop } from "react-icons/md";
 import Link from "next/link";

@@ -519,7 +519,7 @@ export async function generateAndSendTicketPDF(
       const { width, height } = page.getSize();
 
       // 2) fonts
-      const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
+      // const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
       const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
       // 3) données

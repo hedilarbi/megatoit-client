@@ -3,7 +3,7 @@ import { getOrderById } from "@/services/user.service";
 import React, { useEffect } from "react";
 import Spinner from "./spinner/Spinner";
 import Image from "next/image";
-import Logo from "@/assets/logo-small.png"; // Adjust the path as necessary
+// import Logo from "@/assets/logo-small.png"; // Adjust the path as necessary
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { FaArrowLeftLong } from "react-icons/fa6";
