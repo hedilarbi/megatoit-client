@@ -148,13 +148,12 @@ const MatchsList = () => {
               const opponentName = match?.opponent?.name || "";
               const opponentImageUrl = match?.opponent?.imageUrl || "";
 
-              // Domicile => Opponent on Left, Trois-Rivières on Right
-              // Non Domicile => Trois-Rivières on Left, Opponent on Right
-              const leftTeamName = isHome ? opponentName : homeTeamName;
-              const leftTeamLogo = isHome ? opponentImageUrl : homeTeamImageUrl;
+              // Domicile => Trois-Rivières on Right (or vice-versa depending on user preference)
+              const leftTeamName = isHome ? homeTeamName : opponentName;
+              const leftTeamLogo = isHome ? homeTeamImageUrl : opponentImageUrl;
 
-              const rightTeamName = isHome ? homeTeamName : opponentName;
-              const rightTeamLogo = isHome ? homeTeamImageUrl : opponentImageUrl;
+              const rightTeamName = isHome ? opponentName : homeTeamName;
+              const rightTeamLogo = isHome ? opponentImageUrl : homeTeamImageUrl;
 
               return (
                 <div

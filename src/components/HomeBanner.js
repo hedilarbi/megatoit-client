@@ -20,7 +20,7 @@ const HomeBanner = () => {
           />
           <Link
             href="/calendrier"
-            className="inline-flex justify-center items-center border-2 border-brand text-black px-6 py-1.5 sm:px-10 min-w-[200px] sm:min-w-[240px] text-lg rounded-xl bg-brand hover:bg-brand-dark transition-all duration-300 hover:shadow-[0_0_25px_rgba(123,253,72,0.6)] transform hover:-translate-y-0.5"
+            className="inline-flex justify-center items-center border-2 border-brand text-black px-4 py-1 min-w-[140px] sm:min-w-[180px] text-base rounded-lg bg-brand hover:bg-brand-dark transition-all duration-300 hover:shadow-[0_0_20px_rgba(123,253,72,0.6)] transform hover:-translate-y-0.5"
           >
             <span className="font-bebas-neue text-center tracking-wide">
               Billets de match
@@ -47,14 +47,14 @@ const HomeBanner = () => {
 
           {/* Centre : H1 et CTA */}
           <div className="flex flex-col items-center justify-center gap-12 lg:gap-16 px-4">
-            <h1 className="inline-flex items-center bg-black/85 border border-brand/50 px-6 py-3 rounded-2xl shadow-lg backdrop-blur-sm">
-              <span className="font-bebas-neue text-brand tracking-widest text-xl lg:text-2xl xl:text-3xl uppercase text-center leading-tight">
+            <h1 className="inline-flex items-center bg-black/85 border border-brand/50 px-4 py-2 rounded-xl shadow-lg backdrop-blur-sm">
+              <span className="font-bebas-neue text-brand tracking-widest text-base lg:text-xl xl:text-2xl uppercase text-center leading-tight">
                 BSR DE TROIS-RIVIÈRES • BILLETTERIE OFFICIELLE
               </span>
             </h1>
             <Link
               href="/calendrier"
-              className="inline-flex justify-center items-center border-2 border-brand text-black px-12 py-2 min-w-[280px] lg:min-w-[340px] text-2xl lg:text-3xl rounded-xl bg-brand hover:bg-brand-dark transition-all duration-300 hover:shadow-[0_0_40px_rgba(123,253,72,0.8)] transform hover:-translate-y-1"
+              className="inline-flex justify-center items-center border-2 border-brand text-black px-8 py-1.5 min-w-[200px] lg:min-w-[260px] text-lg lg:text-xl rounded-lg bg-brand hover:bg-brand-dark transition-all duration-300 hover:shadow-[0_0_30px_rgba(123,253,72,0.8)] transform hover:-translate-y-1"
             >
               <span className="font-bebas-neue text-center tracking-wide">
                 Billets de match
