@@ -10,7 +10,7 @@ const HomeBanner = () => {
         {/* --- MOBILE LAYOUT --- */}
         <div className="md:hidden relative z-10 w-full h-full flex flex-col items-center justify-evenly pb-4 pt-0 px-4">
           <h1 className="inline-flex items-center bg-black/85 border border-brand/50 px-5 py-2 sm:py-3 rounded-2xl shadow-lg backdrop-blur-sm">
-            <span className="font-bebas-neue text-brand tracking-widest text-sm sm:text-xl uppercase text-center leading-tight">
+            <span className="font-bebas-neue text-brand tracking-widest text-base sm:text-xl uppercase text-center leading-tight">
               BSR DE TROIS-RIVIÈRES • BILLETTERIE OFFICIELLE
             </span>
           </h1>
@@ -57,8 +57,8 @@ const HomeBanner = () => {
 
           {/* Centre : H1 et CTA */}
           <div className="flex flex-col items-center justify-center gap-12 lg:gap-16 px-4">
-            <h1 className="inline-flex items-center bg-black/85 border border-brand/50 px-5 py-2.5 rounded-xl shadow-lg backdrop-blur-sm">
-              <span className="font-bebas-neue text-brand tracking-widest text-lg lg:text-2xl xl:text-3xl uppercase text-center leading-tight">
+            <h1 className="inline-flex items-center bg-black/85 border border-brand/50 px-6 py-3 rounded-xl shadow-lg backdrop-blur-sm">
+              <span className="font-bebas-neue text-brand tracking-widest text-xl lg:text-2xl xl:text-3xl uppercase text-center leading-tight">
                 BSR DE TROIS-RIVIÈRES • BILLETTERIE OFFICIELLE
               </span>
             </h1>
