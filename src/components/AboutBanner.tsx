@@ -6,7 +6,7 @@ const AboutBanner = () => {
     <section className={styles.banner}>
       <div>
         <h1 className="font-bebas-neue md:text-6xl text-3xl text-white text-center">
-          Notre mission
+          L'ESPRIT BSR
         </h1>
       </div>
     </section>

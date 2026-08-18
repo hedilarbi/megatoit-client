@@ -19,7 +19,7 @@ const CtaMatchsBanner = () => {
             Ne manquez aucune minute de l&apos;action. Accédez à tous les matchs réguliers, profitez d&apos;avantages exclusifs et vivez chaque rencontre intensément.
           </p>
         </div>
-        
+
         <Link
           href={"/abonnement-saison"}
           className="shrink-0 flex items-center justify-center gap-3 bg-brand text-black text-xl md:text-2xl px-10 py-5 rounded-xl font-bebas-neue tracking-wider hover:bg-white hover:scale-105 transition-all duration-300 shadow-[0_10px_30px_rgba(123,253,72,0.3)] hover:shadow-[0_10px_40px_rgba(255,255,255,0.4)]"

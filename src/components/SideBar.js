@@ -11,9 +11,8 @@ const SideBar = ({
 }) => {
   return (
     <div
-      className={`${
-        showSidebar ? "" : "translate-x-[100%]"
-      }  w-[70%] bg-white fixed top-0 right-0 border-l border-gray-200 shadow-md h-screen p-4 z-50 transition-width duration-300 ease-in-out font-bebas-neue text-lg`}
+      className={`${showSidebar ? "" : "translate-x-[100%]"
+        }  w-[70%] bg-white fixed top-0 right-0 border-l border-gray-200 shadow-md h-screen p-4 z-50 transition-width duration-300 ease-in-out font-bebas-neue text-lg`}
     >
       <div className="flex justify-end mb-4">
         <button className="text-black " onClick={toggleSidebar}>
@@ -24,26 +23,23 @@ const SideBar = ({
         <Link
           href="/"
           onClick={toggleSidebar}
-          className={`text-black hover:underline  ${
-            pathname === "/" && "underline"
-          } `}
+          className={`text-black hover:underline  ${pathname === "/" && "underline"
+            } `}
         >
           Accueil
         </Link>
         <Link
           href="/calendrier"
-          className={`text-black hover:underline ${
-            pathname === "/calendrier" && "underline"
-          } `}
+          className={`text-black hover:underline ${pathname === "/calendrier" && "underline"
+            } `}
           onClick={toggleSidebar}
         >
           Saison & Billets
         </Link>
         <Link
           href="/abonnement-saison"
-          className={`text-black hover:underline ${
-            pathname === "/abonnement-saison" && "underline"
-          } `}
+          className={`text-black hover:underline ${pathname === "/abonnement-saison" && "underline"
+            } `}
           onClick={toggleSidebar}
         >
           Devenir Membre
@@ -58,28 +54,25 @@ const SideBar = ({
         </Link> */}
         <Link
           href="/partenaires"
-          className={`text-black hover:underline ${
-            pathname === "/partenaires" && "underline"
-          } `}
+          className={`text-black hover:underline ${pathname === "/partenaires" && "underline"
+            } `}
           onClick={toggleSidebar}
         >
-          Fiers Partenaires
+          Nos précieux partenaires
         </Link>
 
         <Link
           href="/notre-mission"
-          className={`text-black hover:underline ${
-            pathname === "/notre-mission" && "underline"
-          } `}
+          className={`text-black hover:underline ${pathname === "/notre-mission" && "underline"
+            } `}
           onClick={toggleSidebar}
         >
           L&apos;Esprit BSR
         </Link>
         <Link
           href="/contact"
-          className={`text-black hover:underline ${
-            pathname === "/contact" && "underline"
-          } `}
+          className={`text-black hover:underline ${pathname === "/contact" && "underline"
+            } `}
           onClick={toggleSidebar}
         >
           Nous Contacter
@@ -90,9 +83,8 @@ const SideBar = ({
         <div className="flex flex-col gap-4 mt-8 border-b pb-8 border-black">
           <Link
             href="/profil"
-            className={`text-black hover:underline ${
-              pathname === "/profil" && "underline"
-            } `}
+            className={`text-black hover:underline ${pathname === "/profil" && "underline"
+              } `}
             onClick={toggleSidebar}
           >
             Profil
@@ -105,18 +97,16 @@ const SideBar = ({
         <div className="flex flex-col gap-4 mt-8 border-b pb-8 border-black">
           <Link
             href="/connexion"
-            className={`text-black hover:underline ${
-              pathname === "/connexion" && "underline"
-            } `}
+            className={`text-black hover:underline ${pathname === "/connexion" && "underline"
+              } `}
             onClick={toggleSidebar}
           >
             Se connecter
           </Link>
           <Link
             href="/inscription"
-            className={`text-black hover:underline ${
-              pathname === "/inscription" && "underline"
-            } `}
+            className={`text-black hover:underline ${pathname === "/inscription" && "underline"
+              } `}
             onClick={toggleSidebar}
           >
             S&apos;inscrire

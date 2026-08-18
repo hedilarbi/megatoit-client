@@ -40,7 +40,8 @@ const FacebookFeed = () => {
   return (
     <section className="mt-12 px-4 md:px-12 lg:px-20">
       <h2 className="font-bebas-neue md:text-6xl text-3xl text-center mb-8 uppercase">
-        AU COEUR DE L&apos;ACTION
+        LES DERNIÈRES NOUVELLES
+
       </h2>
 
       {isLoading ? (
@@ -58,7 +59,7 @@ const FacebookFeed = () => {
                 <div className="relative h-80 sm:h-96 overflow-hidden">
                   <Image
                     src={post.full_picture}
-                    alt="Post image"
+                    alt="Image de la publication"
                     width={600}
                     height={400}
                     unoptimized

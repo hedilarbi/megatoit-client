@@ -41,7 +41,7 @@ const TicketQuantityModal = ({
           Nombre de tickets à acheter
         </h2>
         <p className="mb-6 text-center text-gray-600">
-          Vueillez sélectionner le nombre de tickets que vous souhaitez acheter
+          Veuillez sélectionner le nombre de tickets que vous souhaitez acheter
           pour le match <span className="font-semibold">{match.title}</span> ?
         </p>
 

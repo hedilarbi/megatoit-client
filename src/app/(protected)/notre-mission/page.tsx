@@ -25,7 +25,7 @@ const page = () => {
             l’excellence sportive et le respect se traduisent autant sur la
             glace que dans la communauté. Ensemble, faisons rayonner notre
             équipe et notre région, tout en offrant une vitrine dynamique à ceux
-            qui croient en notre succès. Bonne saison 2025 à tous!
+            qui croient en notre succès. Bonne saison 2026 à tous!
           </p>
         </div>
         <div className="md:w-1/2 w-full">
@@ -37,7 +37,7 @@ const page = () => {
           nos valeurs
         </h2>
         <p className="font-semibold font-lato text-lg mt-4 text-center">
-          ROAD TO THE CUP!
+          EN ROUTE VERS LA COUPE !
         </p>
         <div className="mt-10 flex md:flex-row flex-col md:px-20 justify-center items-center gap-8">
           <div className="flex-1 flex flex-col items-center bg-[#101827] px-4 py-8 rounded-md w-full">
@@ -61,7 +61,7 @@ const page = () => {
               <GiTrophyCup color="black" size={22} />
             </div>
             <h3 className="font-lato font-bold mt-4 text-2xl text-center">
-              Désire de vaincre
+              Désir de vaincre
             </h3>
           </div>
         </div>
@@ -78,14 +78,14 @@ const page = () => {
             <div className="bg-white flex w-30 h-30 rounded-full justify-center items-center">
               <Image
                 src={Avatar}
-                alt="Team Member"
+                alt="Membre de l'équipe"
                 className="w-full h-full rounded-full"
                 width={80}
                 height={80}
               />
             </div>
             <h3 className="font-lato font-bold mt-4 text-2xl text-center">
-              John Doe
+              Jean Dupont
             </h3>
             <h4 className="font-lato font-bold mt-1 text-lg text-center text-gray-500">
               Entraîneur Principal
@@ -99,14 +99,14 @@ const page = () => {
             <div className="bg-white flex w-30 h-30 rounded-full justify-center items-center">
               <Image
                 src={Avatar}
-                alt="Team Member"
+                alt="Membre de l'équipe"
                 className="w-full h-full rounded-full"
                 width={80}
                 height={80}
               />
             </div>
             <h3 className="font-lato font-bold mt-4 text-2xl text-center">
-              John Doe
+              Jean Dupont
             </h3>
             <h4 className="font-lato font-bold mt-1 text-lg text-center text-gray-500">
               Entraîneur Principal
@@ -120,14 +120,14 @@ const page = () => {
             <div className="bg-white flex w-30 h-30 rounded-full justify-center items-center">
               <Image
                 src={Avatar}
-                alt="Team Member"
+                alt="Membre de l'équipe"
                 className="w-full h-full rounded-full"
                 width={80}
                 height={80}
               />
             </div>
             <h3 className="font-lato font-bold mt-4 text-2xl text-center">
-              John Doe
+              Jean Dupont
             </h3>
             <h4 className="font-lato font-bold mt-1 text-lg text-center text-gray-500">
               Entraîneur Principal

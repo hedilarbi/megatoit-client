@@ -48,7 +48,7 @@ const Commenditaires = () => {
   return (
     <div className=" mb-10">
       <div className="carousel-container">
-        <button className="nav left" onClick={prevSlide}>
+        <button className="nav gauche" onClick={prevSlide}>
           <FaChevronLeft />
         </button>
         <div className="carousel-window">
@@ -73,7 +73,7 @@ const Commenditaires = () => {
             ))}
           </div>
         </div>
-        <button className="nav right" onClick={nextSlide}>
+        <button className="nav droite" onClick={nextSlide}>
           <FaChevronRight />
         </button>
 
@@ -115,10 +115,10 @@ const Commenditaires = () => {
             user-select: none;
             z-index: 1;
           }
-          .nav.left {
+          .nav.gauche {
             margin-right: 0.5rem;
           }
-          .nav.right {
+          .nav.droite {
             margin-left: 0.5rem;
           }
         `}</style>

@@ -37,21 +37,23 @@ const AbonnementSection = () => {
     <section className={`${styles.AbonnementSection} overflow-hidden rounded-[2rem] shadow-2xl relative group`}>
       {/* Dark overlay for better readability on the background image */}
       <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/80 to-black/40 z-0"></div>
-      
+
       {/* Decorative neon glow blob */}
       <div className="absolute -top-[20%] -right-[10%] w-[50%] h-[50%] bg-brand/20 blur-[120px] rounded-full pointer-events-none z-0"></div>
 
       <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-12">
-        
+
         {/* Left Column - Copy & CTA */}
         <div className="flex-1 text-left">
           <h2 className="font-bebas-neue text-5xl md:text-7xl text-white leading-none mb-4 uppercase">
             Vivez la <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand to-[#a3ff78]">saison {abonnement?.season || "2026-27"}</span>
-            <br />de l&apos;intérieur
+            <br />AU CŒUR DE L’ACTION
           </h2>
-          
+
           <p className="font-lato text-gray-300 text-lg md:text-xl max-w-xl mb-8 leading-relaxed">
-            Ne manquez aucune minute de l&apos;action. Réservez votre place dès maintenant et profitez d&apos;avantages exclusifs réservés à nos abonnés. L&apos;ambiance n&apos;attend que vous.
+            Réservez votre abonnement  de saison dès maintenant. Profitez d&apos;avantages exclusifs réservés à nos abonnés de saison.
+            <br />
+            Du hockey intense. Une ambiance électrisante. Votre BSR!
           </p>
 
           <Link
@@ -66,7 +68,7 @@ const AbonnementSection = () => {
         {/* Right Column - Pricing Card (Glassmorphism) */}
         <div className="w-full lg:w-[420px] shrink-0">
           <div className="relative bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-[0_8px_32px_rgba(0,0,0,0.5)] hover:border-brand/50 transition-colors duration-500 overflow-hidden">
-            
+
             {/* Top accent line */}
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-brand to-transparent opacity-70"></div>
 
@@ -104,7 +106,7 @@ const AbonnementSection = () => {
                   <p className="font-lato text-gray-400 text-sm">Place garantie à chaque rencontre.</p>
                 </div>
               </div>
-              
+
               <div className="flex items-start gap-4">
                 <div className="mt-1 bg-brand/20 p-1.5 rounded-full">
                   <FaCheck className="text-brand text-sm" />

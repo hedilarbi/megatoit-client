@@ -119,7 +119,7 @@ const CheckoutForm = ({
         return;
       }
     } catch (err) {
-      console.error("Payment error:", err);
+      console.error("Erreur de paiement :", err);
       setError(err.message);
     } finally {
       setLoading(false);

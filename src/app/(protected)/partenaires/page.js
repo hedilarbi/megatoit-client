@@ -21,7 +21,7 @@ const page = () => {
       <section className={styles.banner}>
         <div>
           <h1 className="font-bebas-neue md:text-6xl text-3xl text-white text-center">
-            NOS PARTENAIRES
+            NOS PRÉCIEUX PARTENAIRES
           </h1>
         </div>
       </section>

@@ -92,11 +92,11 @@ const MatchsList = () => {
         setMatchs(visible.slice(0, 3));
       } else {
         setError(response.error);
-        console.error("Error fetching matchs:", response.error);
+        console.error("Erreur lors de la récupération des matchs :", response.error);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
-      console.error("Error fetching matchs:", err);
+      setError(err instanceof Error ? err.message : "Une erreur est survenue");
+      console.error("Erreur lors de la récupération des matchs :", err);
     } finally {
       setLoading(false);
     }

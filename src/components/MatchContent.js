@@ -115,9 +115,9 @@ const MatchContent = ({ id }) => {
     try {
       const response = await getMatchByUid(id);
       if (response.success) setMatch(response.data);
-      else setError("Failed to fetch match data");
+      else setError("Échec de la récupération des données du match");
     } catch (err) {
-      setError(err?.message || "An error occurred");
+      setError(err?.message || "Une erreur est survenue");
     } finally {
       setLoading(false);
     }
@@ -186,7 +186,7 @@ const MatchContent = ({ id }) => {
               <div className="py-16 md:px-24 px-4 w-full ">
                 {match.availableSeats <= 0 && (
                   <p className="text-center text-red-400 font-lato text-lg">
-                    Tickets indisponibles
+                    Billets indisponibles
                   </p>
                 )}
 

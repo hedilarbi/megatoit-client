@@ -19,7 +19,7 @@ const Header = () => {
       setShowSidebar(false); // Close sidebar on logout
       await signOut(auth);
     } catch (error) {
-      console.error("Logout failed:", error);
+      console.error("Échec de la déconnexion :", error);
     }
   };
 
@@ -39,25 +39,22 @@ const Header = () => {
       <div className="hidden md:flex flex-grow justify-center gap-8 font-bebas-neue text-lg">
         <Link
           href="/"
-          className={`text-white hover:text-brand transition-colors ${
-            pathname === "/" && "text-brand underline decoration-2 underline-offset-4"
-          } `}
+          className={`text-white hover:text-brand transition-colors ${pathname === "/" && "text-brand underline decoration-2 underline-offset-4"
+            } `}
         >
           Accueil
         </Link>
         <Link
           href="/calendrier"
-          className={`text-white hover:text-brand transition-colors ${
-            pathname === "/calendrier" && "text-brand underline decoration-2 underline-offset-4"
-          } `}
+          className={`text-white hover:text-brand transition-colors ${pathname === "/calendrier" && "text-brand underline decoration-2 underline-offset-4"
+            } `}
         >
           Saison & Billets
         </Link>
         <Link
           href="/abonnement-saison"
-          className={`text-white hover:text-brand transition-colors ${
-            pathname === "/abonnement-saison" && "text-brand underline decoration-2 underline-offset-4"
-          } `}
+          className={`text-white hover:text-brand transition-colors ${pathname === "/abonnement-saison" && "text-brand underline decoration-2 underline-offset-4"
+            } `}
         >
           Devenir Membre
         </Link>
@@ -70,25 +67,22 @@ const Header = () => {
         </Link> */}
         <Link
           href="/partenaires"
-          className={`text-white hover:text-brand transition-colors ${
-            pathname === "/partenaires" && "text-brand underline decoration-2 underline-offset-4"
-          } `}
+          className={`text-white hover:text-brand transition-colors ${pathname === "/partenaires" && "text-brand underline decoration-2 underline-offset-4"
+            } `}
         >
-          Fiers Partenaires
+          Nos précieux partenaires
         </Link>
         <Link
           href="/notre-mission"
-          className={`text-white hover:text-brand transition-colors ${
-            pathname === "/notre-mission" && "text-brand underline decoration-2 underline-offset-4"
-          } `}
+          className={`text-white hover:text-brand transition-colors ${pathname === "/notre-mission" && "text-brand underline decoration-2 underline-offset-4"
+            } `}
         >
           L&apos;Esprit BSR
         </Link>
         <Link
           href="/contact"
-          className={`text-white hover:text-brand transition-colors ${
-            pathname === "/contact" && "text-brand underline decoration-2 underline-offset-4"
-          } `}
+          className={`text-white hover:text-brand transition-colors ${pathname === "/contact" && "text-brand underline decoration-2 underline-offset-4"
+            } `}
         >
           Nous Contacter
         </Link>
@@ -108,9 +102,8 @@ const Header = () => {
             </button>
             <Link
               href="/profil"
-              className={`text-white hover:text-brand transition-colors ${
-                pathname === "/profil" && "text-brand"
-              } `}
+              className={`text-white hover:text-brand transition-colors ${pathname === "/profil" && "text-brand"
+                } `}
             >
               <FaUserAlt size={24} />
             </Link>
