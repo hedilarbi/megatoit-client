@@ -12,7 +12,7 @@ const CommandeEnCours = ({ paymentIntent }) => {
     let attempts = 0;
 
     const interval = setInterval(async () => {
-      if (attempts >= 5) {
+      if (attempts >= 30) {
         clearInterval(interval);
         // BUG FIX: router.back() left paid users stranded if polling timed out.
         // Redirect to failure page instead so they see instructions and can contact support.
@@ -32,7 +32,7 @@ const CommandeEnCours = ({ paymentIntent }) => {
           clearInterval(interval);
           router.replace(`/commande-reussi?payment_intent=${paymentIntent}`);
         }
-        if (data.success === false && attempts >= 4) {
+        if (data.success === false && attempts >= 29) {
           clearInterval(interval);
           router.replace(`/commande-echoue?payment_intent=${paymentIntent}`);
         }
@@ -44,7 +44,8 @@ const CommandeEnCours = ({ paymentIntent }) => {
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [paymentIntent, router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [paymentIntent]);
 
   return (
     <div className="text-center mt-20 flex h-screen w-screen justify-center items-center">

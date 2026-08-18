@@ -79,7 +79,8 @@ const SuccessContent = ({ paymentIntentId, orderId }) => {
 
   React.useEffect(() => {
     fetchOrder();
-  }, [paymentIntentId, fetchOrder]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [paymentIntentId]);
 
   if (loading) {
     return (

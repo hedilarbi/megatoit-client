@@ -141,7 +141,8 @@ const MatchContent = ({ id }) => {
 
   useEffect(() => {
     fetchMatch();
-  }, [id, fetchMatch]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
   const expired = match ? isExpiredAtEndOfDayQuebec(match.date) : false;
 
