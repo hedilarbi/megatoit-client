@@ -123,8 +123,8 @@ const MatchsList = () => {
 
   return (
     <section className="md:px-8 px-4 w-full py-12">
-      <h2 className="font-bebas-neue md:text-4xl text-2xl text-center">
-        MATCH À VENIR
+      <h2 className="font-bebas-neue md:text-6xl text-3xl text-center">
+        PROCHAINES RENCONTRES
       </h2>
 
       {loading ? (
@@ -148,12 +148,13 @@ const MatchsList = () => {
               const opponentName = match?.opponent?.name || "";
               const opponentImageUrl = match?.opponent?.imageUrl || "";
 
-              // Domicile => Trois-Rivières on Right (or vice-versa depending on user preference)
-              const leftTeamName = isHome ? homeTeamName : opponentName;
-              const leftTeamLogo = isHome ? homeTeamImageUrl : opponentImageUrl;
+              // Domicile => Opponent on Left, Trois-Rivières on Right
+              // Non Domicile => Trois-Rivières on Left, Opponent on Right
+              const leftTeamName = isHome ? opponentName : homeTeamName;
+              const leftTeamLogo = isHome ? opponentImageUrl : homeTeamImageUrl;
 
-              const rightTeamName = isHome ? opponentName : homeTeamName;
-              const rightTeamLogo = isHome ? opponentImageUrl : homeTeamImageUrl;
+              const rightTeamName = isHome ? homeTeamName : opponentName;
+              const rightTeamLogo = isHome ? homeTeamImageUrl : opponentImageUrl;
 
               return (
                 <div
@@ -161,7 +162,7 @@ const MatchsList = () => {
                   className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 pb-6 overflow-hidden"
                 >
                   <div className="bg-black border-b-4 border-brand py-4 rounded-t-md">
-                    <p className="font-lato text-center text-white font-semibold capitalize">
+                    <p className="font-lato text-center text-white font-semibold capitalize text-lg md:text-xl">
                       {dayName}, {date} {/* Always Québec time */}
                     </p>
                   </div>
@@ -238,10 +239,10 @@ const MatchsList = () => {
             })}
           </div>
 
-          <div className="flex justify-center mt-8">
+          <div className="flex justify-center mt-12">
             <Link
               href={"/calendrier"}
-              className="text-center font-bebas-neue text-xl py-3 px-12 text-black border-black border rounded-md hover:bg-brand transition-colors"
+              className="inline-flex justify-center items-center bg-brand text-black font-bebas-neue text-2xl py-4 px-12 rounded-xl hover:scale-105 hover:shadow-[0_10px_20px_rgba(123,253,72,0.3)] transition-all duration-300 w-full sm:w-auto"
             >
               <span>Voir le calendrier complet</span>
             </Link>

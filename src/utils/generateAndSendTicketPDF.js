@@ -28,12 +28,13 @@ export async function generateAndSendTicketPDF(
     if (tickets.length > 0) {
       match = await getMatchById(tickets[0].matchId);
 
-      // By default for ticket creation, Opponent on Left (team1), Trois-Rivières on Right (team2)
-      const team1Name = match?.opponent?.name || "Adversaire";
-      const team1ImageUrl = match?.opponent?.imageUrl;
+      const isHome = match?.type === "Domicile";
+      
+      const team1Name = isHome ? (match?.opponent?.name || "Adversaire") : (match?.homeTeam?.name || "BSR DE TROIS-RIVIÈRES");
+      const team1ImageUrl = isHome ? match?.opponent?.imageUrl : match?.homeTeam?.imageUrl;
 
-      const team2Name = match?.homeTeam?.name || "BSR DE TROIS-RIVIÈRES";
-      const team2ImageUrl = match?.homeTeam?.imageUrl;
+      const team2Name = isHome ? (match?.homeTeam?.name || "BSR DE TROIS-RIVIÈRES") : (match?.opponent?.name || "Adversaire");
+      const team2ImageUrl = isHome ? match?.homeTeam?.imageUrl : match?.opponent?.imageUrl;
 
       const attachments = [];
       const downloadLinks = [];

@@ -57,14 +57,14 @@ const HomeBanner = () => {
 
           {/* Centre : H1 et CTA */}
           <div className="flex flex-col items-center justify-center gap-12 lg:gap-16 px-4">
-            <h1 className="inline-flex items-center bg-black/85 border border-brand/50 px-4 py-2 rounded-xl shadow-lg backdrop-blur-sm">
-              <span className="font-bebas-neue text-brand tracking-widest text-base lg:text-xl xl:text-2xl uppercase text-center leading-tight">
+            <h1 className="inline-flex items-center bg-black/85 border border-brand/50 px-5 py-2.5 rounded-xl shadow-lg backdrop-blur-sm">
+              <span className="font-bebas-neue text-brand tracking-widest text-lg lg:text-2xl xl:text-3xl uppercase text-center leading-tight">
                 BSR DE TROIS-RIVIÈRES • BILLETTERIE OFFICIELLE
               </span>
             </h1>
             <Link
               href="/calendrier"
-              className="inline-flex justify-center items-center border-2 border-brand text-black px-8 py-1.5 min-w-[200px] lg:min-w-[260px] text-lg lg:text-xl rounded-lg bg-brand hover:bg-brand-dark transition-all duration-300 hover:shadow-[0_0_30px_rgba(123,253,72,0.8)] transform hover:-translate-y-1"
+              className="inline-flex justify-center items-center border-2 border-brand text-black px-8 py-2 min-w-[200px] lg:min-w-[280px] text-xl lg:text-2xl rounded-xl bg-brand hover:bg-brand-dark transition-all duration-300 hover:shadow-[0_0_30px_rgba(123,253,72,0.8)] transform hover:-translate-y-1"
             >
               <span className="font-bebas-neue text-center tracking-wide">
                 Billets de match

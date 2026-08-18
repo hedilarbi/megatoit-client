@@ -176,12 +176,13 @@ const MatchContent = ({ id }) => {
             const homeTeamFullName = homeTeamName;
             const opponentFullName = opponentName;
 
-            // Domicile => Trois-Rivières on Right (or vice-versa depending on user preference)
-            const leftTeamName = isHome ? homeTeamName : opponentName;
-            const leftTeamLogo = isHome ? homeTeamImageUrl : opponentImageUrl;
+            // Domicile => Opponent on Left, Trois-Rivières on Right
+            // Non Domicile => Trois-Rivières on Left, Opponent on Right
+            const leftTeamName = isHome ? opponentName : homeTeamName;
+            const leftTeamLogo = isHome ? opponentImageUrl : homeTeamImageUrl;
 
-            const rightTeamName = isHome ? opponentName : homeTeamName;
-            const rightTeamLogo = isHome ? opponentImageUrl : homeTeamImageUrl;
+            const rightTeamName = isHome ? homeTeamName : opponentName;
+            const rightTeamLogo = isHome ? homeTeamImageUrl : opponentImageUrl;
 
             return (
               <div className="py-16 md:px-24 px-4 w-full ">
@@ -256,8 +257,8 @@ const MatchContent = ({ id }) => {
 
                   <div className="md:w-1/2 w-full bg-[#D9D9D9] p-3 rounded-md mt-4">
                     <p className="text-black md:text-lg text-base font-lato">
-                      Ne manquez pas ce match explosif entre {homeTeamFullName} et{" "}
-                      {opponentFullName} ! Vivez l&apos;intensité du hockey
+                      Ne manquez pas ce match explosif entre {leftTeamName} et{" "}
+                      {rightTeamName} ! Vivez l&apos;intensité du hockey
                       LHSAAAQ en direct au {match.place} !
                     </p>
                   </div>
@@ -272,7 +273,7 @@ const MatchContent = ({ id }) => {
                     <div className="flex justify-between flex-col md:flex-row gap-4 items-start ">
                       <div>
                         <h3 className="font-bebas-neue text-2xl">
-                          {homeTeamFullName} vs {opponentFullName}
+                          {leftTeamName} vs {rightTeamName}
                         </h3>
                         <p className="text-[#2E2E2E] font-lato text-lg mt-2 font-semibold">
                           ${match.price.toFixed(2)} par billet

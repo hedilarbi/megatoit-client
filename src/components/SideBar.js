@@ -37,16 +37,25 @@ const SideBar = ({
           } `}
           onClick={toggleSidebar}
         >
-          Calendrier
+          Saison & Billets
         </Link>
         <Link
+          href="/abonnement-saison"
+          className={`text-black hover:underline ${
+            pathname === "/abonnement-saison" && "underline"
+          } `}
+          onClick={toggleSidebar}
+        >
+          Devenir Membre
+        </Link>
+        {/* <Link
           href="https://megatoit.atelierqg.com/"
           target="_blank"
           className={`text-black hover:underline  `}
           onClick={toggleSidebar}
         >
-          Boutique en ligne
-        </Link>
+          Boutique Officielle
+        </Link> */}
         <Link
           href="/partenaires"
           className={`text-black hover:underline ${
@@ -54,7 +63,7 @@ const SideBar = ({
           } `}
           onClick={toggleSidebar}
         >
-          Nos partenaires
+          Fiers Partenaires
         </Link>
 
         <Link
@@ -64,7 +73,7 @@ const SideBar = ({
           } `}
           onClick={toggleSidebar}
         >
-          Notre mission
+          L&apos;Esprit BSR
         </Link>
         <Link
           href="/contact"
@@ -73,7 +82,7 @@ const SideBar = ({
           } `}
           onClick={toggleSidebar}
         >
-          Contact
+          Nous Contacter
         </Link>
       </div>
 

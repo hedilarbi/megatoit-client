@@ -51,22 +51,30 @@ const Header = () => {
             pathname === "/calendrier" && "text-brand underline decoration-2 underline-offset-4"
           } `}
         >
-          Calendrier
+          Saison & Billets
         </Link>
         <Link
+          href="/abonnement-saison"
+          className={`text-white hover:text-brand transition-colors ${
+            pathname === "/abonnement-saison" && "text-brand underline decoration-2 underline-offset-4"
+          } `}
+        >
+          Devenir Membre
+        </Link>
+        {/* <Link
           href="https://megatoit.atelierqg.com/"
           target="_blank"
           className="text-white hover:text-brand transition-colors"
         >
-          Boutique en ligne
-        </Link>
+          Boutique Officielle
+        </Link> */}
         <Link
           href="/partenaires"
           className={`text-white hover:text-brand transition-colors ${
             pathname === "/partenaires" && "text-brand underline decoration-2 underline-offset-4"
           } `}
         >
-          Nos partenaires
+          Fiers Partenaires
         </Link>
         <Link
           href="/notre-mission"
@@ -74,7 +82,7 @@ const Header = () => {
             pathname === "/notre-mission" && "text-brand underline decoration-2 underline-offset-4"
           } `}
         >
-          Notre mission
+          L&apos;Esprit BSR
         </Link>
         <Link
           href="/contact"
@@ -82,7 +90,7 @@ const Header = () => {
             pathname === "/contact" && "text-brand underline decoration-2 underline-offset-4"
           } `}
         >
-          Contact
+          Nous Contacter
         </Link>
       </div>
 

@@ -172,12 +172,13 @@ const MatchsContent = () => {
               const opponentName = match?.opponent?.name || "";
               const opponentImageUrl = match?.opponent?.imageUrl || "";
 
-              // Domicile => Trois-Rivières on Right (or vice-versa depending on user preference)
-              const leftTeamName = isHome ? homeTeamName : opponentName;
-              const leftTeamLogo = isHome ? homeTeamImageUrl : opponentImageUrl;
+              // Domicile => Opponent on Left, Trois-Rivières on Right
+              // Non Domicile => Trois-Rivières on Left, Opponent on Right
+              const leftTeamName = isHome ? opponentName : homeTeamName;
+              const leftTeamLogo = isHome ? opponentImageUrl : homeTeamImageUrl;
 
-              const rightTeamName = isHome ? opponentName : homeTeamName;
-              const rightTeamLogo = isHome ? opponentImageUrl : homeTeamImageUrl;
+              const rightTeamName = isHome ? homeTeamName : opponentName;
+              const rightTeamLogo = isHome ? homeTeamImageUrl : opponentImageUrl;
 
               return (
                 <div
@@ -185,7 +186,7 @@ const MatchsContent = () => {
                   className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 pb-6 overflow-hidden"
                 >
                   <div className="bg-black border-b-4 border-brand py-4 rounded-t-md">
-                    <p className="font-lato text-center text-white font-semibold capitalize ">
+                    <p className="font-lato text-center text-white font-semibold capitalize text-lg md:text-xl">
                       {dayName}, {date} {/* EXACT stored wall time */}
                     </p>
                   </div>
@@ -198,33 +199,33 @@ const MatchsContent = () => {
                           <Image
                             src={leftTeamLogo}
                             alt="Logo Équipe Gauche"
-                            className="h-12 w-12 flex-shrink-0 object-contain"
-                            width={48}
-                            height={48}
+                            className="h-14 w-14 flex-shrink-0 object-contain"
+                            width={56}
+                            height={56}
                           />
                         )}
-                        <h3 className="font-bebas-neue text-lg md:text-xl text-black line-clamp-2 break-words leading-tight text-center">
+                        <h3 className="font-bebas-neue text-xl md:text-2xl text-black line-clamp-2 break-words leading-tight text-center">
                           {leftTeamName}
                         </h3>
                       </div>
 
                       {/* VS (Centre) */}
-                      <p className="font-bebas-neue text-xl text-black mx-2 flex-shrink-0">
+                      <p className="font-bebas-neue text-2xl md:text-3xl text-black mx-2 flex-shrink-0">
                         VS
                       </p>
 
                       {/* Équipe 2 (Droite - 50% centré) */}
                       <div className="flex-1 min-w-0 flex items-center justify-center gap-2 text-center">
-                        <h3 className="font-bebas-neue text-lg md:text-xl text-black line-clamp-2 break-words leading-tight text-center">
+                        <h3 className="font-bebas-neue text-xl md:text-2xl text-black line-clamp-2 break-words leading-tight text-center">
                           {rightTeamName}
                         </h3>
                         {rightTeamLogo && (
                           <Image
                             src={rightTeamLogo}
                             alt="Logo Équipe Droite"
-                            className="h-12 w-12 flex-shrink-0 object-contain"
-                            width={48}
-                            height={48}
+                            className="h-14 w-14 flex-shrink-0 object-contain"
+                            width={56}
+                            height={56}
                           />
                         )}
                       </div>
@@ -232,17 +233,17 @@ const MatchsContent = () => {
                   </div>
 
                   <div className="mt-6 flex justify-between items-center px-4">
-                    <p className="font-lato text-gray-600 text-sm md:text-base">
+                    <p className="font-lato text-gray-600 text-base md:text-lg">
                       <MdPinDrop className="inline mr-1" size={24} />
                       {match.place}
                     </p>
                   </div>
                   <div className="flex justify-between px-4 mt-4">
-                    <p className="font-lato text-black rounded-md bg-[#D9D9D9] px-4 py-1 md:text-base text-xs uppercase ">
+                    <p className="font-lato text-black rounded-md bg-[#D9D9D9] px-4 py-1 text-sm md:text-lg uppercase ">
                       {match.type}
                     </p>
                     {match.category !== "Ligue" && (
-                      <p className="font-lato text-black rounded-md bg-[#D9D9D9] px-4 py-1 md:text-base text-xs ">
+                      <p className="font-lato text-black rounded-md bg-[#D9D9D9] px-4 py-1 text-sm md:text-lg ">
                         {match.category}
                       </p>
                     )}
@@ -251,7 +252,7 @@ const MatchsContent = () => {
                   {match.type === "Domicile" && (
                     <Link
                       href={`/calendrier/${match.id}`}
-                      className="block text-center bg-brand text-black font-bebas-neue py-2 rounded-md mx-4 hover:bg-brand-dark transition-colors duration-300 mt-4"
+                      className="block text-center bg-brand text-black font-bebas-neue text-xl py-3 rounded-md mx-4 hover:bg-brand-dark transition-colors duration-300 mt-6"
                     >
                       Achetez vos billets
                     </Link>
