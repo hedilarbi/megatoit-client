@@ -50,10 +50,10 @@ const AbonnementSection = () => {
             <br />AU CŒUR DE L’ACTION
           </h2>
 
-          <p className="font-lato text-gray-300 text-lg md:text-xl max-w-xl mb-8 leading-relaxed">
-            Réservez votre abonnement  de saison dès maintenant. Profitez d&apos;avantages exclusifs réservés à nos abonnés de saison.
+          <p className="font-lato text-gray-300 text-lg md:text-lg max-w-xl mb-8 leading-relaxed">
+            Réservez votre abonnement de saison dès maintenant et profitez d&apos;avantages exclusifs.
             <br />
-            Du hockey intense. Une ambiance électrisante. Votre BSR!
+            Du hockey intense, une ambiance électrisante. Votre BSR !
           </p>
 
           <Link
