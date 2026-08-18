@@ -24,9 +24,9 @@ export default function Home() {
     <div className="pb-20">
       <HomeBanner />
       {/* <CountDownVendredi /> */}
+      <AbonnementSection />
       <MatchsList />
       {/* <Commenditaires /> */}
-      <AbonnementSection />
       {/* <CtaBoutique /> */}
 
       <FacebookFeed />

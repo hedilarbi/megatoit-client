@@ -38,7 +38,7 @@ const FacebookFeed = () => {
     });
 
   return (
-    <section className="mt-12 px-4 md:px-16 lg:px-24">
+    <section className="mt-12 px-8 md:px-16 lg:px-24">
       <h2 className="text-center text-3xl md:text-4xl font-bold mb-8 font-bebas-neue">
         Les Actualités
       </h2>
@@ -48,14 +48,14 @@ const FacebookFeed = () => {
           <Spinner />
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           {posts.map((post) => (
             <article
               key={post.id}
               className="bg-white rounded-2xl shadow-lg overflow-hidden group hover:shadow-2xl transition-shadow duration-300"
             >
               {post.full_picture && (
-                <div className="relative h-48 overflow-hidden">
+                <div className="relative h-80 sm:h-96 overflow-hidden">
                   <Image
                     src={post.full_picture}
                     alt="Post image"

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import React from "react";
+import Image from "next/image";
 import styles from "@/styles/HomeBanner.module.css";
 
 const HomeBanner = () => {
@@ -13,9 +14,12 @@ const HomeBanner = () => {
               BSR DE TROIS-RIVIÈRES • BILLETTERIE OFFICIELLE
             </span>
           </h1>
-          <img
+          <Image
             src="/Logo-BSR-haute-resolution.png"
             alt="Logo BSR"
+            width={400}
+            height={400}
+            priority
             className="w-48 sm:w-64 object-contain drop-shadow-xl"
           />
           <Link
@@ -26,9 +30,12 @@ const HomeBanner = () => {
               Billets de match
             </span>
           </Link>
-          <img
+          <Image
             src="/Logo-LHSAAAQ-officiel.png"
             alt="Logo LHSAAAQ"
+            width={300}
+            height={200}
+            priority
             className="h-16 sm:h-20 object-contain opacity-90"
           />
         </div>
@@ -38,9 +45,12 @@ const HomeBanner = () => {
           
           {/* Gauche : Logo BSR */}
           <div className="flex-shrink-0">
-            <img
+            <Image
               src="/Logo-BSR-haute-resolution.png"
               alt="Logo BSR"
+              width={500}
+              height={500}
+              priority
               className="w-56 lg:w-72 xl:w-80 object-contain drop-shadow-xl"
             />
           </div>
@@ -64,9 +74,12 @@ const HomeBanner = () => {
 
           {/* Droite : Logo LHSAAAQ */}
           <div className="flex-shrink-0">
-            <img
+            <Image
               src="/Logo-LHSAAAQ-officiel.png"
               alt="Logo LHSAAAQ"
+              width={400}
+              height={300}
+              priority
               className="h-20 lg:h-28 xl:h-32 object-contain opacity-90 hover:opacity-100 transition-opacity"
             />
           </div>

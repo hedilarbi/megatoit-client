@@ -7,11 +7,13 @@
   position: relative;
   margin: auto;
   padding: 48px 32px;
+  margin-top: 48px;
 }
 
 @media (max-width: 768px) {
   .AbonnementSection {
     padding: 48px 12px;
     width: calc(100% - 32px);
+    margin-top: 20px;
   }
 }
