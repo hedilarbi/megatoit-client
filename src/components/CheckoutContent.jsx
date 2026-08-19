@@ -630,7 +630,7 @@ const CheckoutContent = ({ matchId, quantity: rawQuantity, abonnementId }) => {
             </h2>
             <div className="border border-gray-300 rounded-md p-4 mt-4 bg-white flex justify-between">
               <p className="font-lato text-gray-600 font-semibold uppercase">
-                1 x Abonnement de saison RÉGULIÈRE ({abonnement.season})
+                1 x Billet de saison RÉGULIÈRE ({abonnement.season})
               </p>
               <p className="font-lato text-gray-800 font-semibold">
                 ${getEffectiveSubscriptionPrice(abonnement).toFixed(2)}
