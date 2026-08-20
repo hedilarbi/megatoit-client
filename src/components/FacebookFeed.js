@@ -55,10 +55,10 @@ const FacebookFeed = () => {
           {featuredPost && (
             <article
               key={featuredPost.id}
-              className="bg-white rounded-2xl border border-gray-100 shadow-lg overflow-hidden group hover:shadow-2xl transition-all duration-300 flex flex-col lg:flex-row lg:min-h-[450px]"
+              className="bg-white rounded-2xl border border-gray-100 shadow-lg overflow-hidden group hover:shadow-2xl transition-all duration-300 flex flex-col lg:flex-row lg:min-h-[600px]"
             >
               {featuredPost.full_picture && (
-                <div className="relative w-full lg:w-[30%] h-80 sm:h-96 lg:h-auto overflow-hidden shrink-0">
+                <div className="relative w-full lg:w-[30%] h-96 sm:h-[500px] lg:h-auto overflow-hidden shrink-0">
                   <Image
                     src={featuredPost.full_picture}
                     alt="Image de la publication"
@@ -76,7 +76,7 @@ const FacebookFeed = () => {
                   <time className="text-brand-dark text-sm font-semibold tracking-wider block uppercase">
                     {formatDate(featuredPost.created_time)}
                   </time>
-                  <p className="text-gray-800 text-lg md:text-xl font-medium leading-relaxed line-clamp-6 lg:line-clamp-none whitespace-pre-wrap">
+                  <p className="text-gray-950 text-base md:text-lg font-normal leading-snug line-clamp-6 lg:line-clamp-none whitespace-pre-wrap">
                     {featuredPost.message}
                   </p>
                 </div>
@@ -95,7 +95,7 @@ const FacebookFeed = () => {
           )}
 
           {remainingPosts.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12 pt-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12 lg:gap-16 pt-6">
               {remainingPosts.map((post) => (
                 <article
                   key={post.id}
@@ -103,7 +103,7 @@ const FacebookFeed = () => {
                 >
                   <div>
                     {post.full_picture && (
-                      <div className="relative h-48 sm:h-56 overflow-hidden">
+                      <div className="relative h-[400px] sm:h-[500px] overflow-hidden">
                         <Image
                           src={post.full_picture}
                           alt="Image de la publication"
@@ -115,7 +115,7 @@ const FacebookFeed = () => {
                       </div>
                     )}
                     <div className="p-6">
-                      <p className="text-gray-600 text-sm line-clamp-3 whitespace-pre-line">
+                      <p className="text-gray-900 text-sm md:text-base font-normal leading-relaxed line-clamp-4 whitespace-pre-line">
                         {post.message}
                       </p>
                     </div>

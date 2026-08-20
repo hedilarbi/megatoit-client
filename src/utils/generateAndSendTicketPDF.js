@@ -1,6 +1,7 @@
 // services/email.service.ts
 
-import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
+import { PDFDocument, rgb, degrees } from "pdf-lib";
+import fontkit from "@pdf-lib/fontkit";
 import { getStorage } from "firebase-admin/storage";
 import nodemailer from "nodemailer";
 import fs from "fs";
@@ -12,415 +13,314 @@ import {
 } from "@/services/ticket.service";
 import { getAbonementById } from "@/services/abonement.service";
 
-export async function generateAndSendTicketPDF(
-  user,
-  tickets,
-  order,
-  subscription
-) {
+async function drawHorizontalTicket(pdfDoc, data) {
+  pdfDoc.registerFontkit(fontkit);
+  const fontBebasPath = path.join(process.cwd(), "public", "fonts", "BebasNeue-Regular.ttf");
+  const fontLatoRegPath = path.join(process.cwd(), "public", "fonts", "Lato-Regular.ttf");
+  const fontLatoBoldPath = path.join(process.cwd(), "public", "fonts", "Lato-Bold.ttf");
+  const fontLatoBlackPath = path.join(process.cwd(), "public", "fonts", "Lato-Black.ttf");
+
+  const fontBebas = await pdfDoc.embedFont(fs.readFileSync(fontBebasPath));
+  const fontLato = await pdfDoc.embedFont(fs.readFileSync(fontLatoRegPath));
+  const fontLatoBold = await pdfDoc.embedFont(fs.readFileSync(fontLatoBoldPath));
+  const fontLatoBlack = await pdfDoc.embedFont(fs.readFileSync(fontLatoBlackPath));
+
+  const width = data.isSubscription ? 1050 : 900;
+  const height = data.isSubscription ? 400 : 340;
+  const page = pdfDoc.addPage([width, height]);
+
+  page.drawRectangle({ x: 0, y: 0, width, height, color: rgb(0, 0, 0) });
+
+  const greenColor = rgb(123 / 255, 253 / 255, 72 / 255);
+  page.drawRectangle({ x: 0, y: 0, width: 46, height, color: greenColor });
+  
+  const admTextRaw = "ADMISSION GÉNÉRALE";
+  const chars = admTextRaw.split('');
+  let charsTotalWidth = 0;
+  for (const c of chars) charsTotalWidth += fontBebas.widthOfTextAtSize(c, 21);
+  const totalAvailableHeight = height - 40; 
+  const charSpacing = chars.length > 1 ? (totalAvailableHeight - charsTotalWidth) / (chars.length - 1) : 0;
+  let currentY = 20; 
+  const centeredX = 34; 
+  for (const c of chars) {
+    page.drawText(c, { x: centeredX, y: currentY, size: 21, font: fontBebas, color: rgb(0, 0, 0), rotate: degrees(90) });
+    currentY += fontBebas.widthOfTextAtSize(c, 21) + charSpacing;
+  }
+
+  const rightColX = width - 236;
+  
+  page.drawLine({
+    start: { x: rightColX, y: 20 }, end: { x: rightColX, y: height - 20 },
+    thickness: 1, color: rgb(51 / 255, 51 / 255, 51 / 255), dashArray: [4, 4],
+  });
+
+  const qrBoxSize = data.isSubscription ? 180 : 144;
+  const qrBoxX = rightColX + (236 - qrBoxSize) / 2;
+  const qrBoxY = height - 50 - qrBoxSize; 
+  
+  page.drawRectangle({ x: qrBoxX - 8, y: qrBoxY - 8, width: qrBoxSize + 16, height: qrBoxSize + 16, color: rgb(1, 1, 1) });
+  if (data.qrImage) {
+    page.drawImage(data.qrImage, { x: qrBoxX, y: qrBoxY, width: qrBoxSize, height: qrBoxSize });
+  }
+
+  if (data.isSubscription) {
+    const tcSize = 18;
+    const tcW = fontLatoBold.widthOfTextAtSize(data.ticketCode, tcSize);
+    const tcY = qrBoxY - 50; 
+    const tcBoxW = tcW + 24; 
+    const tcBoxH = tcSize + 18; 
+    
+    page.drawRectangle({
+      x: rightColX + 236 / 2 - tcBoxW / 2, y: tcY - 9, width: tcBoxW, height: tcBoxH,
+      color: rgb(123/255 * 0.12, 253/255 * 0.12, 72/255 * 0.12),
+      borderColor: rgb(123/255 * 0.4, 253/255 * 0.4, 72/255 * 0.4), borderWidth: 1
+    });
+    page.drawText(data.ticketCode, { x: rightColX + 236 / 2 - tcW / 2, y: tcY, size: tcSize, font: fontLatoBold, color: greenColor });
+
+    const midX = 46;
+    let myX = midX + 26;
+    const logoSizeTop = 90;
+    if(data.team1LogoImage) {
+      page.drawImage(data.team1LogoImage, { x: myX, y: height - 40 - logoSizeTop, width: logoSizeTop, height: logoSizeTop });
+    }
+    page.drawText("Billet de saison", { x: myX + logoSizeTop + 20, y: height - 80, size: 48, font: fontBebas, color: rgb(1,1,1) });
+    page.drawText(data.monthYearStr, { x: myX + logoSizeTop + 20, y: height - 120, size: 38, font: fontBebas, color: greenColor });
+
+    const venueValW = fontBebas.widthOfTextAtSize(data.venue, 32);
+    page.drawText(data.venue, { x: rightColX - 26 - venueValW, y: height - 85, size: 32, font: fontBebas, color: rgb(1, 1, 1) });
+    const addr1 = "1740 Av. Gilles-Villeneuve";
+    const addr2 = "Trois-Rivières, QC G8Y 7B6";
+    const addrColor = rgb(154/255, 154/255, 154/255);
+    page.drawText(addr1, { x: rightColX - 26 - fontLato.widthOfTextAtSize(addr1, 16), y: height - 110, size: 16, font: fontLato, color: addrColor });
+    page.drawText(addr2, { x: rightColX - 26 - fontLato.widthOfTextAtSize(addr2, 16), y: height - 130, size: 16, font: fontLato, color: addrColor });
+
+    const topBorderY = height - 180;
+    page.drawLine({ start: { x: midX + 26, y: topBorderY }, end: { x: rightColX - 26, y: topBorderY }, thickness: 1, color: rgb(35/255, 35/255, 35/255) });
+
+    const bottomSectionY = 85;
+    const teamSectionH = topBorderY - bottomSectionY;
+    const bottomMidY = bottomSectionY + teamSectionH / 2;
+
+    let bnW = fontBebas.widthOfTextAtSize(data.buyerName, 56);
+    let bNameSize = 56;
+    while (bnW > 380 && bNameSize > 15) { bNameSize--; bnW = fontBebas.widthOfTextAtSize(data.buyerName, bNameSize); }
+    page.drawText(data.buyerName, { x: midX + 26, y: bottomMidY - 20, size: bNameSize, font: fontBebas, color: rgb(1,1,1) });
+
+    const smText = "TOUS LES MATCHS À DOMICILE";
+    const srText = "Saison régulière";
+    const smW = fontLatoBold.widthOfTextAtSize(smText, 14);
+    const srW = fontBebas.widthOfTextAtSize(srText, 34);
+    page.drawText(smText, { x: rightColX - 26 - smW, y: bottomMidY + 10, size: 14, font: fontLatoBold, color: rgb(102/255, 102/255, 102/255) });
+    page.drawText(srText, { x: rightColX - 26 - srW, y: bottomMidY - 25, size: 34, font: fontBebas, color: greenColor });
+
+    page.drawLine({ start: { x: midX, y: bottomSectionY }, end: { x: rightColX, y: bottomSectionY }, thickness: 1, color: rgb(35/255, 35/255, 35/255) });
+    
+    try {
+      const courteauPath = path.join(process.cwd(), "public", "commenditaires", "Courteau.jpg");
+      let courteauImg;
+      try { courteauImg = await pdfDoc.embedPng(fs.readFileSync(courteauPath)); }
+      catch { courteauImg = await pdfDoc.embedJpg(fs.readFileSync(courteauPath)); }
+      const cDims = courteauImg.scale(42 / courteauImg.height);
+      const courteauBoxX = midX + 26;
+      page.drawRectangle({ x: courteauBoxX, y: 18, width: cDims.width + 18, height: 52, color: rgb(1,1,1) });
+      page.drawImage(courteauImg, { x: courteauBoxX + 9, y: 23, width: cDims.width, height: cDims.height });
+    } catch(e) {}
+  } else {
+    let bNameSize = 26;
+    let bnW = fontBebas.widthOfTextAtSize(data.buyerName, bNameSize);
+    let adjustedBNameSize = bNameSize;
+    while (bnW > 200 && adjustedBNameSize > 12) {
+      adjustedBNameSize--;
+      bnW = fontBebas.widthOfTextAtSize(data.buyerName, adjustedBNameSize);
+    }
+    const bNameY = qrBoxY - 40;
+    page.drawText(data.buyerName, { x: rightColX + 236 / 2 - bnW / 2, y: bNameY, size: adjustedBNameSize, font: fontBebas, color: rgb(1, 1, 1) });
+
+    const tcSize = 15;
+    const tcW = fontLatoBold.widthOfTextAtSize(data.ticketCode, tcSize);
+    const tcY = bNameY - 35; 
+    const tcBoxW = tcW + 20; 
+    const tcBoxH = tcSize + 14; 
+    
+    page.drawRectangle({
+      x: rightColX + 236 / 2 - tcBoxW / 2, y: tcY - 7, width: tcBoxW, height: tcBoxH,
+      color: rgb(123/255 * 0.12, 253/255 * 0.12, 72/255 * 0.12),
+      borderColor: rgb(123/255 * 0.4, 253/255 * 0.4, 72/255 * 0.4), borderWidth: 1
+    });
+    page.drawText(data.ticketCode, { x: rightColX + 236 / 2 - tcW / 2, y: tcY, size: tcSize, font: fontLatoBold, color: greenColor });
+
+    const midX = 46;
+    const midW = 618;
+    
+    let myX = midX + 26;
+    if(data.dayStr) {
+      page.drawText(data.dayStr, { x: myX, y: height - 110, size: 96, font: fontBebas, color: rgb(1, 1, 1) });
+      myX += fontBebas.widthOfTextAtSize(data.dayStr, 96) + 12;
+    }
+    page.drawText(data.monthYearStr, { x: myX, y: height - 110, size: 32, font: fontBebas, color: greenColor });
+    page.drawText(data.timeStr, { x: myX, y: height - 130, size: 14, font: fontLatoBold, color: rgb(140 / 255, 140 / 255, 140 / 255) });
+
+    const venueValW = fontBebas.widthOfTextAtSize(data.venue, 28);
+    page.drawText(data.venue, { x: rightColX - 26 - venueValW, y: height - 70, size: 28, font: fontBebas, color: rgb(1, 1, 1) });
+    
+    const addr1 = "1740 Av. Gilles-Villeneuve";
+    const addr2 = "Trois-Rivières, QC G8Y 7B6";
+    const addrColor = rgb(154/255, 154/255, 154/255);
+    page.drawText(addr1, { x: rightColX - 26 - fontLato.widthOfTextAtSize(addr1, 14), y: height - 95, size: 14, font: fontLato, color: addrColor });
+    page.drawText(addr2, { x: rightColX - 26 - fontLato.widthOfTextAtSize(addr2, 14), y: height - 110, size: 14, font: fontLato, color: addrColor });
+
+    const topBorderY = height - 150;
+    page.drawLine({ start: { x: midX + 26, y: topBorderY }, end: { x: rightColX - 26, y: topBorderY }, thickness: 1, color: rgb(35 / 255, 35 / 255, 35 / 255) });
+
+    const bottomSectionY = 75; 
+    const teamSectionH = topBorderY - bottomSectionY;
+    const bottomMidY = bottomSectionY + teamSectionH / 2; 
+
+    const logoSize = 64;
+    const logoY = bottomMidY - logoSize / 2;
+    
+    if(data.team1LogoImage) {
+      page.drawImage(data.team1LogoImage, { x: midX + 26, y: logoY, width: logoSize, height: logoSize });
+    }
+    const team1Y = bottomMidY - 12;
+    
+    const getBestLayout = (text) => {
+      let size = 36;
+      while (size > 14) {
+        if (fontBebas.widthOfTextAtSize(text, size) <= 200) {
+          return { size, lines: [text] };
+        }
+        const breakChars = [' ', '-'];
+        let bestSplitIndex = -1;
+        let minDiff = Infinity;
+        for (let i = 0; i < text.length; i++) {
+          if (breakChars.includes(text[i])) {
+            const line1 = text.substring(0, i + (text[i] === '-' ? 1 : 0)).trim();
+            const line2 = text.substring(i + 1).trim();
+            const w1 = fontBebas.widthOfTextAtSize(line1, size);
+            const w2 = fontBebas.widthOfTextAtSize(line2, size);
+            if (w1 <= 200 && w2 <= 200) {
+              const diff = Math.abs(w1 - w2);
+              if (diff < minDiff) { minDiff = diff; bestSplitIndex = i; }
+            }
+          }
+        }
+        if (bestSplitIndex !== -1) {
+          const isHyphen = text[bestSplitIndex] === '-';
+          return { size, lines: [ text.substring(0, bestSplitIndex + (isHyphen ? 1 : 0)).trim(), text.substring(bestSplitIndex + 1).trim() ] };
+        }
+        size--;
+      }
+      return { size: 14, lines: [text] };
+    };
+
+    const layout1 = getBestLayout(data.team1Name);
+    const layout2 = getBestLayout(data.team2Name);
+    
+    const finalSize = Math.min(layout1.size, layout2.size);
+    const lineHeight = finalSize * 1.1;
+
+    const drawTeamLines = (lines, x, align) => {
+      let startY = team1Y + (lines.length - 1) * (lineHeight / 2);
+      for (const line of lines) {
+        const w = fontBebas.widthOfTextAtSize(line, finalSize);
+        let px = align === 'right' ? x - w : x;
+        page.drawText(line, { x: px, y: startY, size: finalSize, font: fontBebas, color: rgb(1, 1, 1) });
+        startY -= lineHeight;
+      }
+    };
+
+    drawTeamLines(layout1.lines, midX + 26 + logoSize + 16, 'left');
+    
+    const vsW = fontLatoBlack.widthOfTextAtSize("VS", 16);
+    page.drawText("VS", { x: midX + midW / 2 - vsW / 2, y: bottomMidY - 6, size: 16, font: fontLatoBlack, color: greenColor });
+
+    drawTeamLines(layout2.lines, rightColX - 26 - logoSize - 16, 'right');
+    
+    if(data.team2LogoImage) {
+      page.drawImage(data.team2LogoImage, { x: rightColX - 26 - logoSize, y: logoY, width: logoSize, height: logoSize });
+    }
+
+    page.drawLine({ start: { x: midX, y: bottomSectionY }, end: { x: rightColX, y: bottomSectionY }, thickness: 1, color: rgb(35 / 255, 35 / 255, 35 / 255) });
+    
+    try {
+      const courteauPath = path.join(process.cwd(), "public", "commenditaires", "Courteau.jpg");
+      let courteauImg;
+      try { courteauImg = await pdfDoc.embedPng(fs.readFileSync(courteauPath)); }
+      catch { courteauImg = await pdfDoc.embedJpg(fs.readFileSync(courteauPath)); }
+      const cDims = courteauImg.scale(35 / courteauImg.height);
+      const courteauBoxX = midX + 26;
+      page.drawRectangle({ x: courteauBoxX, y: 15, width: cDims.width + 16, height: 45, color: rgb(1,1,1) });
+      page.drawImage(courteauImg, { x: courteauBoxX + 8, y: 20, width: cDims.width, height: cDims.height });
+    } catch (e) {
+      console.error("Courteau logo error:", e);
+    }
+  }
+}
+
+export async function generateAndSendTicketPDF(user, tickets, order, subscription) {
   try {
     const bucket = getStorage().bucket();
     const logoPath = path.join(process.cwd(), "public", "logo-big.jpeg");
-
     const userName = user.userName.toUpperCase();
-    let match = null;
+    const attachments = [];
+    const downloadLinks = [];
+
+    const embedTeamLogo = async (pdfDoc, imageUrl) => {
+      if (imageUrl) {
+        try {
+          const res = await fetch(imageUrl);
+          if (res.ok) {
+            const buffer = await res.arrayBuffer();
+            try { return await pdfDoc.embedPng(buffer); } catch { return await pdfDoc.embedJpg(buffer); }
+          }
+        } catch (e) { console.error("Error fetching team logo", e); }
+      }
+      const logoBytes = fs.readFileSync(logoPath);
+      try { return await pdfDoc.embedPng(logoBytes); } catch { return await pdfDoc.embedJpg(logoBytes); }
+    };
 
     if (tickets.length > 0) {
-      match = await getMatchById(tickets[0].matchId);
-
+      const match = await getMatchById(tickets[0].matchId);
       const isHome = match?.type === "Domicile";
       
-      const team1Name = isHome ? (match?.opponent?.name || "Adversaire") : (match?.homeTeam?.name || "BSR DE TROIS-RIVIÈRES");
+      const team1Name = isHome ? (match?.opponent?.name || "Adversaire") : (match?.homeTeam?.name || "BSR DE TROIS-RIVIERES");
       const team1ImageUrl = isHome ? match?.opponent?.imageUrl : match?.homeTeam?.imageUrl;
-
-      const team2Name = isHome ? (match?.homeTeam?.name || "BSR DE TROIS-RIVIÈRES") : (match?.opponent?.name || "Adversaire");
+      const team2Name = isHome ? (match?.homeTeam?.name || "BSR DE TROIS-RIVIERES") : (match?.opponent?.name || "Adversaire");
       const team2ImageUrl = isHome ? match?.homeTeam?.imageUrl : match?.opponent?.imageUrl;
 
-      const attachments = [];
-      const downloadLinks = [];
-
-      const formatDate = (timestamp) => {
-        const ms = timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000;
-        const date = new Date(ms);
-        const dayName = date.toLocaleDateString("fr-FR", {
-          weekday: "long",
-        });
-        const str = new Intl.DateTimeFormat("fr-FR", {
-          timeZone: "Etc/GMT-1",
-          day: "numeric",
-          month: "long",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: false,
-        }).format(date);
-        return { dayName, date: str };
-      };
-
-      const { dayName, date } = formatDate(match.date);
+      const ms = match.date.seconds * 1000 + match.date.nanoseconds / 1000000;
+      const dateObj = new Date(ms);
+      const dayStr = dateObj.getDate().toString();
+      const monthYearStr = dateObj.toLocaleDateString("fr-FR", { month: "long", year: "numeric" }).toUpperCase();
+      const timeStr = `${dateObj.toLocaleDateString("fr-FR", { weekday: "long" })} · ${dateObj.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}`.toUpperCase();
 
       for (const ticket of tickets) {
-        // … dans votre boucle for (const ticket of tickets) { …
-        // 1) création du document et de la page
         const pdfDoc = await PDFDocument.create();
-        // page plus large pour passer le QR à droite
-        const page = pdfDoc.addPage([800, 320]);
-        const { width, height } = page.getSize();
-
-        // 2) fonts
-        const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
-        const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-
-        // 3) données
-        const placeText = match.place;
-        const ticketCode = ticket.TicketCode;
-
-        // Helper to embed team logo from URL (PNG/JPG) with local fallback
-        const embedTeamLogo = async (imageUrl) => {
-          if (imageUrl) {
-            try {
-              const res = await fetch(imageUrl);
-              if (res.ok) {
-                const buffer = await res.arrayBuffer();
-                try {
-                  return await pdfDoc.embedPng(buffer);
-                } catch {
-                  return await pdfDoc.embedJpg(buffer);
-                }
-              }
-            } catch (e) {
-              console.error(`Error fetching team logo from ${imageUrl}:`, e);
-            }
-          }
-          const logoBytes = fs.readFileSync(logoPath);
-          try {
-            return await pdfDoc.embedPng(logoBytes);
-          } catch {
-            return await pdfDoc.embedJpg(logoBytes);
-          }
-        };
-
-        // 4) embeds
-        const team1LogoImage = await embedTeamLogo(team1ImageUrl);
-        const team2LogoImage = await embedTeamLogo(team2ImageUrl);
+        const team1LogoImage = await embedTeamLogo(pdfDoc, team1ImageUrl);
+        const team2LogoImage = await embedTeamLogo(pdfDoc, team2ImageUrl);
         const qrImage = await pdfDoc.embedPng(ticket.qrCodeImage);
 
-        // 5) régions et dimensions
-        const margin = 20;
-        const qrSize = 200;
-        const separatorX = width - qrSize - margin - 30; // x de la ligne de séparation verticale
-        const leftWidth = separatorX - 2 * margin; // largeur dispo à gauche du QR
-
-        const borderWidth = 20; // épaisseur de la bordure
-
-        page.drawRectangle({
-          x: borderWidth / 2,
-          y: borderWidth / 2,
-          width: width - borderWidth,
-          height: height - borderWidth,
-          color: rgb(1, 1, 1),
-          borderColor: rgb(0, 0, 0),
-          borderWidth,
+        await drawHorizontalTicket(pdfDoc, {
+          ticketCode: ticket.TicketCode,
+          buyerName: userName,
+          team1Name, team1LogoImage,
+          team2Name, team2LogoImage,
+          dayStr, monthYearStr, timeStr,
+          venue: match.place || "Colisée Jean-Guy-Talbot",
+          qrImage,
+          isSubscription: false
         });
 
-        // 6) Draw QR + séparation
-        page.drawLine({
-          start: { x: separatorX, y: margin },
-          end: { x: separatorX, y: height - margin },
-          thickness: 2,
-          color: rgb(0, 0, 0),
-        });
-        page.drawImage(qrImage, {
-          x: separatorX + margin,
-          y: height - qrSize - margin - 30,
-          width: qrSize,
-          height: qrSize,
-        });
-
-        // 7) Title tout en haut
-        // 7) Titre à gauche + userName à droite (sur la même ligne)
-        const title = `BILLET N° ${ticketCode}`;
-        const titleSize = 28;
-
-        const userText = String(userName || "");
-        let userSize = 24; // taille du userName (gras)
-        const minUserSize = 12; // taille min si ça ne rentre pas
-
-        const titleY = height - 60;
-        const titleLeftX = margin + 20;
-        const gapMin = 40; // espace minimal entre le titre et le userName
-
-        const titleW = fontBold.widthOfTextAtSize(title, titleSize);
-
-        // Limite droite de la colonne gauche (avant la séparation / QR)
-        const rightBound = separatorX - margin;
-
-        // Largeur du userName à la taille initiale
-        let userW = fontBold.widthOfTextAtSize(userText, userSize);
-
-        // Position droite par défaut (aligné à droite)
-        let userX = rightBound - userW;
-
-        // Respecter l’espace minimal entre les deux textes
-        if (userX < titleLeftX + titleW + gapMin) {
-          userX = titleLeftX + titleW + gapMin;
-        }
-
-        // Si ça déborde encore, réduire la taille du userName progressivement
-        while (userX + userW > rightBound && userSize > minUserSize) {
-          userSize -= 1;
-          userW = fontBold.widthOfTextAtSize(userText, userSize);
-          userX = Math.max(titleLeftX + titleW + gapMin, rightBound - userW);
-        }
-
-        // Dessin du titre (gauche)
-        page.drawText(title, {
-          x: titleLeftX,
-          y: titleY,
-          size: titleSize,
-          font: fontBold,
-          color: rgb(0, 0, 0),
-        });
-
-        // Dessin du userName (droite, en gras)
-        page.drawText(userText, {
-          x: userX,
-          y: titleY,
-          size: userSize,
-          font: fontBold,
-          color: rgb(0, 0, 0),
-        });
-
-        // 8) Ligne horizontale supérieure
-        page.drawLine({
-          start: { x: margin + 20, y: height - 80 },
-          end: { x: separatorX - margin, y: height - 80 },
-          thickness: 1,
-          color: rgb(0, 0, 0),
-        });
-        const ADMINSSION_NOTE = "ADMISSION GÉNÉRALE";
-        const ADMINSSION_NOTE_SIZE = 20;
-        const ADMINSSION_NOTE_W = fontBold.widthOfTextAtSize(
-          ADMINSSION_NOTE,
-          ADMINSSION_NOTE_SIZE
-        );
-        const ADMINSSION_NOTE_Y = height - 80 - 35; // 20px sous le header
-        page.drawText(ADMINSSION_NOTE, {
-          x: (leftWidth - ADMINSSION_NOTE_W) / 2 + margin,
-          y: ADMINSSION_NOTE_Y,
-          size: ADMINSSION_NOTE_SIZE,
-          font: fontBold,
-        });
-
-        // 9) Header logos + « VS » (Fixed symmetric 2-block layout with text wrapping)
-        const vsText = " VS ";
-        const vsSize = 22;
-        const vsW = fontBold.widthOfTextAtSize(vsText, vsSize);
-
-        const centerX = margin + leftWidth / 2;
-        const vsX = centerX - vsW / 2;
-        const headerY = height - 165;
-
-        // Draw " VS " in the center
-        page.drawText(vsText, {
-          x: vsX,
-          y: headerY - 5,
-          size: vsSize,
-          font: fontBold,
-          color: rgb(0, 0, 0),
-        });
-
-        // Compute equal fixed block widths
-        const leftBlockMinX = margin + 15;
-        const leftBlockMaxX = vsX - 10;
-        const blockWidth = leftBlockMaxX - leftBlockMinX;
-
-        const rightBlockMaxX = separatorX - margin - 15;
-
-        // Scale logos to max 55x55 maintaining aspect ratio
-        const fitLogo = (img, maxW = 55, maxH = 55) => {
-          const s = Math.min(maxW / img.width, maxH / img.height);
-          return { width: img.width * s, height: img.height * s };
-        };
-
-        const team1Dims = fitLogo(team1LogoImage);
-        const team2Dims = fitLogo(team2LogoImage);
-
-        // Helper to wrap & scale team name to fit inside remaining text width (1 or 2 lines)
-        const wrapAndScaleTeamName = (text, maxWidth) => {
-          let fSize = 16;
-          const minFSize = 10;
-
-          while (fSize >= minFSize) {
-            const singleW = fontBold.widthOfTextAtSize(text, fSize);
-            if (singleW <= maxWidth) {
-              return { lines: [text], fontSize: fSize, lineHeight: fSize * 1.15 };
-            }
-
-            const words = text.split(" ");
-            if (words.length > 1) {
-              let bestLines = null;
-              let minDiff = Infinity;
-
-              for (let i = 1; i < words.length; i++) {
-                const l1 = words.slice(0, i).join(" ");
-                const l2 = words.slice(i).join(" ");
-                const w1 = fontBold.widthOfTextAtSize(l1, fSize);
-                const w2 = fontBold.widthOfTextAtSize(l2, fSize);
-
-                if (w1 <= maxWidth && w2 <= maxWidth) {
-                  const diff = Math.abs(w1 - w2);
-                  if (diff < minDiff) {
-                    minDiff = diff;
-                    bestLines = [l1, l2];
-                  }
-                }
-              }
-
-              if (bestLines) {
-                return { lines: bestLines, fontSize: fSize, lineHeight: fSize * 1.15 };
-              }
-            }
-
-            fSize -= 1;
-          }
-
-          const words = text.split(" ");
-          const mid = Math.ceil(words.length / 2);
-          return {
-            lines: [words.slice(0, mid).join(" "), words.slice(mid).join(" ")],
-            fontSize: minFSize,
-            lineHeight: minFSize * 1.15,
-          };
-        };
-
-        // --- Team 1 Block (Left): [Logo 1] [Name 1] ---
-        page.drawImage(team1LogoImage, {
-          x: leftBlockMinX,
-          y: headerY - team1Dims.height / 2,
-          width: team1Dims.width,
-          height: team1Dims.height,
-        });
-
-        const text1AvailableW = blockWidth - team1Dims.width - 8;
-        const wrapped1 = wrapAndScaleTeamName(team1Name, text1AvailableW);
-        const text1X = leftBlockMinX + team1Dims.width + 8;
-
-        if (wrapped1.lines.length === 1) {
-          page.drawText(wrapped1.lines[0], {
-            x: text1X,
-            y: headerY - wrapped1.fontSize / 3,
-            size: wrapped1.fontSize,
-            font: fontBold,
-            color: rgb(0, 0, 0),
-          });
-        } else {
-          page.drawText(wrapped1.lines[0], {
-            x: text1X,
-            y: headerY + wrapped1.lineHeight / 2 - 3,
-            size: wrapped1.fontSize,
-            font: fontBold,
-            color: rgb(0, 0, 0),
-          });
-          page.drawText(wrapped1.lines[1], {
-            x: text1X,
-            y: headerY - wrapped1.lineHeight / 2 - 3,
-            size: wrapped1.fontSize,
-            font: fontBold,
-            color: rgb(0, 0, 0),
-          });
-        }
-
-        // --- Team 2 Block (Right): [Name 2] [Logo 2] ---
-        const logo2X = rightBlockMaxX - team2Dims.width;
-        page.drawImage(team2LogoImage, {
-          x: logo2X,
-          y: headerY - team2Dims.height / 2,
-          width: team2Dims.width,
-          height: team2Dims.height,
-        });
-
-        const text2AvailableW = blockWidth - team2Dims.width - 8;
-        const wrapped2 = wrapAndScaleTeamName(team2Name, text2AvailableW);
-        const text2RightX = logo2X - 8;
-
-        if (wrapped2.lines.length === 1) {
-          const w = fontBold.widthOfTextAtSize(wrapped2.lines[0], wrapped2.fontSize);
-          page.drawText(wrapped2.lines[0], {
-            x: text2RightX - w,
-            y: headerY - wrapped2.fontSize / 3,
-            size: wrapped2.fontSize,
-            font: fontBold,
-            color: rgb(0, 0, 0),
-          });
-        } else {
-          const w1 = fontBold.widthOfTextAtSize(wrapped2.lines[0], wrapped2.fontSize);
-          const w2 = fontBold.widthOfTextAtSize(wrapped2.lines[1], wrapped2.fontSize);
-
-          page.drawText(wrapped2.lines[0], {
-            x: text2RightX - w1,
-            y: headerY + wrapped2.lineHeight / 2 - 3,
-            size: wrapped2.fontSize,
-            font: fontBold,
-            color: rgb(0, 0, 0),
-          });
-          page.drawText(wrapped2.lines[1], {
-            x: text2RightX - w2,
-            y: headerY - wrapped2.lineHeight / 2 - 3,
-            size: wrapped2.fontSize,
-            font: fontBold,
-            color: rgb(0, 0, 0),
-          });
-        }
-
-        // 10) Texte du lieu
-        const logoH = 55;
-        const placeSize = 16;
-        const placeW = fontRegular.widthOfTextAtSize(placeText, placeSize);
-        const placeY = headerY - logoH + 20; // 20px sous le header
-        page.drawText(placeText, {
-          x: (leftWidth - placeW) / 2 + margin,
-          y: placeY,
-          size: placeSize,
-          font: fontRegular,
-        });
-
-        // 11) Ligne horizontale inférieure
-
-        page.drawLine({
-          start: { x: margin + 20, y: 70 },
-          end: { x: separatorX - margin, y: 70 },
-          thickness: 1,
-          color: rgb(0, 0, 0),
-        });
-
-        // 12) Date en bas
-        const dateText = `${dayName.toUpperCase()}, ${date.toUpperCase()}`;
-        const dateSize = 18;
-        const dateW = fontBold.widthOfTextAtSize(dateText, dateSize);
-        const dateY = 40;
-        page.drawText(dateText, {
-          x: (leftWidth - dateW) / 2 + margin,
-          y: dateY,
-          size: dateSize,
-          font: fontBold,
-        });
-
-        // … ensuite sauvegarde, upload et envoi email comme avant …
-
-        // Save & upload
         const pdfBytes = await pdfDoc.save();
         const fileName = `tickets/${ticket.TicketCode}.pdf`;
         const file = bucket.file(fileName);
-        await file.save(pdfBytes, {
-          metadata: { contentType: "application/pdf" },
-        });
+        await file.save(pdfBytes, { metadata: { contentType: "application/pdf" } });
         await file.makePublic();
         const downloadURL = file.publicUrl();
         downloadLinks.push(downloadURL);
         await updateTicketDownLoadUrl(ticket.TicketCode, downloadURL);
-
-        // Add to email attachments
+        
         attachments.push({
           filename: `billet-${ticket.TicketCode}.pdf`,
           content: pdfBytes,
@@ -429,274 +329,6 @@ export async function generateAndSendTicketPDF(
       }
 
       const port = Number(process.env.SMTP_PORT) || 465;
-
-      console.log("📧 [EMAIL TICKET] Configuration SMTP :", {
-        host: process.env.SMTP_HOST,
-        port,
-        user: process.env.EMAIL_USER,
-        to: user.email,
-        ticketsCount: tickets.length,
-      });
-
-      const transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        port,
-        secure: port === 465, // true for 465, false for 587
-        requireTLS: false, // only require STARTTLS on ports like 587
-        auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
-        tls: { minVersion: "TLSv1.2" },
-      });
-
-      try {
-        console.log("⏳ [EMAIL TICKET] Vérification connexion SMTP...");
-        await transporter.verify();
-        console.log("✅ [EMAIL TICKET] Connexion SMTP vérifiée avec succès !");
-      } catch (verifyError) {
-        console.error("❌ [EMAIL TICKET] ÉCHEC VÉRIFICATION SMTP :", verifyError);
-        throw verifyError;
-      }
-
-      const subjectTickets = ` ${tickets.length > 1 ? "Vos billets" : "Votre billet"
-        } - ${team1Name} vs ${team2Name}`;
-      const textTickets =
-        `Commande confirmée (N°${order.code}).\n` +
-        `${tickets.length > 1 ? "Billets" : "Billet"
-        } en pièce jointe (PDF).\n` +
-        `Émetteur : Billetterie BSR DE TROIS-RIVIÈRES <billets@bsr3r.com>\n` +
-        `Si vous n'êtes pas à l'origine de cet achat, contactez info@bsr3r.com.`;
-
-      // ton HTML existant:
-      const htmlTickets = `
-  <div style="text-align:center">
-    <img src="cid:logo-big" alt="BSR DE TROIS-RIVIÈRES" style="width:150px;height:auto" />
-  </div>
-  <p style="text-align:center;font-weight:bold;font-size:22px">Commande confirmée !</p>
-  <p style="text-align:center;font-size:16px">
-    Votre commande <strong>N° ${order.code}</strong> est confirmée.
-    Vous trouverez en pièce jointe ${tickets.length > 1 ? "vos billets" : "votre billet"
-        }.
-  </p>
-`;
-
-      try {
-        console.log(`⏳ [EMAIL TICKET] Envoi de l'email à ${user.email}...`);
-        const mailInfo = await transporter.sendMail({
-          from: `${process.env.EMAIL_USER}`,
-          to: user.email,
-          subject: subjectTickets,
-          text: textTickets, // << ajoute la version texte
-          html: htmlTickets,
-          envelope: {
-            from: process.env.EMAIL_USER, // MAIL FROM / Return-Path = billets@bsr3r.com
-            to: user.email,
-          },
-          headers: {
-            "List-Unsubscribe": `<mailto:info@bsr3r.com>`,
-            "X-Entity-Type": "Transactional", // indicatif, certains filtres aiment
-          },
-          attachments: [
-            ...attachments,
-            {
-              filename: "logo-big.jpeg",
-              path: path.join(process.cwd(), "public", "logo-big.jpeg"),
-              cid: "logo-big",
-            },
-          ],
-        });
-        console.log("✅ [EMAIL TICKET] Email envoyé avec succès !", mailInfo.messageId || mailInfo);
-      } catch (sendError) {
-        console.error("❌ [EMAIL TICKET] ÉCHEC DE L'ENVOI PAR NODEMAILER :", sendError);
-        throw sendError;
-      }
-    }
-
-    // Subscription PDF (unchanged except logo size/position)
-    if (subscription) {
-      const abonnement = await getAbonementById(subscription.abonnementId);
-
-      const pdfDoc = await PDFDocument.create();
-      // page plus large pour passer le QR à droite
-      const page = pdfDoc.addPage([800, 320]);
-      const { width, height } = page.getSize();
-
-      // 2) fonts
-      // const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
-      const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-
-      // 3) données
-
-      const ticketCode = subscription.code;
-
-      // 4) embeds
-      const logoBytes = fs.readFileSync(logoPath);
-      let team1LogoImage;
-      try {
-        team1LogoImage = await pdfDoc.embedPng(logoBytes);
-      } catch {
-        team1LogoImage = await pdfDoc.embedJpg(logoBytes);
-      }
-      const qrImage = await pdfDoc.embedPng(subscription.qrCodeImage);
-
-      const titleWithSeason = `${abonnement.data.title} (${abonnement.data.season})`;
-
-      // 5) régions et dimensions
-      const margin = 20;
-      const qrSize = 200;
-      const separatorX = width - qrSize - margin - 30; // x de la ligne de séparation verticale
-      const leftWidth = separatorX - 2 * margin; // largeur dispo à gauche du QR
-
-      const borderWidth = 20; // épaisseur de la bordure
-
-      page.drawRectangle({
-        x: borderWidth / 2,
-        y: borderWidth / 2,
-        width: width - borderWidth,
-        height: height - borderWidth,
-        color: rgb(1, 1, 1),
-        borderColor: rgb(0, 0, 0),
-        borderWidth,
-      });
-
-      // 6) Draw QR + séparation
-      page.drawLine({
-        start: { x: separatorX, y: margin },
-        end: { x: separatorX, y: height - margin },
-        thickness: 2,
-        color: rgb(0, 0, 0),
-      });
-      page.drawImage(qrImage, {
-        x: separatorX + margin,
-        y: height - qrSize - margin - 30,
-        width: qrSize,
-        height: qrSize,
-      });
-
-      // 7) Title tout en haut
-      // 7) Titre "Abonnement N ..." à gauche + userName en gras à droite
-
-      const title = `ABONNEMENT N° ${ticketCode}`;
-      const titleSize = 20;
-
-      const userText = String(userName || "");
-      let userSize = 22; // taille du userName (gras)
-      const minUserSize = 12; // taille min si ça ne rentre pas
-
-      const titleY = height - 60;
-      const titleLeftX = margin + 20;
-      const gapMin = 40; // espace minimal entre le titre et le userName
-
-      const titleW = fontBold.widthOfTextAtSize(title, titleSize);
-
-      // Limite droite de la colonne gauche (avant la séparation / QR)
-      const rightBound = separatorX - margin;
-
-      // Largeur/position du userName
-      let userW = fontBold.widthOfTextAtSize(userText, userSize);
-      let userX = rightBound - userW;
-
-      // Respecter l’espace minimal entre les deux textes
-      if (userX < titleLeftX + titleW + gapMin) {
-        userX = titleLeftX + titleW + gapMin;
-      }
-
-      // Si ça déborde encore, réduire la taille du userName
-      while (userX + userW > rightBound && userSize > minUserSize) {
-        userSize -= 1;
-        userW = fontBold.widthOfTextAtSize(userText, userSize);
-        userX = Math.max(titleLeftX + titleW + gapMin, rightBound - userW);
-      }
-
-      // Dessin du titre (gauche)
-      page.drawText(title, {
-        x: titleLeftX,
-        y: titleY,
-        size: titleSize,
-        font: fontBold,
-        color: rgb(0, 0, 0),
-      });
-
-      // Dessin du userName (droite, en gras)
-      page.drawText(userText, {
-        x: userX,
-        y: titleY,
-        size: userSize,
-        font: fontBold,
-        color: rgb(0, 0, 0),
-      });
-
-      // 8) Ligne horizontale supérieure
-      page.drawLine({
-        start: { x: margin + 20, y: height - 80 },
-        end: { x: separatorX - margin, y: height - 80 },
-        thickness: 1,
-        color: rgb(0, 0, 0),
-      });
-      const ADMINSSION_NOTE = "ADMISSION GÉNÉRALE";
-      const ADMINSSION_NOTE_SIZE = 20;
-      const ADMINSSION_NOTE_W = fontBold.widthOfTextAtSize(
-        ADMINSSION_NOTE,
-        ADMINSSION_NOTE_SIZE
-      );
-      const ADMINSSION_NOTE_Y = height - 80 - 35; // 20px sous le header
-      page.drawText(ADMINSSION_NOTE, {
-        x: (leftWidth - ADMINSSION_NOTE_W) / 2 + margin,
-        y: ADMINSSION_NOTE_Y,
-        size: ADMINSSION_NOTE_SIZE,
-        font: fontBold,
-      });
-
-      //i want i the center of the pdf add the logo of megatoit
-      const logoH = 100; // hauteur du logo
-      const logoDims = team1LogoImage.scale(logoH / team1LogoImage.height);
-      const logoX = (leftWidth - logoDims.width) / 2 + margin;
-      const logoY = height - 155;
-      page.drawImage(team1LogoImage, {
-        x: logoX,
-        y: logoY - logoDims.height / 2 + titleSize / 2 - 30,
-        width: logoDims.width,
-        height: logoDims.height,
-      });
-
-
-      // 11) Ligne horizontale inférieure
-
-      page.drawLine({
-        start: { x: margin + 20, y: 60 },
-        end: { x: separatorX - margin, y: 60 },
-        thickness: 1,
-        color: rgb(0, 0, 0),
-      });
-
-      // 12) Date en bas
-
-      const dateSize = 18;
-      const dateW = fontBold.widthOfTextAtSize(titleWithSeason, dateSize);
-      const dateY = 35;
-      page.drawText(titleWithSeason, {
-        x: (leftWidth - dateW) / 2 + margin,
-        y: dateY,
-        size: dateSize,
-        font: fontBold,
-      });
-
-      const pdfBytes = await pdfDoc.save();
-      const fileName = `abonnements/${subscription.code}.pdf`;
-      const file = bucket.file(fileName);
-      await file.save(pdfBytes, {
-        metadata: { contentType: "application/pdf" },
-      });
-      await file.makePublic();
-      const downloadURL = file.publicUrl();
-      await updateSubscriptionDownloadUrl(subscription.code, downloadURL);
-      const port = Number(process.env.SMTP_PORT) || 465;
-
-      console.log("📧 [EMAIL ABONNEMENT] Configuration SMTP :", {
-        host: process.env.SMTP_HOST,
-        port,
-        user: process.env.EMAIL_USER,
-        to: user.email,
-      });
-
       const transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST,
         port,
@@ -706,75 +338,87 @@ export async function generateAndSendTicketPDF(
         tls: { minVersion: "TLSv1.2" },
       });
 
-      try {
-        console.log("⏳ [EMAIL ABONNEMENT] Vérification connexion SMTP...");
-        await transporter.verify();
-        console.log("✅ [EMAIL ABONNEMENT] Connexion SMTP vérifiée avec succès !");
-      } catch (verifyError) {
-        console.error("❌ [EMAIL ABONNEMENT] ÉCHEC VÉRIFICATION SMTP :", verifyError);
-        throw verifyError;
-      }
+      const subjectTickets = ` ${tickets.length > 1 ? "Vos billets" : "Votre billet"} - ${team1Name} vs ${team2Name}`;
+      const htmlTickets = `
+  <div style="text-align:center">
+    <img src="cid:logo-big" alt="BSR DE TROIS-RIVIÈRES" style="width:150px;height:auto" />
+  </div>
+  <p style="text-align:center;font-weight:bold;font-size:22px">Commande confirmée !</p>
+  <p style="text-align:center;font-size:16px">
+    Votre commande <strong>N° ${order.code}</strong> est confirmée.
+    Vous trouverez en pièce jointe ${tickets.length > 1 ? "vos billets" : "votre billet"}.
+  </p>
+`;
 
       try {
-        console.log(`⏳ [EMAIL ABONNEMENT] Envoi de l'email d'abonnement à ${user.email}...`);
-        const mailInfo = await transporter.sendMail({
+        await transporter.sendMail({
           from: `${process.env.EMAIL_USER}`,
           to: user.email,
-          subject: `Votre abonnement BSR DE TROIS-RIVIÈRES pour la saison ${abonnement.data.season}`,
-          text:
-            `Votre abonnement pour la saison ${abonnement.data.season} est prêt !\n\n` +
-            `Téléchargez-le en pièce jointe.\n\n` +
-            `Émetteur : Billetterie BSR DE TROIS-RIVIÈRES <${process.env.EMAIL_USER}>`,
-          html: `
-            <div style="text-align:center">
-          <img src="cid:logo-big" alt="BSR DE TROIS-RIVIÈRES" style="width:150px;height:auto" />
-            </div>
-            <p style="text-align:center;font-weight:bold;font-size:22px">
-          Commande confirmée !
-            </p>
-            <p style="text-align:center;font-size:16px">
-          Votre commande <strong>N° ${order.code}</strong> est confirmée.
-          Vous trouverez en pièce jointe votre abonnement.
-            </p>
-            <p style="background:#f7f7f7;border-radius:8px;padding:16px 20px;margin:24px auto 16px auto;max-width:500px;font-size:15px;color:#333;text-align:center;border:1px solid #e0e0e0;">
-          <strong style="color:#1976d2;">Note :</strong>
-          Ce billet de saison donne droit à l’accès à tous les matchs de
-          la saison régulière du BSR DE TROIS-RIVIÈRES.<br>
-          Il est <b>unique</b> et <b>incessible</b>.<br>
-          Sa présentation est <u>obligatoire</u> à chaque entrée au Colisée Jean-Guy Talbot.
-            </p>
-          `,
-          envelope: {
-            from: process.env.EMAIL_USER,
-            to: user.email,
-          },
-          headers: {
-            "List-Unsubscribe": `<mailto:info@bsr3r.com>`,
-            "X-Entity-Type": "Transactional",
-          },
+          subject: subjectTickets,
+          text: "Commande confirmée. Billet(s) en pièce jointe.",
+          html: htmlTickets,
+          envelope: { from: process.env.EMAIL_USER, to: user.email },
           attachments: [
-            {
-              filename: `abonnement-${subscription.code}.pdf`,
-              content: pdfBytes,
-              contentType: "application/pdf",
-            },
-            {
-              filename: "logo-big.jpeg",
-              content: logoBytes,
-              cid: "logo-big",
-            },
+            ...attachments,
+            { filename: "logo-big.jpeg", path: path.join(process.cwd(), "public", "logo-big.jpeg"), cid: "logo-big" },
           ],
         });
-        console.log("✅ [EMAIL ABONNEMENT] Email d'abonnement envoyé avec succès !", mailInfo.messageId || mailInfo);
-      } catch (sendError) {
-        console.error("❌ [EMAIL ABONNEMENT] ÉCHEC DE L'ENVOI PAR NODEMAILER :", sendError);
-        throw sendError;
-      }
+      } catch (e) { console.error("Email send failed", e); }
     }
 
+    if (subscription) {
+      const abonnement = await getAbonementById(subscription.abonnementId);
+      const pdfDoc = await PDFDocument.create();
+      
+      const logoBytes = fs.readFileSync(logoPath);
+      let teamLogo;
+      try { teamLogo = await pdfDoc.embedPng(logoBytes); } catch { teamLogo = await pdfDoc.embedJpg(logoBytes); }
+      const qrImage = await pdfDoc.embedPng(subscription.qrCodeImage);
+
+      await drawHorizontalTicket(pdfDoc, {
+        ticketCode: subscription.code,
+        buyerName: userName,
+        team1Name: "BSR DE TROIS-RIVIERES", team1LogoImage: teamLogo,
+        team2Name: abonnement.data.title, team2LogoImage: teamLogo,
+        dayStr: "", monthYearStr: abonnement.data.season.replace("-", " – "), timeStr: "BILLET DE SAISON",
+        venue: "Colisée Jean-Guy-Talbot",
+        qrImage,
+        isSubscription: true
+      });
+
+      const pdfBytes = await pdfDoc.save();
+      const fileName = `abonnements/${subscription.code}.pdf`;
+      const file = bucket.file(fileName);
+      await file.save(pdfBytes, { metadata: { contentType: "application/pdf" } });
+      await file.makePublic();
+      await updateSubscriptionDownloadUrl(subscription.code, file.publicUrl());
+      
+      const port = Number(process.env.SMTP_PORT) || 465;
+      const transporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST, port, secure: port === 465, requireTLS: false,
+        auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
+        tls: { minVersion: "TLSv1.2" },
+      });
+
+      try {
+        await transporter.sendMail({
+          from: `${process.env.EMAIL_USER}`, to: user.email,
+          subject: `Votre abonnement pour la saison ${abonnement.data.season}`,
+          text: "Votre abonnement est prêt.",
+          html: `
+            <div style="text-align:center"><img src="cid:logo-big" alt="BSR" style="width:150px;height:auto" /></div>
+            <p style="text-align:center;font-weight:bold;font-size:22px">Commande confirmée !</p>
+            <p style="text-align:center;font-size:16px">Votre abonnement est en pièce jointe.</p>`,
+          attachments: [
+            { filename: `abonnement-${subscription.code}.pdf`, content: pdfBytes, contentType: "application/pdf" },
+            { filename: "logo-big.jpeg", content: logoBytes, cid: "logo-big" },
+          ],
+        });
+      } catch (e) { console.error("Sub email failed", e); }
+    }
     return { success: true };
   } catch (error) {
-    console.error("Error generating or sending PDF:", error);
-    throw new Error("Failed to generate or send PDF");
+    console.error("Error generating PDF:", error);
+    throw new Error("Failed to generate PDF");
   }
 }
