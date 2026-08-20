@@ -124,7 +124,7 @@ async function drawHorizontalTicket(pdfDoc, data) {
       const courteauBoxX = midX + 26;
       page.drawRectangle({ x: courteauBoxX, y: 18, width: cDims.width + 18, height: 52, color: rgb(1,1,1) });
       page.drawImage(courteauImg, { x: courteauBoxX + 9, y: 23, width: cDims.width, height: cDims.height });
-    } catch(e) {}
+    } catch(err) { console.error("Error loading sponsor logo:", err.message); }
   } else {
     let bNameSize = 26;
     let bnW = fontBebas.widthOfTextAtSize(data.buyerName, bNameSize);
