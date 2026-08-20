@@ -115,13 +115,6 @@ const SideBar = ({
       )}
       <div className="flex items-center justify-center mt-4 gap-4 ">
         <Link
-          href="https://www.lhsaaaq.com/"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img src="/Logo-LHSAAAQ-officiel.png" alt="LHSAAAQ" style={{ height: "24px", width: "auto" }} />
-        </Link>
-        <Link
           href="https://www.facebook.com/profile.php?id=61574831637274&locale=fr_FR"
           target="_blank"
           rel="noopener noreferrer"

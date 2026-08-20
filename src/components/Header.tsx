@@ -29,9 +29,12 @@ const Header = () => {
   return (
     <div className="h-20 md:h-24 bg-black fixed top-0 left-0 w-full flex items-center px-4 md:px-16 z-50 justify-between shadow-md border-b-4 border-brand">
       {/* Logo */}
-      <div className="flex-shrink-0">
+      <div className="flex-shrink-0 flex items-center gap-2 md:gap-4">
         <Link href="/">
           <Image src={Logo} alt="Logo" className="h-10 md:h-14 w-auto" />
+        </Link>
+        <Link href="https://www.lhsaaaq.com/" target="_blank" rel="noopener noreferrer">
+          <img src="/Logo-LHSAAAQ-officiel.png" alt="LHSAAAQ" className="h-10 md:h-14 w-auto" />
         </Link>
       </div>
 

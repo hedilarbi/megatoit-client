@@ -10,9 +10,14 @@ const Footer = () => {
     <div>
       <div className="bg-black border-t-4 border-brand md:px-20 px-10 pt-8 pb-20 md:pb-30 text-white">
         <div className="md:flex justify-between flex flex-col md:flex-row gap-8">
-          <Link href="/">
-            <Image src={Logo} alt="Logo" className="h-20 w-auto mb-4" />
-          </Link>
+          <div className="flex items-center gap-4 mb-4">
+            <Link href="/">
+              <Image src={Logo} alt="Logo" className="h-20 w-auto" />
+            </Link>
+            <Link href="https://www.lhsaaaq.com/" target="_blank" rel="noopener noreferrer">
+              <img src="/Logo-LHSAAAQ-officiel.png" alt="LHSAAAQ" className="h-20 w-auto" />
+            </Link>
+          </div>
 
           <div>
             <h3 className="font-bebas-neue text-white text-xl mb-2">
@@ -33,14 +38,7 @@ const Footer = () => {
             <h3 className="font-bebas-neue text-white text-xl mb-2">
               Suivez-nous
             </h3>
-            <div className="flex items-center gap-4 text-white">
-              <Link
-                href="https://www.lhsaaaq.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <img src="/Logo-LHSAAAQ-officiel.png" alt="LHSAAAQ" style={{ height: "24px", width: "auto" }} className="hover:opacity-80 transition-opacity" />
-              </Link>
+            <div className="flex gap-4 text-white">
               <Link
                 href="https://www.facebook.com/profile.php?id=61574831637274&locale=fr_FR"
                 target="_blank"
@@ -49,14 +47,14 @@ const Footer = () => {
                 <FaFacebook size={24} className="hover:text-brand transition-colors" />
               </Link>
               <Link
-                href="https://www.facebook.com/profile.php?id=61574831637274&locale=fr_FR"
+                href="https://www.instagram.com/bsrtroisrivieres?igsh=Y3J5cWcwY28zYjQz"
                 target="_blank"
                 rel="noopener noreferrer"
               >
                 <RiInstagramFill size={24} className="hover:text-brand transition-colors" />
               </Link>
               <Link
-                href="https://www.facebook.com/profile.php?id=61574831637274&locale=fr_FR"
+                href="https://www.tiktok.com/@megatoit"
                 target="_blank"
                 rel="noopener noreferrer"
               >
