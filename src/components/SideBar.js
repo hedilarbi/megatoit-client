@@ -1,7 +1,8 @@
 import Link from "next/link";
 import React from "react";
 import { MdClose } from "react-icons/md";
-import { FaFacebook } from "react-icons/fa";
+import { FaFacebook, FaTiktok } from "react-icons/fa";
+import { RiInstagramFill } from "react-icons/ri";
 const SideBar = ({
   toggleSidebar,
   showSidebar,
@@ -120,6 +121,20 @@ const SideBar = ({
           rel="noopener noreferrer"
         >
           <FaFacebook size={24} color="black" />
+        </Link>
+        <Link
+          href="https://www.instagram.com/bsrtroisrivieres?igsh=Y3J5cWcwY28zYjQz"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <RiInstagramFill size={24} color="black" />
+        </Link>
+        <Link
+          href="https://www.tiktok.com/@megatoit"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <FaTiktok size={24} color="black" />
         </Link>
       </div>
     </div>
