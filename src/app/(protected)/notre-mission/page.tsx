@@ -4,7 +4,7 @@ import React from "react";
 
 import { FaHandRock, FaUsers } from "react-icons/fa";
 import { GiTrophyCup } from "react-icons/gi";
-import VideoSection from "@/components/VideoSection";
+import Image from "next/image";
 import Link from "next/link";
 import { BsFillTicketPerforatedFill } from "react-icons/bs";
 import { IoDiamond } from "react-icons/io5";
@@ -28,8 +28,14 @@ const page = () => {
             qui croient en notre succès. Bonne saison 2026 à tous!
           </p>
         </div>
-        <div className="md:w-1/2 w-full">
-          <VideoSection />
+        <div className="md:w-1/2 w-full flex justify-center">
+          <Image
+            src="/equipe13.jpeg"
+            alt="Équipe BSR de Trois-Rivières"
+            width={800}
+            height={600}
+            className="w-full h-auto rounded-xl shadow-lg object-cover"
+          />
         </div>
       </div>
       <div className="mt-14 bg-black text-white py-8 px-6  w-full md:w-[95%] mx-auto">
