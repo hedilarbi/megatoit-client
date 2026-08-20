@@ -33,7 +33,14 @@ const Footer = () => {
             <h3 className="font-bebas-neue text-white text-xl mb-2">
               Suivez-nous
             </h3>
-            <div className="flex gap-4 text-white">
+            <div className="flex items-center gap-4 text-white">
+              <Link
+                href="https://www.lhsaaaq.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <img src="/Logo-LHSAAAQ-officiel.png" alt="LHSAAAQ" style={{ height: "24px", width: "auto" }} className="hover:opacity-80 transition-opacity" />
+              </Link>
               <Link
                 href="https://www.facebook.com/profile.php?id=61574831637274&locale=fr_FR"
                 target="_blank"
