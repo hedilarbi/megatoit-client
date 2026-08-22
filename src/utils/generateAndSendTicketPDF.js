@@ -13,6 +13,12 @@ import {
 } from "@/services/ticket.service";
 import { getAbonementById } from "@/services/abonement.service";
 
+// Nom affiché par les clients mail. Sans lui, l'en-tête ne porte que l'adresse : la liste
+// des messages retombe alors sur la partie locale (« billets ») et le message affiche
+// l'adresse brute. L'enveloppe SMTP, elle, garde l'adresse seule.
+const EMAIL_FROM_NAME = process.env.EMAIL_FROM_NAME || "Billetterie BSR";
+const mailFrom = () => `"${EMAIL_FROM_NAME}" <${process.env.EMAIL_USER}>`;
+
 async function drawHorizontalTicket(pdfDoc, data) {
   pdfDoc.registerFontkit(fontkit);
   const fontBebasPath = path.join(process.cwd(), "public", "fonts", "BebasNeue-Regular.ttf");
@@ -398,7 +404,7 @@ export async function generateAndSendTicketPDF(user, tickets, order, subscriptio
 
       try {
         await transporter.sendMail({
-          from: `${process.env.EMAIL_USER}`,
+          from: mailFrom(),
           to: user.email,
           subject: subjectTickets,
           text: "Commande confirmée. Billet(s) en pièce jointe.",
@@ -448,7 +454,7 @@ export async function generateAndSendTicketPDF(user, tickets, order, subscriptio
 
       try {
         await transporter.sendMail({
-          from: `${process.env.EMAIL_USER}`, to: user.email,
+          from: mailFrom(), to: user.email,
           subject: `Votre abonnement pour la saison ${abonnement.data.season}`,
           text: "Votre abonnement est prêt.",
           html: `
