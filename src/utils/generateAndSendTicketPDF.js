@@ -88,8 +88,8 @@ async function drawHorizontalTicket(pdfDoc, data) {
 
     const venueValW = fontBebas.widthOfTextAtSize(data.venue, 32);
     page.drawText(data.venue, { x: rightColX - 26 - venueValW, y: height - 85, size: 32, font: fontBebas, color: rgb(1, 1, 1) });
-    const addr1 = "1740 Av. Gilles-Villeneuve";
-    const addr2 = "Trois-Rivières, QC G8Y 7B6";
+    const addr1 = data.addr1 || "1740 Av. Gilles-Villeneuve";
+    const addr2 = data.addr2 || "Trois-Rivières, QC G8Y 7B6";
     const addrColor = rgb(154/255, 154/255, 154/255);
     page.drawText(addr1, { x: rightColX - 26 - fontLato.widthOfTextAtSize(addr1, 16), y: height - 110, size: 16, font: fontLato, color: addrColor });
     page.drawText(addr2, { x: rightColX - 26 - fontLato.widthOfTextAtSize(addr2, 16), y: height - 130, size: 16, font: fontLato, color: addrColor });
@@ -163,8 +163,8 @@ async function drawHorizontalTicket(pdfDoc, data) {
     const venueValW = fontBebas.widthOfTextAtSize(data.venue, 28);
     page.drawText(data.venue, { x: rightColX - 26 - venueValW, y: height - 70, size: 28, font: fontBebas, color: rgb(1, 1, 1) });
     
-    const addr1 = "1740 Av. Gilles-Villeneuve";
-    const addr2 = "Trois-Rivières, QC G8Y 7B6";
+    const addr1 = data.addr1 || "1740 Av. Gilles-Villeneuve";
+    const addr2 = data.addr2 || "Trois-Rivières, QC G8Y 7B6";
     const addrColor = rgb(154/255, 154/255, 154/255);
     page.drawText(addr1, { x: rightColX - 26 - fontLato.widthOfTextAtSize(addr1, 14), y: height - 95, size: 14, font: fontLato, color: addrColor });
     page.drawText(addr2, { x: rightColX - 26 - fontLato.widthOfTextAtSize(addr2, 14), y: height - 110, size: 14, font: fontLato, color: addrColor });
@@ -295,6 +295,18 @@ export async function generateAndSendTicketPDF(user, tickets, order, subscriptio
       const monthYearStr = dateObj.toLocaleDateString("fr-FR", { month: "long", year: "numeric" }).toUpperCase();
       const timeStr = `${dateObj.toLocaleDateString("fr-FR", { weekday: "long" })} · ${dateObj.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}`.toUpperCase();
 
+      let addr1 = "1740 Av. Gilles-Villeneuve";
+      let addr2 = "Trois-Rivières, QC G8Y 7B6";
+      
+      const isSpecialMatch = 
+        (dayStr === "23" && monthYearStr === "JANVIER 2027") || 
+        (dayStr === "19" && monthYearStr === "SEPTEMBRE 2026");
+
+      if (isSpecialMatch) {
+        addr1 = "375 Rue Germain";
+        addr2 = "Saint-Léonard-d'Aston, QC J0C 1M0";
+      }
+
       for (const ticket of tickets) {
         const pdfDoc = await PDFDocument.create();
         const team1LogoImage = await embedTeamLogo(pdfDoc, team1ImageUrl);
@@ -308,6 +320,8 @@ export async function generateAndSendTicketPDF(user, tickets, order, subscriptio
           team2Name, team2LogoImage,
           dayStr, monthYearStr, timeStr,
           venue: match.place || "Colisée Jean-Guy-Talbot",
+          addr1,
+          addr2,
           qrImage,
           isSubscription: false
         });

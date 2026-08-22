@@ -2,7 +2,7 @@
 
 import HomeBanner from "@/components/HomeBanner";
 import MatchsList from "@/components/MatchsList";
-
+import CountDownVendredi from "@/components/CountDownVendredi";
 import FacebookFeed from "@/components/FacebookFeed";
 // import CtaBoutique from "@/components/CtaBoutique";
 import AbonnementSection from "@/components/AbonnementSection";
@@ -22,8 +22,12 @@ export const metadata = {
 export default function Home() {
   return (
     <div className="pb-20">
-      <HomeBanner />
-      {/* <CountDownVendredi /> */}
+      <div className="relative mb-48 md:mb-56">
+        <HomeBanner />
+        <div className="absolute left-1/2 -translate-x-1/2 -bottom-16 md:-bottom-8 translate-y-1/2 w-full z-20 flex justify-center px-4 md:px-0">
+          <CountDownVendredi />
+        </div>
+      </div>
       <AbonnementSection />
       <MatchsList />
       {/* <Commenditaires /> */}
