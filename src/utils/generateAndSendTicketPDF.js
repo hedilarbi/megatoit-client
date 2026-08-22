@@ -29,6 +29,21 @@ async function drawHorizontalTicket(pdfDoc, data) {
   const height = data.isSubscription ? 400 : 340;
   const page = pdfDoc.addPage([width, height]);
 
+  const formatVenue = (text, font, size, maxW) => {
+    if (font.widthOfTextAtSize(text, size) <= maxW) return [text];
+    const parts = text.split(" - ");
+    if (parts.length > 1) return parts.map(p => p.trim());
+    const words = text.split(" ");
+    let lines = [], cur = "";
+    for (let w of words) {
+      if (!cur) { cur = w; continue; }
+      if (font.widthOfTextAtSize(cur + " " + w, size) <= maxW) { cur += " " + w; }
+      else { lines.push(cur); cur = w; }
+    }
+    if (cur) lines.push(cur);
+    return lines;
+  };
+
   page.drawRectangle({ x: 0, y: 0, width, height, color: rgb(0, 0, 0) });
 
   const greenColor = rgb(123 / 255, 253 / 255, 72 / 255);
@@ -86,13 +101,22 @@ async function drawHorizontalTicket(pdfDoc, data) {
     page.drawText("Billet de saison", { x: myX + logoSizeTop + 20, y: height - 80, size: 48, font: fontBebas, color: rgb(1,1,1) });
     page.drawText(data.monthYearStr, { x: myX + logoSizeTop + 20, y: height - 120, size: 38, font: fontBebas, color: greenColor });
 
-    const venueValW = fontBebas.widthOfTextAtSize(data.venue, 32);
-    page.drawText(data.venue, { x: rightColX - 26 - venueValW, y: height - 85, size: 32, font: fontBebas, color: rgb(1, 1, 1) });
+    const venueSize = 32;
+    const venueLines = formatVenue(data.venue, fontBebas, venueSize, 300);
+    let currentYVenue = height - 85 + (venueLines.length > 1 ? 20 : 0);
+    for (const line of venueLines) {
+      const lineW = fontBebas.widthOfTextAtSize(line, venueSize);
+      page.drawText(line, { x: rightColX - 26 - lineW, y: currentYVenue, size: venueSize, font: fontBebas, color: rgb(1, 1, 1) });
+      currentYVenue -= (venueSize + 2);
+    }
+    
+    currentYVenue -= 5;
     const addr1 = data.addr1 || "1740 Av. Gilles-Villeneuve";
     const addr2 = data.addr2 || "Trois-Rivières, QC G8Y 7B6";
     const addrColor = rgb(154/255, 154/255, 154/255);
-    page.drawText(addr1, { x: rightColX - 26 - fontLato.widthOfTextAtSize(addr1, 16), y: height - 110, size: 16, font: fontLato, color: addrColor });
-    page.drawText(addr2, { x: rightColX - 26 - fontLato.widthOfTextAtSize(addr2, 16), y: height - 130, size: 16, font: fontLato, color: addrColor });
+    page.drawText(addr1, { x: rightColX - 26 - fontLato.widthOfTextAtSize(addr1, 16), y: currentYVenue, size: 16, font: fontLato, color: addrColor });
+    currentYVenue -= 20;
+    page.drawText(addr2, { x: rightColX - 26 - fontLato.widthOfTextAtSize(addr2, 16), y: currentYVenue, size: 16, font: fontLato, color: addrColor });
 
     const topBorderY = height - 180;
     page.drawLine({ start: { x: midX + 26, y: topBorderY }, end: { x: rightColX - 26, y: topBorderY }, thickness: 1, color: rgb(35/255, 35/255, 35/255) });
@@ -160,14 +184,22 @@ async function drawHorizontalTicket(pdfDoc, data) {
     page.drawText(data.monthYearStr, { x: myX, y: height - 110, size: 32, font: fontBebas, color: greenColor });
     page.drawText(data.timeStr, { x: myX, y: height - 130, size: 14, font: fontLatoBold, color: rgb(140 / 255, 140 / 255, 140 / 255) });
 
-    const venueValW = fontBebas.widthOfTextAtSize(data.venue, 28);
-    page.drawText(data.venue, { x: rightColX - 26 - venueValW, y: height - 70, size: 28, font: fontBebas, color: rgb(1, 1, 1) });
+    const venueSize = 28;
+    const venueLines = formatVenue(data.venue, fontBebas, venueSize, 280);
+    let currentYVenue = height - 70 + (venueLines.length > 1 ? 20 : 0);
+    for (const line of venueLines) {
+      const lineW = fontBebas.widthOfTextAtSize(line, venueSize);
+      page.drawText(line, { x: rightColX - 26 - lineW, y: currentYVenue, size: venueSize, font: fontBebas, color: rgb(1, 1, 1) });
+      currentYVenue -= (venueSize + 2);
+    }
     
+    currentYVenue -= 5;
     const addr1 = data.addr1 || "1740 Av. Gilles-Villeneuve";
     const addr2 = data.addr2 || "Trois-Rivières, QC G8Y 7B6";
     const addrColor = rgb(154/255, 154/255, 154/255);
-    page.drawText(addr1, { x: rightColX - 26 - fontLato.widthOfTextAtSize(addr1, 14), y: height - 95, size: 14, font: fontLato, color: addrColor });
-    page.drawText(addr2, { x: rightColX - 26 - fontLato.widthOfTextAtSize(addr2, 14), y: height - 110, size: 14, font: fontLato, color: addrColor });
+    page.drawText(addr1, { x: rightColX - 26 - fontLato.widthOfTextAtSize(addr1, 14), y: currentYVenue, size: 14, font: fontLato, color: addrColor });
+    currentYVenue -= 15;
+    page.drawText(addr2, { x: rightColX - 26 - fontLato.widthOfTextAtSize(addr2, 14), y: currentYVenue, size: 14, font: fontLato, color: addrColor });
 
     const topBorderY = height - 150;
     page.drawLine({ start: { x: midX + 26, y: topBorderY }, end: { x: rightColX - 26, y: topBorderY }, thickness: 1, color: rgb(35 / 255, 35 / 255, 35 / 255) });
