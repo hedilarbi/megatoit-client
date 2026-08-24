@@ -107,10 +107,10 @@ const SuccessContent = ({ paymentIntentId, orderId }) => {
             Merci pour votre achat !{" "}
             {order.match
               ? "Vos billets ont été envoyés"
-              : "Votre abonnement a été envoyé"}{" "}
+              : `${order.quantity > 1 ? "Vos abonnements ont" : "Votre abonnement a"} été envoyé${order.quantity > 1 ? "s" : ""}`}{" "}
             à votre adresse courriel.
           </h2>
-          <p className="font-lato text-base text-center">
+          <p className="font-lato text-lg font-bold text-center">
             Vérifiez votre boîte de réception et vos spams si nécessaire.
           </p>
           {!order.match && (
@@ -146,7 +146,9 @@ const SuccessContent = ({ paymentIntentId, orderId }) => {
                   <p className="font-lato text-base text-[#414A5A]">
                     Abonnement
                   </p>
-                  <p>{order.abonnement.title}</p>
+                  <p>
+                    {order.quantity || 1} x {order.abonnement.title}
+                  </p>
                 </div>
               )}
               {order.match && (

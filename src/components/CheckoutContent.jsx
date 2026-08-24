@@ -37,7 +37,9 @@ import { getEffectiveSubscriptionPrice } from "@/utils/subscriptionUtils";
 
 const CheckoutContent = ({ matchId, quantity: rawQuantity, abonnementId }) => {
   // BUG FIX: parse quantity to number — URL params are strings, and "0" is truthy
-  const quantity = rawQuantity ? parseInt(rawQuantity, 10) : null;
+  const ticketQuantity = rawQuantity ? parseInt(rawQuantity, 10) : null;
+  const [abonnementQuantity, setAbonnementQuantity] = useState(1);
+  const quantity = matchId ? ticketQuantity : abonnementQuantity;
   const [match, setMatch] = useState(null);
   const [abonnement, setAbonnement] = useState(null);
 
@@ -123,10 +125,13 @@ const CheckoutContent = ({ matchId, quantity: rawQuantity, abonnementId }) => {
             const TaxesList = taxesResponse.data.map((tax) => ({
               name: tax.nom,
               percentage: tax.valeur,
-              value: (effectiveSubPrice * tax.valeur) / 100,
+              value: (effectiveSubPrice * abonnementQuantity * tax.valeur) / 100,
             }));
             setTaxes(TaxesList);
-            setTotal(effectiveSubPrice + TaxesList.reduce((acc, t) => acc + t.value, 0));
+            setTotal(
+              effectiveSubPrice * abonnementQuantity +
+                TaxesList.reduce((acc, t) => acc + t.value, 0)
+            );
           }
         } else {
           setError("Abonnement introuvable");
@@ -162,7 +167,8 @@ const CheckoutContent = ({ matchId, quantity: rawQuantity, abonnementId }) => {
     setCodeError(null);
 
     if (abonnement) {
-      const subtotal = getEffectiveSubscriptionPrice(abonnement);
+      const subtotal =
+        getEffectiveSubscriptionPrice(abonnement) * abonnementQuantity;
       const newTaxes = taxes.map((tax) => ({
         ...tax,
         value: (subtotal * tax.percentage) / 100,
@@ -192,7 +198,8 @@ const CheckoutContent = ({ matchId, quantity: rawQuantity, abonnementId }) => {
         setCodeData(response.data);
 
         if (abonnement) {
-          const baseSubPrice = getEffectiveSubscriptionPrice(abonnement);
+          const baseSubPrice =
+            getEffectiveSubscriptionPrice(abonnement) * abonnementQuantity;
           let newSubtotal = baseSubPrice;
           if (response.data.type === "percent") {
             newSubtotal = baseSubPrice * (1 - response.data.percent / 100);
@@ -245,6 +252,30 @@ const CheckoutContent = ({ matchId, quantity: rawQuantity, abonnementId }) => {
     resetCode();
   };
 
+  const updateAbonnementQuantity = (value) => {
+    const nextQuantity = Math.max(1, Math.min(100, Number.parseInt(value, 10) || 1));
+    setAbonnementQuantity(nextQuantity);
+    setConfirmed(false);
+
+    if (!abonnement) return;
+    const baseSubtotal =
+      getEffectiveSubscriptionPrice(abonnement) * nextQuantity;
+    let discountedSubtotal = baseSubtotal;
+    if (codeData?.type === "percent") {
+      discountedSubtotal = baseSubtotal * (1 - codeData.percent / 100);
+    } else if (codeData?.type === "amount") {
+      discountedSubtotal = Math.max(0, baseSubtotal - codeData.amount);
+    }
+    const newTaxes = taxes.map((tax) => ({
+      ...tax,
+      value: (discountedSubtotal * tax.percentage) / 100,
+    }));
+    setTaxes(newTaxes);
+    setTotal(
+      discountedSubtotal + newTaxes.reduce((sum, tax) => sum + tax.value, 0)
+    );
+  };
+
   const processOrder = async () => {
     try {
       setTreatingOrder(true);
@@ -259,6 +290,7 @@ const CheckoutContent = ({ matchId, quantity: rawQuantity, abonnementId }) => {
           ticketPrice: match ? match.price : null,
           abonnementId: abonnement ? abonnementId : null,
           abonnementPrice: abonnement ? getEffectiveSubscriptionPrice(abonnement) : null,
+          abonnementQuantity: abonnement ? abonnementQuantity : null,
           amount: total,
           promoCodeId: codeData ? codeData.id : null,
         },
@@ -630,11 +662,46 @@ const CheckoutContent = ({ matchId, quantity: rawQuantity, abonnementId }) => {
             </h2>
             <div className="border border-gray-300 rounded-md p-4 mt-4 bg-white flex justify-between">
               <p className="font-lato text-gray-600 font-semibold uppercase">
-                1 x Billet de saison RÉGULIÈRE ({abonnement.season})
+                {abonnementQuantity} x Billet(s) de saison RÉGULIÈRE ({abonnement.season})
               </p>
               <p className="font-lato text-gray-800 font-semibold">
-                ${getEffectiveSubscriptionPrice(abonnement).toFixed(2)}
+                ${getEffectiveSubscriptionPrice(abonnement).toFixed(2)} x {abonnementQuantity} = $
+                {(getEffectiveSubscriptionPrice(abonnement) * abonnementQuantity).toFixed(2)}
               </p>
+            </div>
+            <div className="mt-4 flex items-center gap-4">
+              <label htmlFor="abonnementQuantity" className="font-lato font-semibold uppercase">
+                Quantité
+              </label>
+              <div className="flex items-center overflow-hidden rounded-md border border-gray-300 bg-white">
+                <button
+                  type="button"
+                  onClick={() => updateAbonnementQuantity(abonnementQuantity - 1)}
+                  disabled={abonnementQuantity <= 1}
+                  className="px-4 py-2 text-xl font-bold disabled:opacity-40 cursor-pointer"
+                  aria-label="Diminuer la quantité"
+                >
+                  −
+                </button>
+                <input
+                  id="abonnementQuantity"
+                  type="number"
+                  min="1"
+                  max="100"
+                  value={abonnementQuantity}
+                  onChange={(event) => updateAbonnementQuantity(event.target.value)}
+                  className="w-20 border-x border-gray-300 py-2 text-center font-semibold"
+                />
+                <button
+                  type="button"
+                  onClick={() => updateAbonnementQuantity(abonnementQuantity + 1)}
+                  disabled={abonnementQuantity >= 100}
+                  className="px-4 py-2 text-xl font-bold disabled:opacity-40 cursor-pointer"
+                  aria-label="Augmenter la quantité"
+                >
+                  +
+                </button>
+              </div>
             </div>
           </div>
 
@@ -741,7 +808,9 @@ const CheckoutContent = ({ matchId, quantity: rawQuantity, abonnementId }) => {
             <div className="border border-gray-300 rounded-md p-4 mt-4 bg-white">
               <div className="flex justify-between w-full font-lato text-base">
                 <p className="font-semibold uppercase">Sous-total</p>
-                <p>${getEffectiveSubscriptionPrice(abonnement).toFixed(2)}</p>
+                <p>
+                  ${(getEffectiveSubscriptionPrice(abonnement) * abonnementQuantity).toFixed(2)}
+                </p>
               </div>
 
               {codeIsValid && codeData && (
@@ -750,7 +819,7 @@ const CheckoutContent = ({ matchId, quantity: rawQuantity, abonnementId }) => {
                   <p>
                     {codeData.type === "percent"
                       ? `-$${(
-                        (getEffectiveSubscriptionPrice(abonnement) * codeData.percent) /
+                        (getEffectiveSubscriptionPrice(abonnement) * abonnementQuantity * codeData.percent) /
                         100
                       ).toFixed(2)}`
                       : `-$${parseFloat(codeData.amount).toFixed(2)}`}

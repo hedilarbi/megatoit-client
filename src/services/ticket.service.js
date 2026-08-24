@@ -36,16 +36,26 @@ export const createTicketAndOrder = async ({
       };
     }
     if (abonnementId && abonnementPrice) {
+      const subscriptionQuantity = Number.parseInt(quantity || 1, 10);
+      if (
+        !Number.isInteger(subscriptionQuantity) ||
+        subscriptionQuantity < 1 ||
+        subscriptionQuantity > 100
+      ) {
+        throw new Error("Invalid subscription quantity");
+      }
       const buffer = crypto.randomBytes(Math.ceil(8 / 2));
       const code = buffer.toString("hex").slice(0, 10);
       order = {
         userId,
         code,
         abonnementId,
+        quantity: subscriptionQuantity,
         abonnementPrice,
         amount,
         paymentIntentId,
         subscriptionId: "",
+        subscriptionIds: [],
         paiement_status: true,
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
         promoCodeId,
@@ -118,49 +128,52 @@ export const createTicketAndOrder = async ({
       });
     }
     let abonnement = null;
+    const abonnements = [];
     if (abonnementId) {
-      const subscriptionRef = admin
-        .firestore()
-        .collection("subscriptions")
-        .doc();
-      const subscriptionId = subscriptionRef.id;
-      order.subscriptionId = subscriptionId;
-      const toQrCode = "s/" + subscriptionId;
-      const qrImageBuffer = await QRCode.toBuffer(toQrCode, {
-        errorCorrectionLevel: "H",
-        type: "png",
-        width: 300,
-        margin: 1,
-      });
-      const bucket = getStorage().bucket();
-      const file = bucket.file(`qrcodes/${toQrCode}.png`);
-      await file.save(qrImageBuffer, {
-        metadata: {
-          contentType: "image/png",
-        },
-      });
-
-      // Rends-le public (ou utilise signed URL si privé)
-      await file.makePublic();
-      const qrCodeURL = file.publicUrl();
-      const buffer = crypto.randomBytes(Math.ceil(8 / 2));
-      const code = buffer.toString("hex").slice(0, 10);
-      const subscription = {
-        userId,
-        abonnementId,
-        orderId,
-        qrCodeURL,
-        code,
-        matchs: [],
-        price: abonnementPrice,
-        createdAt: admin.firestore.FieldValue.serverTimestamp(),
-        isActive: true,
-      };
-      await subscriptionRef.set(subscription);
-      abonnement = {
-        ...subscription,
-        qrCodeImage: qrImageBuffer,
-      };
+      for (let i = 0; i < order.quantity; i++) {
+        const subscriptionRef = admin
+          .firestore()
+          .collection("subscriptions")
+          .doc();
+        const subscriptionId = subscriptionRef.id;
+        order.subscriptionIds.push(subscriptionId);
+        const toQrCode = "s/" + subscriptionId;
+        const qrImageBuffer = await QRCode.toBuffer(toQrCode, {
+          errorCorrectionLevel: "H",
+          type: "png",
+          width: 300,
+          margin: 1,
+        });
+        const bucket = getStorage().bucket();
+        const file = bucket.file(`qrcodes/${toQrCode}.png`);
+        await file.save(qrImageBuffer, {
+          metadata: { contentType: "image/png" },
+        });
+        await file.makePublic();
+        const qrCodeURL = file.publicUrl();
+        const buffer = crypto.randomBytes(Math.ceil(8 / 2));
+        const code = buffer.toString("hex").slice(0, 10);
+        const subscription = {
+          userId,
+          abonnementId,
+          orderId,
+          qrCodeURL,
+          code,
+          matchs: [],
+          price: abonnementPrice,
+          createdAt: admin.firestore.FieldValue.serverTimestamp(),
+          isActive: true,
+        };
+        await subscriptionRef.set(subscription);
+        abonnements.push({
+          ...subscription,
+          id: subscriptionId,
+          qrCodeImage: qrImageBuffer,
+        });
+      }
+      // Keep legacy readers working while new readers use subscriptionIds.
+      order.subscriptionId = order.subscriptionIds[0];
+      abonnement = abonnements[0] || null;
     }
     await orderRef.set(order);
     return {
@@ -168,6 +181,7 @@ export const createTicketAndOrder = async ({
       data: {
         tickets,
         abonnement,
+        abonnements,
         order,
         orderId,
       },

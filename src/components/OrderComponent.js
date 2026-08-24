@@ -247,7 +247,7 @@ const OrderComponent = ({ id }) => {
       {order?.abonnement && (
         <div className=" px-4 md:px-8">
           <h3 className="font-lato text-[#414A5A] font-semibold text-2xl text-center">
-            Abonnement
+            Détails de la commande
           </h3>
           <p className="text-base text-gray-600 mt-1 md:text-lg">
             <span className="font-semibold capitalize">Titre: </span>
@@ -282,18 +282,29 @@ const OrderComponent = ({ id }) => {
             <span className="font-semibold">Total payé: </span>$
             {(order.amount / 100).toFixed(2)}
           </p>
-          <div className="mt-4 border border-black rounded-md shadow-md p-3 flex justify-between items-center ">
-            <p className="text-base text-gray-600 font-semibold">
-              Abonnement N° {order.subscription.code}
-            </p>
-            <a
-              href={order.subscription.downloadUrl}
-              className="text-white bg-black rounded-md px-4 py-1 font-bebas-neue hover:underline"
-              target="_blank"
+          {(order.subscriptions?.length
+            ? order.subscriptions
+            : order.subscription
+              ? [order.subscription]
+              : []
+          ).map((subscription) => (
+            <div
+              key={subscription.id || subscription.code}
+              className="mt-4 border border-black rounded-md shadow-md p-3 flex justify-between items-center"
             >
-              Voir l&apos;abonnement
-            </a>
-          </div>
+              <p className="text-base text-gray-600 font-semibold">
+                Abonnement N° {subscription.code}
+              </p>
+              <a
+                href={subscription.downloadUrl}
+                className="text-white bg-black rounded-md px-4 py-1 font-bebas-neue hover:underline"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Voir l&apos;abonnement
+              </a>
+            </div>
+          ))}
         </div>
       )}
     </div>

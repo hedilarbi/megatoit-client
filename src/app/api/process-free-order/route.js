@@ -4,6 +4,7 @@ import {
   getUserDocument,
 } from "@/services/ticket.service";
 import { generateAndSendTicketPDF } from "@/utils/generateAndSendTicketPDF";
+import { calculateSubscriptionOrderPricing } from "@/services/subscriptionPricing.service";
 
 export const runtime = "nodejs";
 export const config = {
@@ -38,6 +39,7 @@ export async function POST(request) {
       promoCodeId,
       abonnementId,
       abonnementPrice,
+      abonnementQuantity,
       amount,
     } = body;
 
@@ -49,7 +51,14 @@ export async function POST(request) {
     // BUG FIX #2: validate that at least one valid purchase type is present
     // to avoid a TypeError crash when response stays null
     const hasMatchPurchase = Boolean(matchId && quantity && ticketPrice);
-    const hasAbonnementPurchase = Boolean(abonnementId && abonnementPrice);
+    const parsedAbonnementQuantity = Number.parseInt(abonnementQuantity || "1", 10);
+    const hasAbonnementPurchase = Boolean(
+      abonnementId &&
+        abonnementPrice &&
+        Number.isInteger(parsedAbonnementQuantity) &&
+        parsedAbonnementQuantity >= 1 &&
+        parsedAbonnementQuantity <= 100
+    );
     if (!hasMatchPurchase && !hasAbonnementPurchase) {
       return new Response(
         JSON.stringify({ error: "Invalid purchase payload: matchId or abonnementId required" }),
@@ -109,30 +118,22 @@ export async function POST(request) {
     if (hasAbonnementPurchase) {
       let verifiedPrice = abonnementPrice;
       try {
-        const abonnementDoc = await admin
-          .firestore()
-          .collection("abonements")
-          .doc(String(abonnementId))
-          .get();
-
-        if (abonnementDoc.exists) {
-          const abonnementData = abonnementDoc.data();
-          const SERVER_NOW = new Date();
-          const PRE_SALE_CUTOFF = new Date("2026-09-07T03:59:59.999Z");
-
-          let effectivePrice = Number(abonnementData.price || 0);
-          if (
-            SERVER_NOW <= PRE_SALE_CUTOFF &&
-            abonnementData.reducedPrice !== undefined &&
-            abonnementData.reducedPrice !== null &&
-            Number(abonnementData.reducedPrice) > 0
-          ) {
-            effectivePrice = Number(abonnementData.reducedPrice);
-          }
-          verifiedPrice = effectivePrice;
+        const pricing = await calculateSubscriptionOrderPricing({
+          abonnementId,
+          quantity: parsedAbonnementQuantity,
+          promoCodeId,
+        });
+        verifiedPrice = pricing.unitPrice;
+        if (pricing.total !== 0 || Number(amount) !== 0) {
+          return new Response(JSON.stringify({ error: "Invalid free order amount" }), {
+            status: 400,
+          });
         }
       } catch (e) {
         console.error("Error verifying abonnement price in process-free-order:", e);
+        return new Response(JSON.stringify({ error: "Unable to verify subscription price" }), {
+          status: 400,
+        });
       }
 
       response = await createTicketAndOrder({
@@ -140,6 +141,7 @@ export async function POST(request) {
         abonnementId,
         paymentIntentId: null,
         abonnementPrice: verifiedPrice,
+        quantity: parsedAbonnementQuantity,
         amount,
 
         promoCodeId,
@@ -162,12 +164,12 @@ export async function POST(request) {
         response.data.order
       );
     }
-    if (response.data.abonnement) {
+    if (response.data.abonnements?.length) {
       await generateAndSendTicketPDF(
         userData,
         [],
         response.data.order,
-        response.data.abonnement
+        response.data.abonnements
       );
     }
 

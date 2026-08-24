@@ -1,6 +1,6 @@
-import admin from "@/lib/firebaseAdmin";
 import { NextResponse } from "next/server";
 import crypto from "crypto";
+import { calculateSubscriptionOrderPricing } from "@/services/subscriptionPricing.service";
 
 import Stripe from "stripe";
 
@@ -75,6 +75,7 @@ export async function POST(request) {
       ticketPrice,
       abonnementPrice,
       abonnementId,
+      abonnementQuantity,
       userName,
       email,
       codeId,
@@ -98,7 +99,14 @@ export async function POST(request) {
     }
 
     const hasMatchPurchase = Boolean(matchId && quantity && ticketPrice);
-    const hasAbonnementPurchase = Boolean(abonnementId && abonnementPrice);
+    const parsedAbonnementQuantity = Number.parseInt(abonnementQuantity || quantity || "1", 10);
+    const hasAbonnementPurchase = Boolean(
+      abonnementId &&
+        abonnementPrice &&
+        Number.isInteger(parsedAbonnementQuantity) &&
+        parsedAbonnementQuantity >= 1 &&
+        parsedAbonnementQuantity <= 100
+    );
     if (hasMatchPurchase === hasAbonnementPurchase) {
       return new Response(
         JSON.stringify({
@@ -113,30 +121,22 @@ export async function POST(request) {
     let verifiedAbonnementPrice = abonnementPrice;
     if (hasAbonnementPurchase) {
       try {
-        const abonnementDoc = await admin
-          .firestore()
-          .collection("abonements")
-          .doc(String(abonnementId))
-          .get();
-
-        if (abonnementDoc.exists) {
-          const abonnementData = abonnementDoc.data();
-          const SERVER_NOW = new Date();
-          const PRE_SALE_CUTOFF = new Date("2026-09-07T03:59:59.999Z");
-
-          let effectivePrice = Number(abonnementData.price || 0);
-          if (
-            SERVER_NOW <= PRE_SALE_CUTOFF &&
-            abonnementData.reducedPrice !== undefined &&
-            abonnementData.reducedPrice !== null &&
-            Number(abonnementData.reducedPrice) > 0
-          ) {
-            effectivePrice = Number(abonnementData.reducedPrice);
-          }
-          verifiedAbonnementPrice = effectivePrice;
+        const pricing = await calculateSubscriptionOrderPricing({
+          abonnementId,
+          quantity: parsedAbonnementQuantity,
+          promoCodeId: codeId,
+        });
+        verifiedAbonnementPrice = pricing.unitPrice;
+        if (pricing.amountInCents !== amountInCents) {
+          return new Response(JSON.stringify({ error: "Invalid payment amount" }), {
+            status: 400,
+          });
         }
       } catch (err) {
         console.error("Error verifying abonnement price server-side:", err);
+        return new Response(JSON.stringify({ error: "Unable to verify subscription price" }), {
+          status: 400,
+        });
       }
     }
 
@@ -147,11 +147,11 @@ export async function POST(request) {
       email,
       amount: amountInCents,
       currency,
-      quantity,
       matchId,
       ticketPrice,
       abonnementPrice: verifiedAbonnementPrice,
       abonnementId,
+      quantity: hasAbonnementPurchase ? parsedAbonnementQuantity : quantity,
       codeId,
     });
 
@@ -186,6 +186,7 @@ export async function POST(request) {
         userId: String(userId),
         abonnementId: String(abonnementId),
         abonnementPrice: String(verifiedAbonnementPrice),
+        quantity: String(parsedAbonnementQuantity),
       };
       if (codeId) metadata.codeId = String(codeId);
       if (checkoutSessionId) {

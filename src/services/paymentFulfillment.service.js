@@ -104,7 +104,7 @@ export const fulfillSuccessfulPaymentIntent = async (paymentIntent, sourceId) =>
       });
     } else if (abonnementId && abonnementPrice) {
       response = await createTicketAndOrder({
-        userId, abonnementId, abonnementPrice,
+        userId, abonnementId, abonnementPrice, quantity,
         amount: paymentIntent.amount,
         paymentIntentId: paymentIntent.id,
         promoCodeId,
@@ -125,8 +125,8 @@ export const fulfillSuccessfulPaymentIntent = async (paymentIntent, sourceId) =>
       const userData = await getUserDocument(userId);
       if (response.data.tickets.length) {
         await generateAndSendTicketPDF(userData, response.data.tickets, response.data.order);
-      } else if (response.data.abonnement) {
-        await generateAndSendTicketPDF(userData, [], response.data.order, response.data.abonnement);
+      } else if (response.data.abonnements?.length) {
+        await generateAndSendTicketPDF(userData, [], response.data.order, response.data.abonnements);
       }
     } catch (error) {
       console.error("Order created but ticket email failed:", error);

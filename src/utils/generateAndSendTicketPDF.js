@@ -396,33 +396,47 @@ export async function generateAndSendTicketPDF(user, tickets, order, subscriptio
       } catch (e) { console.error("Email send failed", e); }
     }
 
-    if (subscription) {
-      const abonnement = await getAbonementById(subscription.abonnementId);
-      const pdfDoc = await PDFDocument.create();
-      
+    const subscriptions = Array.isArray(subscription)
+      ? subscription
+      : subscription
+        ? [subscription]
+        : [];
+
+    if (subscriptions.length > 0) {
+      const abonnement = await getAbonementById(subscriptions[0].abonnementId);
       const logoBytes = fs.readFileSync(logoPath);
-      let teamLogo;
-      try { teamLogo = await pdfDoc.embedPng(logoBytes); } catch { teamLogo = await pdfDoc.embedJpg(logoBytes); }
-      const qrImage = await pdfDoc.embedPng(subscription.qrCodeImage);
+      const subscriptionAttachments = [];
 
-      await drawHorizontalTicket(pdfDoc, {
-        ticketCode: subscription.code,
-        buyerName: userName,
-        team1Name: "BSR DE TROIS-RIVIERES", team1LogoImage: teamLogo,
-        team2Name: abonnement.data.title, team2LogoImage: teamLogo,
-        dayStr: "", monthYearStr: abonnement.data.season.replace("-", " – "), timeStr: "BILLET DE SAISON",
-        venue: "Colisée Jean-Guy-Talbot",
-        qrImage,
-        isSubscription: true
-      });
+      for (const currentSubscription of subscriptions) {
+        const pdfDoc = await PDFDocument.create();
+        let teamLogo;
+        try { teamLogo = await pdfDoc.embedPng(logoBytes); } catch { teamLogo = await pdfDoc.embedJpg(logoBytes); }
+        const qrImage = await pdfDoc.embedPng(currentSubscription.qrCodeImage);
 
-      const pdfBytes = await pdfDoc.save();
-      const fileName = `abonnements/${subscription.code}.pdf`;
-      const file = bucket.file(fileName);
-      await file.save(pdfBytes, { metadata: { contentType: "application/pdf" } });
-      await file.makePublic();
-      await updateSubscriptionDownloadUrl(subscription.code, file.publicUrl());
-      
+        await drawHorizontalTicket(pdfDoc, {
+          ticketCode: currentSubscription.code,
+          buyerName: userName,
+          team1Name: "BSR DE TROIS-RIVIERES", team1LogoImage: teamLogo,
+          team2Name: abonnement.data.title, team2LogoImage: teamLogo,
+          dayStr: "", monthYearStr: abonnement.data.season.replace("-", " – "), timeStr: "BILLET DE SAISON",
+          venue: "Colisée Jean-Guy-Talbot",
+          qrImage,
+          isSubscription: true
+        });
+
+        const pdfBytes = await pdfDoc.save();
+        const fileName = `abonnements/${currentSubscription.code}.pdf`;
+        const file = bucket.file(fileName);
+        await file.save(pdfBytes, { metadata: { contentType: "application/pdf" } });
+        await file.makePublic();
+        await updateSubscriptionDownloadUrl(currentSubscription.code, file.publicUrl());
+        subscriptionAttachments.push({
+          filename: `abonnement-${currentSubscription.code}.pdf`,
+          content: pdfBytes,
+          contentType: "application/pdf",
+        });
+      }
+
       const port = Number(process.env.SMTP_PORT) || 465;
       const transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST, port, secure: port === 465, requireTLS: false,
@@ -433,14 +447,14 @@ export async function generateAndSendTicketPDF(user, tickets, order, subscriptio
       try {
         await transporter.sendMail({
           from: mailFrom(), to: user.email,
-          subject: `Votre abonnement pour la saison ${abonnement.data.season}`,
-          text: "Votre abonnement est prêt.",
+          subject: `${subscriptions.length > 1 ? "Vos abonnements" : "Votre abonnement"} pour la saison ${abonnement.data.season}`,
+          text: `${subscriptions.length > 1 ? "Vos abonnements sont prêts." : "Votre abonnement est prêt."}`,
           html: `
             <div style="text-align:center"><img src="cid:logo-big" alt="BSR" style="width:150px;height:auto" /></div>
             <p style="text-align:center;font-weight:bold;font-size:22px">Commande confirmée !</p>
-            <p style="text-align:center;font-size:16px">Votre abonnement est en pièce jointe.</p>`,
+            <p style="text-align:center;font-size:16px">${subscriptions.length > 1 ? `Vos ${subscriptions.length} abonnements sont` : "Votre abonnement est"} en pièce jointe.</p>`,
           attachments: [
-            { filename: `abonnement-${subscription.code}.pdf`, content: pdfBytes, contentType: "application/pdf" },
+            ...subscriptionAttachments,
             { filename: "logo-big.jpeg", content: logoBytes, cid: "logo-big" },
           ],
         });

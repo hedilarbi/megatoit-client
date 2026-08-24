@@ -62,13 +62,22 @@ export const getUserOrders = async (uid) => {
             match: matchData,
           };
         }
-        if (orderData.subscriptionId) {
-          const subscriptiontDoc = await getDoc(
-            doc(db, "subscriptions", orderData.subscriptionId)
-          );
-          const subscriptionData = subscriptiontDoc.exists()
-            ? subscriptiontDoc.data()
-            : null;
+        if (orderData.subscriptionId || orderData.subscriptionIds?.length) {
+          const subscriptionIds = orderData.subscriptionIds?.length
+            ? orderData.subscriptionIds
+            : [orderData.subscriptionId];
+          const subscriptions = (
+            await Promise.all(
+              subscriptionIds.map(async (subscriptionId) => {
+                const subscriptionDoc = await getDoc(
+                  doc(db, "subscriptions", subscriptionId)
+                );
+                return subscriptionDoc.exists()
+                  ? { id: subscriptionDoc.id, ...subscriptionDoc.data() }
+                  : null;
+              })
+            )
+          ).filter(Boolean);
           const abonnementDoc = await getDoc(
             doc(db, "abonements", orderData.abonnementId)
           );
@@ -79,7 +88,8 @@ export const getUserOrders = async (uid) => {
           return {
             id: orderDoc.id,
             ...orderData,
-            subscription: subscriptionData,
+            subscription: subscriptions[0] || null,
+            subscriptions,
             abonnement: abonnementData,
           };
         }
@@ -154,16 +164,23 @@ export const getOrderById = async (id) => {
           };
         }
       }
-      if (orderData.subscriptionId) {
-        const subscriptionDoc = await getDoc(
-          doc(db, "subscriptions", orderData.subscriptionId)
-        );
-        if (subscriptionDoc.exists()) {
-          orderData.subscription = {
-            id: subscriptionDoc.id,
-            ...subscriptionDoc.data(),
-          };
-        }
+      if (orderData.subscriptionId || orderData.subscriptionIds?.length) {
+        const subscriptionIds = orderData.subscriptionIds?.length
+          ? orderData.subscriptionIds
+          : [orderData.subscriptionId];
+        orderData.subscriptions = (
+          await Promise.all(
+            subscriptionIds.map(async (subscriptionId) => {
+              const subscriptionDoc = await getDoc(
+                doc(db, "subscriptions", subscriptionId)
+              );
+              return subscriptionDoc.exists()
+                ? { id: subscriptionDoc.id, ...subscriptionDoc.data() }
+                : null;
+            })
+          )
+        ).filter(Boolean);
+        orderData.subscription = orderData.subscriptions[0] || null;
       }
 
       return { success: true, data: { id: orderDoc.id, ...orderData } };

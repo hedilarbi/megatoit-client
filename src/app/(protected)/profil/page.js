@@ -113,7 +113,7 @@ const Profil = () => {
         setOrders(sortedOrders);
 
         const totalAbonnements = sortedOrders.reduce((acc, order) => {
-          return acc + (order.abonnementId ? 1 : 0);
+          return acc + (order.abonnementId ? order.quantity || 1 : 0);
         }, 0);
         setAbonnementCount(totalAbonnements);
 
@@ -344,14 +344,27 @@ const Profil = () => {
                 ) : (
                   content.map((order) => {
                     const createdD = formatLocalDate(order.createdAt);
+                    const abonnementTitle =
+                      order.abonnement?.title || "Abonnement indisponible";
+                    const abonnementSeason = order.abonnement?.season
+                      ? ` (${order.abonnement.season})`
+                      : "";
                     return (
                       <div
                         key={order.id}
                         className="bg-white p-4 mb-4 rounded-md shadow-md"
                       >
                         <h3 className="font-bebas-neue text-xl text-black">
-                          {order.abonnement.title} ({order.abonnement.season})
+                          {order.quantity || order.subscriptionIds?.length || 1} x{" "}
+                          {abonnementTitle}
+                          {abonnementSeason}
                         </h3>
+
+                        {!order.abonnement && (
+                          <p className="mt-1 text-sm text-amber-700">
+                            Les informations de ce produit ne sont plus disponibles.
+                          </p>
+                        )}
 
                         <p className="text-sm text-gray-600 mt-1 capitalize">
                           <span className="font-semibold mr-1">Acheté le:</span>
