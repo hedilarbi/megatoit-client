@@ -31,8 +31,7 @@ const CommandeEnCours = ({ paymentIntent }) => {
         if (data.success) {
           clearInterval(interval);
           router.replace(`/commande-reussi?payment_intent=${paymentIntent}`);
-        }
-        if (data.success === false && attempts >= 29) {
+        } else if (data.status === "payment_failed") {
           clearInterval(interval);
           router.replace(`/commande-echoue?payment_intent=${paymentIntent}`);
         }

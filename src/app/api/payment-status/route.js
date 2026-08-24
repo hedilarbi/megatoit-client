@@ -1,24 +1,64 @@
-// /api/payment-status.ts
-import { getOrderByIntent } from "@/services/ticket.service";
+import { fulfillSuccessfulPaymentIntent } from "@/services/paymentFulfillment.service";
+import { findOrderByPaymentIntentId } from "@/services/ticket.service";
 import { NextResponse } from "next/server";
+import Stripe from "stripe";
+
+export const runtime = "nodejs";
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+  apiVersion: "2023-10-16",
+});
 
 export async function GET(req) {
   const { searchParams } = new URL(req.url);
-  const payment_intent = searchParams.get("payment_intent");
-
-  if (!payment_intent) {
+  const paymentIntentId = searchParams.get("payment_intent");
+  if (!paymentIntentId) {
     return NextResponse.json(
-      { error: "Missing payment_intent" },
+      { success: false, status: "invalid", error: "Missing payment_intent" },
       { status: 400 }
     );
   }
 
-  // Option 1: Check from your database
-  const order = await getOrderByIntent(payment_intent);
+  try {
+    const existingOrder = await findOrderByPaymentIntentId(paymentIntentId);
+    if (existingOrder) {
+      return NextResponse.json({
+        success: true,
+        status: "fulfilled",
+        orderId: existingOrder.id,
+      });
+    }
 
-  if (!order) {
-    return NextResponse.json({ success: false, message: "not created" });
+    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+    if (paymentIntent.status === "succeeded") {
+      const result = await fulfillSuccessfulPaymentIntent(
+        paymentIntent,
+        `status_recovery_${paymentIntent.id}`
+      );
+      return NextResponse.json({
+        success: result.state === "fulfilled",
+        status: result.state,
+        orderId: result.orderId,
+      });
+    }
+
+    const failedStatuses = new Set([
+      "canceled",
+      "requires_payment_method",
+      "requires_action",
+    ]);
+    return NextResponse.json({
+      success: false,
+      status: failedStatuses.has(paymentIntent.status)
+        ? "payment_failed"
+        : "processing",
+      paymentStatus: paymentIntent.status,
+    });
+  } catch (error) {
+    console.error("Error checking or fulfilling payment:", error);
+    return NextResponse.json(
+      { success: false, status: "processing", error: "Status unavailable" },
+      { status: 503 }
+    );
   }
-
-  return NextResponse.json({ success: true });
 }
