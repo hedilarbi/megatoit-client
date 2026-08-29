@@ -57,7 +57,7 @@ const AbonnementSection = () => {
           </p>
 
           <Link
-            href={`/checkout?abonnementId=${abonnement?.id}`}
+            href="/abonnement-saison"
             className="hidden lg:inline-flex items-center gap-3 bg-brand text-black text-xl px-8 py-4 rounded-xl font-bebas-neue tracking-wide hover:bg-white hover:text-black hover:scale-105 transition-all duration-300 shadow-[0_10px_30px_rgba(123,253,72,0.3)] hover:shadow-[0_10px_40px_rgba(255,255,255,0.4)]"
           >
             <FaTicketAlt />
@@ -119,8 +119,7 @@ const AbonnementSection = () => {
             </div>
 
             <Link
-              href={`/checkout?abonnementId=${abonnement?.id}`}
-              className="lg:hidden flex items-center justify-center gap-3 w-full bg-brand text-black text-xl px-6 py-4 rounded-xl font-bebas-neue tracking-wide hover:bg-white transition-all shadow-[0_5px_20px_rgba(123,253,72,0.3)]"
+              href="/abonnement-saison" className="lg:hidden flex items-center justify-center gap-3 w-full bg-brand text-black text-xl px-6 py-4 rounded-xl font-bebas-neue tracking-wide hover:bg-white transition-all shadow-[0_5px_20px_rgba(123,253,72,0.3)]"
             >
               <FaTicketAlt />
               Acheter maintenant
