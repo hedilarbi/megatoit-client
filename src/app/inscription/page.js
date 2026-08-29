@@ -176,11 +176,9 @@ const InscriptionPage = () => {
           <h1 className="md:text-3xl text-2xl font-bold mb-3 font-bebas-neue text-center md:text-left mt-4">
             S&apos;inscrire
           </h1>
-          <p className="mt-2 font-lato text-sm md:text-base">
+          <p className="mt-2 font-lato text-sm md:text-base mb-3">
             Créez un compte pour acheter vos billets
           </p>
-
-          {error && <p className="text-red-500 mb-3">{error}</p>}
 
           <form onSubmit={handleSubmit}>
             <div className="mb-3 mt-3">
@@ -274,6 +272,8 @@ const InscriptionPage = () => {
                 autoComplete="new-password"
               />
             </div>
+
+            {error && <p className="text-red-500 mb-3 text-sm">{error}</p>}
 
             <button
               type="submit"
