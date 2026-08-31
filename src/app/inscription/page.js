@@ -279,7 +279,7 @@ const InscriptionPage = () => {
               type="submit"
               className="w-full bg-brand hover:bg-brand-dark text-black py-2 px-4 rounded font-bebas-neue text-2xl cursor-pointer transition-colors"
             >
-              S&apos;inscrire
+              Créer mon compte
             </button>
           </form>
 
