@@ -1,6 +1,6 @@
 import admin from "@/lib/firebaseAdmin";
 
-const PRE_SALE_CUTOFF = new Date("2026-09-07T03:59:59.999Z");
+const PRE_SALE_CUTOFF = new Date("2026-09-14T03:59:59.999Z");
 
 export const calculateSubscriptionOrderPricing = async ({
   abonnementId,

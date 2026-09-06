@@ -91,7 +91,7 @@ const AbonnementSection = () => {
               </div>
               {isPreSale && (
                 <p className="text-sm text-gray-400 font-lato mt-4">
-                  Offre valable jusqu&apos;au <strong className="text-white">6 septembre 2026</strong>.
+                  Offre valable jusqu&apos;au <strong className="text-white">13 septembre 2026</strong>.
                 </p>
               )}
             </div>
