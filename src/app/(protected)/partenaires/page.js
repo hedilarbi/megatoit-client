@@ -33,7 +33,7 @@ const page = () => {
             <Image
               src={`/Logos_PNG_Fond_Blanc/${logo}`}
               alt={logo}
-              className={`w-auto object-contain ${logo === '10_Phylexpert.png' ? 'h-16' : 'h-24'}`}
+              className={`w-auto object-contain ${logo === '10_Phylexpert.png' ? 'h-12' : 'h-16'}`}
               width={250}
               height={100}
               priority
