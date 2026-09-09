@@ -3,12 +3,11 @@ import Image from "next/image";
 import { useEffect, useRef } from "react";
 
 const LOGOS = [
-  { src: "/commenditaires/GroupeCTR.jpg", alt: "Groupe CTR" },
-  { src: "/commenditaires/immo3r.jpg", alt: "Immo3R" },
-  { src: "/commenditaires/MaisonDebauche.jpg", alt: "Maison Debauche" },
-
-
-  { src: "/commenditaires/SphereExtermination.jpg", alt: "Sphere" },
+  { src: "/Logos_PNG_Fond_Blanc/07_Sherwin-Williams.png", alt: "Sherwin Williams" },
+  { src: "/Logos_PNG_Fond_Blanc/immo3r.jpg", alt: "Immo3R" },
+  { src: "/Logos_PNG_Fond_Blanc/LSC.jpeg", alt: "LSC" },
+  { src: "/Logos_PNG_Fond_Blanc/10_Phylexpert.png", alt: "Phylexpert", customClass: "h-8" },
+  { src: "/Logos_PNG_Fond_Blanc/designunik.jpeg", alt: "Design Unik" },
 ];
 
 export default function SponsorsBar() {
@@ -138,7 +137,7 @@ export default function SponsorsBar() {
               key={logo.src}
               src={logo.src}
               alt={logo.alt}
-              className="w-auto h-10"
+              className={`w-auto object-contain ${logo.customClass || "h-12"}`}
               width={200}
               height={100}
               priority
@@ -154,7 +153,7 @@ export default function SponsorsBar() {
             key={logo.src}
             src={logo.src}
             alt={logo.alt}
-            className="h-9 w-auto object-contain"
+            className={`w-auto object-contain ${logo.customClass || "h-12"}`}
             width={200}
             height={100}
             priority

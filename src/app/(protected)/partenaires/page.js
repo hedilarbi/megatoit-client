@@ -3,19 +3,20 @@ import React from "react";
 import styles from "@/styles/MatchsBanner.module.css";
 const page = () => {
   const logos = [
-    "Antidote.jpg",
-    "AtelierQG.jpg",
-    "Courteau.jpg",
-    "GroupeChartierLesage.jpg",
-    "GroupeCTR.jpg",
-    "joyal.jpeg",
-    "sherwin.png",
+    "LSC.jpeg",
+    "01_SPB_Equipements.png",
+    "02_Equipe_Bruneau_Cote_REMAX.png",
+    "03_Rooftop_Trois-Rivieres.png",
+    "04_Godcher_Racing_Team.png",
+    "05_Fugere_St-Louis_CPA.png",
+    "06_Joyal_et_Fils.png",
+    "07_Sherwin-Williams.png",
+    "08_Peinture_Robert_Dupont.png",
+    "09_Casse-Croute_Courteau.png",
     "immo3r.jpg",
-    "peinture.png",
-    "PowerPlay.png",
-    "MaisonDebauche.jpg",
-    "SevignyEpoxy.jpg",
-    "SphereExtermination.jpg",
+    "11_Sphere_Extermination.png",
+    "10_Phylexpert.png",
+    "designunik.jpeg",
   ];
   return (
     <div className="pb-20">
@@ -30,11 +31,11 @@ const page = () => {
         {logos.map((logo) => (
           <div key={logo} className="flex justify-center items-center">
             <Image
-              src={`/commenditaires/${logo}`}
+              src={`/Logos_PNG_Fond_Blanc/${logo}`}
               alt={logo}
-              className="w-auto h-auto  object-contain"
-              width={180}
-              height={50}
+              className={`w-auto object-contain ${logo === '10_Phylexpert.png' ? 'h-16' : 'h-24'}`}
+              width={250}
+              height={100}
               priority
             />
           </div>
