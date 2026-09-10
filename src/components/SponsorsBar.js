@@ -3,11 +3,11 @@ import Image from "next/image";
 import { useEffect, useRef } from "react";
 
 const LOGOS = [
-  { src: "/Logos_PNG_Fond_Blanc/07_Sherwin-Williams.png", alt: "Sherwin Williams" },
-  { src: "/Logos_PNG_Fond_Blanc/immo3r.jpg", alt: "Immo3R" },
-  { src: "/Logos_PNG_Fond_Blanc/LSC.jpeg", alt: "LSC" },
-  { src: "/Logos_PNG_Fond_Blanc/10_Phylexpert.png", alt: "Phylexpert", customClass: "h-6" },
-  { src: "/Logos_PNG_Fond_Blanc/designunik.jpeg", alt: "Design Unik" },
+  { src: "/Logos_PNG_Fond_Blanc/07_Sherwin-Williams.png", alt: "Sherwin Williams", customClass: "h-10" },
+  { src: "/Logos_PNG_Fond_Blanc/immo3r.jpg", alt: "Immo3R", customClass: "h-12" },
+  { src: "/Logos_PNG_Fond_Blanc/LSC.jpeg", alt: "LSC", customClass: "h-12" },
+  { src: "/Logos_PNG_Fond_Blanc/10_Phylexpert.png", alt: "Phylexpert", customClass: "h-4" },
+  { src: "/Logos_PNG_Fond_Blanc/designunik.jpeg", alt: "Design Unik", customClass: "h-5" },
 ];
 
 export default function SponsorsBar() {
