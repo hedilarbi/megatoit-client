@@ -34,7 +34,7 @@ const AbonnementSection = () => {
       : 200;
 
   return (
-    <section className={`${styles.AbonnementSection} overflow-hidden rounded-[2rem] shadow-2xl relative group`}>
+    <section id="abonnement" className={`${styles.AbonnementSection} overflow-hidden rounded-[2rem] shadow-2xl relative group`}>
       {/* Dark overlay for better readability on the background image */}
       <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/80 to-black/40 z-0"></div>
 
