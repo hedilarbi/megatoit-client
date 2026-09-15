@@ -18,7 +18,7 @@ export const createTicketAndOrder = async ({
     const orderRef = admin.firestore().collection("orders").doc();
     let order = null;
 
-    if (matchId && quantity && ticketPrice) {
+    if (matchId && quantity && ticketPrice !== undefined && ticketPrice !== null) {
       const buffer = crypto.randomBytes(Math.ceil(8 / 2));
       const code = buffer.toString("hex").slice(0, 10);
       order = {
@@ -35,7 +35,7 @@ export const createTicketAndOrder = async ({
         promoCodeId,
       };
     }
-    if (abonnementId && abonnementPrice) {
+    if (abonnementId && abonnementPrice !== undefined && abonnementPrice !== null) {
       const subscriptionQuantity = Number.parseInt(quantity || 1, 10);
       if (
         !Number.isInteger(subscriptionQuantity) ||
