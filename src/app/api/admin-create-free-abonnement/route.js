@@ -1,7 +1,6 @@
 import admin from "@/lib/firebaseAdmin";
 import { createTicketAndOrder } from "@/services/ticket.service";
 import { generateAndSendTicketPDF } from "@/utils/generateAndSendTicketPDF";
-import crypto from "crypto";
 
 export const runtime = "nodejs";
 export const config = {
@@ -15,7 +14,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "Content-Type, x-admin-key",
 };
 
-export async function OPTIONS(request) {
+export async function OPTIONS() {
   return new Response(null, {
     status: 204,
     headers: corsHeaders,
