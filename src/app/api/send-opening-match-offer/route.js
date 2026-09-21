@@ -1,11 +1,13 @@
 import { after, NextResponse } from "next/server";
 import nodemailer from "nodemailer";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, limit, query, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { getOpeningMatchEmailTemplate } from "@/utils/openingMatchEmailTemplate";
 import path from "node:path";
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const getUserName = (user) => [user.userName, user.firstName]
+  .find((value) => typeof value === "string" && value.trim())?.trim() || "";
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
@@ -43,20 +45,17 @@ async function processEmailsInBackground(targetEmail) {
 
   let list;
   if (targetEmail) {
-    list = [{ email: targetEmail, name: "cher partisan" }];
+    const userQuery = query(collection(db, "users"), where("email", "==", targetEmail), limit(1));
+    const userSnapshot = await getDocs(userQuery);
+    const user = userSnapshot.docs[0]?.data();
+    list = [{ email: targetEmail, name: user ? getUserName(user) : "" }];
   } else {
     const snapshot = await getDocs(collection(db, "users"));
-    const recipients = new Map();
-
-    for (const doc of snapshot.docs) {
+    list = snapshot.docs.flatMap((doc) => {
       const user = doc.data();
       const email = typeof user.email === "string" ? user.email.trim() : "";
-      if (email && !recipients.has(email.toLowerCase())) {
-        recipients.set(email.toLowerCase(), { email, name: user.userName || user.firstName || "cher partisan" });
-      }
-    }
-
-    list = [...recipients.values()];
+      return email ? [{ email, name: getUserName(user) }] : [];
+    });
   }
 
   console.log(`${list.length} destinataires pour le match d'ouverture.`);
@@ -69,7 +68,7 @@ async function processEmailsInBackground(targetEmail) {
           from: `"${process.env.EMAIL_FROM_NAME || "Billetterie BSR"}" <${process.env.EMAIL_USER}>`,
           to: email,
           subject: "Match d'ouverture BSR le 25 septembre : 50 % de rabais",
-          text: `Bonjour ${name},\n\nLe vendredi 25 septembre 2026 à 20 h, St-Lambert-de-Lauzon affronte le BSR Trois-Rivières pour le match d'ouverture.\n\nProfitez de 50 % de rabais avec le code promo BSR50 pour acheter votre billet : https://bsr3r.com/calendrier/ov2dS6VfPr7gWRd812sA`,
+          text: `Bonjour${name ? ` ${name}` : ""},\n\nMATCH D'OUVERTURE — vendredi 25 septembre 2026 à 20 h : St-Lambert-de-Lauzon affronte le BSR Trois-Rivières.\n\nOuverture des portes à 17 h\nDJ et animation sur place\nRestaurant et bar ouverts\nUn chandail remis à chacun des 100 premiers partisans !\n\nArrivez tôt pour profiter de l'ambiance et encourager votre BSR !\n\nProfitez de 50 % de rabais avec le code promo BSR50 pour acheter votre billet : https://bsr3r.com/calendrier/ov2dS6VfPr7gWRd812sA`,
           html: getOpeningMatchEmailTemplate(name),
           attachments: [{
             filename: "St-Lambert-de-Lauzon.png",

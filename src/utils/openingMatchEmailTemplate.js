@@ -10,7 +10,7 @@ const escapeHtml = (value) =>
   })[character]);
 
 export function getOpeningMatchEmailTemplate(userName) {
-  const name = escapeHtml(userName);
+  const name = userName ? ` <strong style="color:#7bfd48;">${escapeHtml(userName)}</strong>` : "";
 
   return `<!DOCTYPE html>
 <html lang="fr">
@@ -27,6 +27,7 @@ export function getOpeningMatchEmailTemplate(userName) {
           <p style="margin:0 0 8px;color:#7bfd48;font-size:14px;font-weight:bold;letter-spacing:2px;">SAISON 2026-27</p>
           <h1 style="margin:0;color:#ffffff;font-size:32px;line-height:1.2;">MATCH D’OUVERTURE</h1>
           <p style="margin:14px 0 0;color:#dddddd;font-size:18px;">Vendredi 25 septembre 2026 à 20 h</p>
+          <p style="margin:8px 0 0;color:#7bfd48;font-size:16px;font-weight:bold;">Ouverture des portes à 17 h</p>
         </td></tr>
         <tr><td style="padding:20px;">
           <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="table-layout:fixed;background:#1b1b1b;border-radius:8px;">
@@ -44,8 +45,15 @@ export function getOpeningMatchEmailTemplate(userName) {
           </table>
         </td></tr>
         <tr><td style="padding:4px 24px 32px;color:#dddddd;font-size:16px;line-height:1.6;">
-          <p style="margin:0 0 14px;">Bonjour <strong style="color:#7bfd48;">${name}</strong>,</p>
-          <p style="margin:0 0 20px;">La saison commence bientôt ! Réservez votre place pour encourager le BSR Trois-Rivières lors du match d’ouverture.</p>
+          <p style="margin:0 0 14px;">Bonjour${name},</p>
+          <p style="margin:0 0 14px;">Le match d’ouverture vous réserve toute une soirée :</p>
+          <ul style="margin:0 0 18px;padding-left:22px;color:#dddddd;">
+            <li style="margin-bottom:6px;">Ouverture des portes à 17 h</li>
+            <li style="margin-bottom:6px;">DJ et animation sur place</li>
+            <li style="margin-bottom:6px;">Restaurant et bar ouverts</li>
+            <li>Un chandail remis à chacun des 100 premiers partisans !</li>
+          </ul>
+          <p style="margin:0 0 20px;">Arrivez tôt pour profiter de l’ambiance et encourager votre BSR !</p>
           <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background:#1b1b1b;border:1px solid #7bfd48;border-radius:8px;">
             <tr><td align="center" style="padding:18px 12px;">
               <strong style="display:block;color:#7bfd48;font-size:26px;">50 % de rabais</strong>
