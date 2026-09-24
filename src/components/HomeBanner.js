@@ -22,14 +22,26 @@ const HomeBanner = () => {
             priority
             className="w-48 sm:w-64 object-contain drop-shadow-xl"
           />
-          <Link
-            href="/calendrier"
-            className="inline-flex justify-center items-center border-2 border-brand text-black px-4 py-1 min-w-[140px] sm:min-w-[180px] text-base rounded-lg bg-brand hover:bg-brand-dark transition-all duration-300 hover:shadow-[0_0_20px_rgba(123,253,72,0.6)] transform hover:-translate-y-0.5"
-          >
-            <span className="font-bebas-neue text-center tracking-wide">
-              Billets de match
-            </span>
-          </Link>
+          <div className="flex flex-row flex-wrap justify-center items-center gap-2.5 sm:gap-3">
+            <Link
+              href="/calendrier"
+              className="inline-flex justify-center items-center border-2 border-brand text-black px-4 py-1 min-w-[130px] sm:min-w-[160px] text-base sm:text-lg rounded-lg bg-brand hover:bg-brand-dark transition-all duration-300 hover:shadow-[0_0_20px_rgba(123,253,72,0.6)] transform hover:-translate-y-0.5"
+            >
+              <span className="font-bebas-neue text-center tracking-wide">
+                Billets de match
+              </span>
+            </Link>
+            <Link
+              href="https://os.designunik.ca/boutique/bsr?fbclid=IwY2xjawUhArVwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMXNUSUdmSVlUR1NudHpMWXlzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEeSHCBFyHxE8qQr9dz6lx-h6wCrPsCTUTZRXnkc_RPrZj8eYIXWoB9QOFNzIc_aem_pwX6aA9Of5eVXaHJlJSyZg"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex justify-center items-center border-2 border-brand text-white px-4 py-1 min-w-[130px] sm:min-w-[160px] text-base sm:text-lg rounded-lg bg-black/80 hover:bg-brand hover:text-black transition-all duration-300 hover:shadow-[0_0_20px_rgba(123,253,72,0.6)] transform hover:-translate-y-0.5 backdrop-blur-sm"
+            >
+              <span className="font-bebas-neue text-center tracking-wide">
+                Boutique en ligne
+              </span>
+            </Link>
+          </div>
           <Image
             src="/Logo-LHSAAAQ-officiel.png"
             alt="Logo LHSAAAQ"
@@ -55,21 +67,33 @@ const HomeBanner = () => {
             />
           </div>
 
-          {/* Centre : H1 et CTA */}
-          <div className="flex flex-col items-center justify-center gap-12 lg:gap-16 px-4">
+          {/* Centre : H1 et CTAs */}
+          <div className="flex flex-col items-center justify-center gap-10 lg:gap-14 px-4">
             <h1 className="inline-flex items-center bg-black/85 border border-brand/50 px-6 py-3 rounded-xl shadow-lg backdrop-blur-sm">
               <span className="font-bebas-neue text-brand tracking-widest text-xl lg:text-2xl xl:text-3xl uppercase text-center leading-tight">
                 BSR DE TROIS-RIVIÈRES • BILLETTERIE OFFICIELLE
               </span>
             </h1>
-            <Link
-              href="/calendrier"
-              className="inline-flex justify-center items-center border-2 border-brand text-black px-8 py-2 min-w-[200px] lg:min-w-[280px] text-xl lg:text-2xl rounded-xl bg-brand hover:bg-brand-dark transition-all duration-300 hover:shadow-[0_0_30px_rgba(123,253,72,0.8)] transform hover:-translate-y-1"
-            >
-              <span className="font-bebas-neue text-center tracking-wide">
-                Billets de match
-              </span>
-            </Link>
+            <div className="flex flex-wrap items-center justify-center gap-4">
+              <Link
+                href="/calendrier"
+                className="inline-flex justify-center items-center border-2 border-brand text-black px-6 lg:px-8 py-2 min-w-[180px] lg:min-w-[220px] text-xl lg:text-2xl rounded-xl bg-brand hover:bg-brand-dark transition-all duration-300 hover:shadow-[0_0_30px_rgba(123,253,72,0.8)] transform hover:-translate-y-1"
+              >
+                <span className="font-bebas-neue text-center tracking-wide">
+                  Billets de match
+                </span>
+              </Link>
+              <Link
+                href="https://os.designunik.ca/boutique/bsr?fbclid=IwY2xjawUhArVwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMXNUSUdmSVlUR1NudHpMWXlzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEeSHCBFyHxE8qQr9dz6lx-h6wCrPsCTUTZRXnkc_RPrZj8eYIXWoB9QOFNzIc_aem_pwX6aA9Of5eVXaHJlJSyZg"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex justify-center items-center border-2 border-brand text-white px-6 lg:px-8 py-2 min-w-[180px] lg:min-w-[220px] text-xl lg:text-2xl rounded-xl bg-black/80 hover:bg-brand hover:text-black transition-all duration-300 hover:shadow-[0_0_30px_rgba(123,253,72,0.8)] transform hover:-translate-y-1 backdrop-blur-sm"
+              >
+                <span className="font-bebas-neue text-center tracking-wide">
+                  Boutique en ligne
+                </span>
+              </Link>
+            </div>
           </div>
 
           {/* Droite : Logo LHSAAAQ */}
