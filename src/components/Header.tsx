@@ -61,13 +61,14 @@ const Header = () => {
         >
           Devenir Membre
         </Link>
-        {/* <Link
-          href="https://megatoit.atelierqg.com/"
+        <Link
+          href="https://os.designunik.ca/boutique/bsr?fbclid=IwY2xjawUhArVwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMXNUSUdmSVlUR1NudHpMWXlzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEeSHCBFyHxE8qQr9dz6lx-h6wCrPsCTUTZRXnkc_RPrZj8eYIXWoB9QOFNzIc_aem_pwX6aA9Of5eVXaHJlJSyZg"
           target="_blank"
+          rel="noopener noreferrer"
           className="text-white hover:text-brand transition-colors"
         >
-          Boutique Officielle
-        </Link> */}
+          Boutique en ligne
+        </Link>
         <Link
           href="/partenaires"
           className={`text-white hover:text-brand transition-colors ${pathname === "/partenaires" && "text-brand underline decoration-2 underline-offset-4"
@@ -81,13 +82,6 @@ const Header = () => {
             } `}
         >
           L&apos;Esprit BSR
-        </Link>
-        <Link
-          href="/contact"
-          className={`text-white hover:text-brand transition-colors ${pathname === "/contact" && "text-brand underline decoration-2 underline-offset-4"
-            } `}
-        >
-          Nous Contacter
         </Link>
       </div>
 

@@ -45,14 +45,15 @@ const SideBar = ({
         >
           Devenir Membre
         </Link>
-        {/* <Link
-          href="https://megatoit.atelierqg.com/"
+        <Link
+          href="https://os.designunik.ca/boutique/bsr?fbclid=IwY2xjawUhArVwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMXNUSUdmSVlUR1NudHpMWXlzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEeSHCBFyHxE8qQr9dz6lx-h6wCrPsCTUTZRXnkc_RPrZj8eYIXWoB9QOFNzIc_aem_pwX6aA9Of5eVXaHJlJSyZg"
           target="_blank"
-          className={`text-black hover:underline  `}
+          rel="noopener noreferrer"
+          className="text-black hover:underline"
           onClick={toggleSidebar}
         >
-          Boutique Officielle
-        </Link> */}
+          Boutique en ligne
+        </Link>
         <Link
           href="/partenaires"
           className={`text-black hover:underline ${pathname === "/partenaires" && "underline"

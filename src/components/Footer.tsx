@@ -26,12 +26,18 @@ const Footer = () => {
             <ul className="font-lato text-gray-300">
               <li className="flex items-center gap-2 mb-2">
                 <IoMdMail className="text-brand" />
-                <p>info@bsr3r.com</p>
+                <a href="mailto:info@bsr3r.com" className="hover:text-brand transition-colors">
+                  info@bsr3r.com
+                </a>
               </li>
-              {/* <li className="flex items-center gap-2 mb-2">
-                <FaPhone />
-                <p>+1 1 23 45 67 89</p>
-              </li> */}
+              <li className="mb-2">
+                <Link
+                  href="/contact"
+                  className="hover:text-brand transition-colors"
+                >
+                  Nous contacter
+                </Link>
+              </li>
             </ul>
           </div>
           <div>

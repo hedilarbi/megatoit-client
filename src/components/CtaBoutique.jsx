@@ -14,8 +14,9 @@ const CtaBoutique = () => {
         </p>
       </div>
       <Link
-        href="https://megatoit.atelierqg.com/"
+        href="https://os.designunik.ca/boutique/bsr?fbclid=IwY2xjawUhArVwZG9mBWV4dG4DYWVtAjEwAGJyaWQRMXNUSUdmSVlUR1NudHpMWXlzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEeSHCBFyHxE8qQr9dz6lx-h6wCrPsCTUTZRXnkc_RPrZj8eYIXWoB9QOFNzIc_aem_pwX6aA9Of5eVXaHJlJSyZg"
         target="_blank"
+        rel="noopener noreferrer"
         className="bg-brand hover:bg-brand-dark transition-colors rounded-md text-black px-12 py-2 font-bebas-neue text-lg text-center"
       >
         Aller à la boutique
