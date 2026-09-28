@@ -1,6 +1,7 @@
 import admin from "@/lib/firebaseAdmin";
 import {
   createTicketAndOrder,
+  findNextHomeMatch,
   findOrderByPaymentIntentId,
   getUserDocument,
 } from "@/services/ticket.service";
@@ -95,12 +96,25 @@ export const fulfillSuccessfulPaymentIntent = async (paymentIntent, sourceId) =>
 
     let response;
     if (matchId && Number.isInteger(quantity) && quantity > 0 && ticketPrice) {
+      // The free match is fixed when the PaymentIntent is created, so the
+      // customer gets the match shown in the checkout banner.
+      let freeMatchId = null;
+      if (promoCodeId) {
+        const promoDoc = await admin.firestore().collection("promoCodes").doc(promoCodeId).get();
+        const promo = promoDoc.exists ? promoDoc.data() : null;
+        // A "freeTicket" code only gives free tickets for the match it is attached to
+        if (promo?.type === "freeTicket" && (!promo.matchId || promo.matchId === matchId)) {
+          freeMatchId = metadata.freeMatchId || (await findNextHomeMatch(matchId))?.id || null;
+          if (!freeMatchId) console.error(`No next home match for free tickets of ${paymentIntent.id}`);
+        }
+      }
       response = await createTicketAndOrder({
         userId, matchId, quantity,
         ticketPrice: Number.parseFloat(ticketPrice),
         amount: paymentIntent.amount,
         paymentIntentId: paymentIntent.id,
         promoCodeId,
+        freeMatchId,
       });
     } else if (abonnementId && abonnementPrice) {
       response = await createTicketAndOrder({
@@ -124,7 +138,11 @@ export const fulfillSuccessfulPaymentIntent = async (paymentIntent, sourceId) =>
     try {
       const userData = await getUserDocument(userId);
       if (response.data.tickets.length) {
-        await generateAndSendTicketPDF(userData, response.data.tickets, response.data.order);
+        await generateAndSendTicketPDF(
+          userData,
+          [...response.data.tickets, ...response.data.freeTickets],
+          response.data.order
+        );
       } else if (response.data.abonnements?.length) {
         await generateAndSendTicketPDF(userData, [], response.data.order, response.data.abonnements);
       }

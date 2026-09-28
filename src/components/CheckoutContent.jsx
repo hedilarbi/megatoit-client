@@ -1,6 +1,10 @@
 "use client";
 import { useAuth } from "@/context/AuthContext";
-import { getMatchByUid, verifyPromoCode } from "@/services/match.service";
+import {
+  getAllMatches,
+  getMatchByUid,
+  verifyPromoCode,
+} from "@/services/match.service";
 import { getAllTaxes } from "@/services/taxes.service";
 import { getUserDocument } from "@/services/user.service";
 import { getAbonementById } from "@/services/abonement.service";
@@ -35,6 +39,15 @@ const formatDate = (timestamp) => {
 
 import { getEffectiveSubscriptionPrice } from "@/utils/subscriptionUtils";
 
+const toMillis = (timestamp) =>
+  timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000;
+
+// Same order as the match header: Domicile => opponent vs Trois-Rivières
+const matchTitle = (m) =>
+  m?.type === "Domicile"
+    ? `${m?.opponent?.name || ""} vs ${m?.homeTeam?.name || ""}`
+    : `${m?.homeTeam?.name || ""} vs ${m?.opponent?.name || ""}`;
+
 const CheckoutContent = ({ matchId, quantity: rawQuantity, abonnementId }) => {
   // BUG FIX: parse quantity to number — URL params are strings, and "0" is truthy
   const ticketQuantity = rawQuantity ? parseInt(rawQuantity, 10) : null;
@@ -62,6 +75,10 @@ const CheckoutContent = ({ matchId, quantity: rawQuantity, abonnementId }) => {
   const [codeData, setCodeData] = useState(null);
   const [codeIsValid, setCodeIsValid] = useState(true);
   const [codeError, setCodeError] = useState(null);
+  // Next home match, for a "freeTicket" promo code
+  const [freeMatch, setFreeMatch] = useState(null);
+  // Match a "freeTicket" code is attached to, when the user picked another one
+  const [codeOnlyForMatch, setCodeOnlyForMatch] = useState(null);
 
   const router = useRouter();
 
@@ -165,6 +182,8 @@ const CheckoutContent = ({ matchId, quantity: rawQuantity, abonnementId }) => {
     setCodeData(null);
     setCodeIsValid(true);
     setCodeError(null);
+    setFreeMatch(null);
+    setCodeOnlyForMatch(null);
 
     if (abonnement) {
       const subtotal =
@@ -190,8 +209,39 @@ const CheckoutContent = ({ matchId, quantity: rawQuantity, abonnementId }) => {
 
   const verifyCode = async () => {
     setCodeError(null);
+    setCodeOnlyForMatch(null);
     try {
       const response = await verifyPromoCode(code, user.uid);
+
+      if (response.success && response.data.type === "freeTicket") {
+        if (!match) {
+          setCodeIsValid(false);
+          setCodeError("Ce code promo est valide uniquement pour des billets de match");
+          return;
+        }
+        if (response.data.matchId && response.data.matchId !== matchId) {
+          const attached = await getMatchByUid(response.data.matchId);
+          setCodeIsValid(false);
+          if (attached.success) setCodeOnlyForMatch(attached.data);
+          else setCodeError("Ce code promo n'est pas applicable à ce match");
+          return;
+        }
+        const matchesResponse = await getAllMatches();
+        const nextHomeMatch = matchesResponse.success
+          ? matchesResponse.data.find(
+              (m) =>
+                m.type === "Domicile" &&
+                m.date &&
+                toMillis(m.date) > toMillis(match.date)
+            )
+          : null;
+        if (!nextHomeMatch) {
+          setCodeIsValid(false);
+          setCodeError("Aucun match à domicile à venir pour ce code promo");
+          return;
+        }
+        setFreeMatch(nextHomeMatch);
+      }
 
       if (response.success) {
         setCodeIsValid(true);
@@ -441,6 +491,16 @@ const CheckoutContent = ({ matchId, quantity: rawQuantity, abonnementId }) => {
                       {(match.price * quantity).toFixed(2)}
                     </p>
                   </div>
+                  {codeData?.type === "freeTicket" && freeMatch && (
+                    <div className="border border-green-600 rounded-md p-4 mt-2 bg-green-50 flex justify-between">
+                      <p className="font-lato text-green-800 font-semibold uppercase">
+                        {quantity} x billet(s) gratuit(s) {matchTitle(freeMatch)}
+                      </p>
+                      <p className="font-lato text-green-800 font-semibold">
+                        $0.00
+                      </p>
+                    </div>
+                  )}
                 </div>
               </>
             );
@@ -485,7 +545,7 @@ const CheckoutContent = ({ matchId, quantity: rawQuantity, abonnementId }) => {
                   {codeError}
                 </p>
               )}
-              {codeIsValid && codeData && (
+              {codeIsValid && codeData && codeData.type !== "freeTicket" && (
                 <p className="text-green-500 mt-2 font-lato font-semibold">
                   Code promo appliqué:{" "}
                   {codeData.type === "percent"
@@ -494,6 +554,50 @@ const CheckoutContent = ({ matchId, quantity: rawQuantity, abonnementId }) => {
                 </p>
               )}
             </div>
+            {codeIsValid && codeData?.type === "freeTicket" && freeMatch && (
+              <div className="mt-4 rounded-md bg-green-600 p-4 text-white font-lato">
+                <p className="font-bebas-neue text-2xl">
+                  {quantity > 1
+                    ? `${quantity} billets offerts !`
+                    : "Un billet offert !"}
+                </p>
+                <p className="mt-1 text-base">
+                  {quantity > 1
+                    ? `${quantity} billets gratuits`
+                    : "Un billet gratuit"}{" "}
+                  du match{" "}
+                  <span className="font-bold uppercase">
+                    {matchTitle(freeMatch)}
+                  </span>{" "}
+                  le{" "}
+                  <span className="font-bold uppercase">
+                    {formatDate(freeMatch.date).dayName},{" "}
+                    {formatDate(freeMatch.date).date}
+                  </span>{" "}
+                  {quantity > 1 ? "seront ajoutés" : "sera ajouté"}{" "}
+                  automatiquement à votre commande.
+                </p>
+              </div>
+            )}
+            {codeOnlyForMatch && (
+              <div className="mt-4 rounded-md bg-red-600 p-4 text-white font-lato">
+                <p className="font-bebas-neue text-2xl">
+                  Code promo non applicable
+                </p>
+                <p className="mt-1 text-base">
+                  Ce code promo n&apos;est applicable qu&apos;au match{" "}
+                  <span className="font-bold uppercase">
+                    {matchTitle(codeOnlyForMatch)}
+                  </span>{" "}
+                  le{" "}
+                  <span className="font-bold uppercase">
+                    {formatDate(codeOnlyForMatch.date).dayName},{" "}
+                    {formatDate(codeOnlyForMatch.date).date}
+                  </span>
+                  .
+                </p>
+              </div>
+            )}
           </div>
 
           <div className="py-10 border-b border-black">
@@ -550,7 +654,16 @@ const CheckoutContent = ({ matchId, quantity: rawQuantity, abonnementId }) => {
                 <p>${(match.price * quantity).toFixed(2)}</p>
               </div>
 
-              {codeIsValid && codeData && (
+              {codeIsValid && codeData && codeData.type === "freeTicket" && (
+                <div className="flex justify-between w-full font-lato text-base">
+                  <p className="font-semibold uppercase">
+                    {quantity} billet(s) gratuit(s)
+                  </p>
+                  <p>$0.00</p>
+                </div>
+              )}
+
+              {codeIsValid && codeData && codeData.type !== "freeTicket" && (
                 <div className="flex justify-between w-full font-lato text-base">
                   <p className="font-semibold uppercase">Réduction</p>
                   <p>

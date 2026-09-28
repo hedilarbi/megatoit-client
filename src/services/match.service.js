@@ -131,6 +131,14 @@ export const getOrderByIntent = async (paymentIntentId) => {
       }
     }
 
+    // Next home match of a "freeTicket" promo code
+    if (orderData.freeMatchId) {
+      const freeMatchDoc = await getDoc(doc(db, "matchs", orderData.freeMatchId));
+      if (freeMatchDoc.exists()) {
+        orderData.freeMatch = { id: freeMatchDoc.id, ...freeMatchDoc.data() };
+      }
+    }
+
     if (orderData.abonnementId) {
       const abonnementDoc = await getDoc(
         doc(db, "abonements", orderData.abonnementId)
@@ -170,6 +178,14 @@ export const getOrderByUID = async (orderId) => {
       const matchDoc = await getDoc(doc(db, "matchs", orderData.matchId));
       if (matchDoc.exists()) {
         orderData.match = { id: matchDoc.id, ...matchDoc.data() };
+      }
+    }
+
+    // Next home match of a "freeTicket" promo code
+    if (orderData.freeMatchId) {
+      const freeMatchDoc = await getDoc(doc(db, "matchs", orderData.freeMatchId));
+      if (freeMatchDoc.exists()) {
+        orderData.freeMatch = { id: freeMatchDoc.id, ...freeMatchDoc.data() };
       }
     }
 

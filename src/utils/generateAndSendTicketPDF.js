@@ -297,33 +297,52 @@ export async function generateAndSendTicketPDF(user, tickets, order, subscriptio
     };
 
     if (tickets.length > 0) {
-      const match = await getMatchById(tickets[0].matchId);
-      const isHome = match?.type === "Domicile";
-      
-      const team1Name = isHome ? (match?.opponent?.name || "Adversaire") : (match?.homeTeam?.name || "BSR DE TROIS-RIVIERES");
-      const team1ImageUrl = isHome ? match?.opponent?.imageUrl : match?.homeTeam?.imageUrl;
-      const team2Name = isHome ? (match?.homeTeam?.name || "BSR DE TROIS-RIVIERES") : (match?.opponent?.name || "Adversaire");
-      const team2ImageUrl = isHome ? match?.homeTeam?.imageUrl : match?.opponent?.imageUrl;
+      // A "freeTicket" promo code adds tickets for a second match, so render
+      // each match once and pick its data per ticket.
+      const matchIds = [...new Set(tickets.map((t) => t.matchId))];
+      const matchesById = new Map();
+      for (const matchId of matchIds) {
+        const match = await getMatchById(matchId);
+        const isHome = match?.type === "Domicile";
 
-      const ms = match.date.seconds * 1000 + match.date.nanoseconds / 1000000;
-      const dateObj = new Date(ms);
-      const dayStr = dateObj.getDate().toString();
-      const monthYearStr = dateObj.toLocaleDateString("fr-FR", { month: "long", year: "numeric" }).toUpperCase();
-      const timeStr = `${dateObj.toLocaleDateString("fr-FR", { weekday: "long" })} · ${dateObj.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}`.toUpperCase();
+        const team1Name = isHome ? (match?.opponent?.name || "Adversaire") : (match?.homeTeam?.name || "BSR DE TROIS-RIVIERES");
+        const team1ImageUrl = isHome ? match?.opponent?.imageUrl : match?.homeTeam?.imageUrl;
+        const team2Name = isHome ? (match?.homeTeam?.name || "BSR DE TROIS-RIVIERES") : (match?.opponent?.name || "Adversaire");
+        const team2ImageUrl = isHome ? match?.homeTeam?.imageUrl : match?.opponent?.imageUrl;
 
-      let addr1 = "1740 Av. Gilles-Villeneuve";
-      let addr2 = "Trois-Rivières, QC G8Y 7B6";
-      
-      const isSpecialMatch = 
-        (dayStr === "23" && monthYearStr === "JANVIER 2027") || 
-        (dayStr === "19" && monthYearStr === "SEPTEMBRE 2026");
+        const ms = match.date.seconds * 1000 + match.date.nanoseconds / 1000000;
+        const dateObj = new Date(ms);
+        const dayStr = dateObj.getDate().toString();
+        const monthYearStr = dateObj.toLocaleDateString("fr-FR", { month: "long", year: "numeric" }).toUpperCase();
+        const timeStr = `${dateObj.toLocaleDateString("fr-FR", { weekday: "long" })} · ${dateObj.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}`.toUpperCase();
 
-      if (isSpecialMatch) {
-        addr1 = "375 Rue Germain";
-        addr2 = "Saint-Léonard-d'Aston, QC J0C 1M0";
+        let addr1 = "1740 Av. Gilles-Villeneuve";
+        let addr2 = "Trois-Rivières, QC G8Y 7B6";
+
+        const isSpecialMatch =
+          (dayStr === "23" && monthYearStr === "JANVIER 2027") ||
+          (dayStr === "19" && monthYearStr === "SEPTEMBRE 2026");
+
+        if (isSpecialMatch) {
+          addr1 = "375 Rue Germain";
+          addr2 = "Saint-Léonard-d'Aston, QC J0C 1M0";
+        }
+
+        matchesById.set(matchId, {
+          match,
+          team1Name, team1ImageUrl, team2Name, team2ImageUrl,
+          dayStr, monthYearStr, timeStr, addr1, addr2,
+          // Same values as the PDF ticket, so the email and the PDF always agree
+          dateLabel: `${dateObj.toLocaleDateString("fr-FR", { weekday: "long" })} ${dayStr} ${dateObj.toLocaleDateString("fr-FR", { month: "long", year: "numeric" })} à ${dateObj.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}`,
+        });
       }
 
       for (const ticket of tickets) {
+        const {
+          match,
+          team1Name, team1ImageUrl, team2Name, team2ImageUrl,
+          dayStr, monthYearStr, timeStr, addr1, addr2,
+        } = matchesById.get(ticket.matchId);
         const pdfDoc = await PDFDocument.create();
         const team1LogoImage = await embedTeamLogo(pdfDoc, team1ImageUrl);
         const team2LogoImage = await embedTeamLogo(pdfDoc, team2ImageUrl);
@@ -352,7 +371,7 @@ export async function generateAndSendTicketPDF(user, tickets, order, subscriptio
         await updateTicketDownLoadUrl(ticket.TicketCode, downloadURL);
         
         attachments.push({
-          filename: `billet-${ticket.TicketCode}.pdf`,
+          filename: `${ticket.isFree ? "billet-gratuit" : "billet"}-${ticket.TicketCode}.pdf`,
           content: pdfBytes,
           contentType: "application/pdf",
         });
@@ -368,7 +387,18 @@ export async function generateAndSendTicketPDF(user, tickets, order, subscriptio
         tls: { minVersion: "TLSv1.2" },
       });
 
-      const subjectTickets = ` ${tickets.length > 1 ? "Vos billets" : "Votre billet"} - ${team1Name} vs ${team2Name}`;
+      const paidTickets = tickets.filter((t) => !t.isFree);
+      const freeTickets = tickets.filter((t) => t.isFree);
+      const mainMatch = matchesById.get((paidTickets[0] || tickets[0]).matchId);
+      const freeMatch = freeTickets.length ? matchesById.get(freeTickets[0].matchId) : null;
+      const matchLine = (m, count, label) => `
+  <p style="text-align:center;font-size:16px">
+    ${label} : <strong>${count} billet${count > 1 ? "s" : ""}</strong><br />
+    ${m.team1Name} vs ${m.team2Name}<br />
+    ${m.dateLabel}
+  </p>`;
+
+      const subjectTickets = ` ${tickets.length > 1 ? "Vos billets" : "Votre billet"} - ${mainMatch.team1Name} vs ${mainMatch.team2Name}${freeMatch ? ` + ${freeTickets.length > 1 ? "billets gratuits" : "billet gratuit"}` : ""}`;
       const htmlTickets = `
   <div style="text-align:center">
     <img src="cid:logo-big" alt="BSR DE TROIS-RIVIÈRES" style="width:150px;height:auto" />
@@ -378,6 +408,7 @@ export async function generateAndSendTicketPDF(user, tickets, order, subscriptio
     Votre commande <strong>N° ${order.code}</strong> est confirmée.
     Vous trouverez en pièce jointe ${tickets.length > 1 ? "vos billets" : "votre billet"}.
   </p>
+  ${freeMatch ? `${matchLine(mainMatch, paidTickets.length, "Match")}${matchLine(freeMatch, freeTickets.length, "Offert avec votre code promo")}` : ""}
 `;
 
       try {

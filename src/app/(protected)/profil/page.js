@@ -76,6 +76,26 @@ function formatLocalDate(timestamp) {
   };
 }
 
+/**
+ * A "freeTicket" promo code gives tickets for another match (the next home
+ * match): list them as their own row, right after the paid order's row.
+ */
+function withFreeTicketRows(orders) {
+  return orders.flatMap((order) =>
+    order.freeMatch && order.freeTickets?.length
+      ? [
+          order,
+          {
+            ...order,
+            isFreeRow: true,
+            match: order.freeMatch,
+            tickets: order.freeTickets,
+          },
+        ]
+      : [order]
+  );
+}
+
 const Profil = () => {
   const { user, loading } = useAuth();
   const [userData, setUserData] = React.useState(null);
@@ -124,7 +144,7 @@ const Profil = () => {
 
         if (filterType === "tickets") {
           const tickets = sortedOrders.filter((order) => order.matchId);
-          setContent(tickets);
+          setContent(withFreeTicketRows(tickets));
         } else if (filterType === "abonnements") {
           const abonnements = sortedOrders.filter((order) => order.abonnementId);
           setContent(abonnements);
@@ -157,7 +177,7 @@ const Profil = () => {
       const tickets = sortOrders(
         orders.filter((order) => order.matchId)
       );
-      setContent(tickets);
+      setContent(withFreeTicketRows(tickets));
     } else if (type === "abonnements") {
       const abonnements = sortOrders(
         orders.filter((order) => order.abonnementId)
@@ -253,9 +273,16 @@ const Profil = () => {
 
                     return (
                       <div
-                        key={order.id}
-                        className="bg-white p-4 mb-4 rounded-md shadow-md"
+                        key={order.isFreeRow ? `${order.id}-gratuit` : order.id}
+                        className={`bg-white p-4 mb-4 rounded-md shadow-md ${
+                          order.isFreeRow ? "border-2 border-green-600" : ""
+                        }`}
                       >
+                        {order.isFreeRow && (
+                          <p className="mb-2 inline-block rounded bg-green-600 px-2 py-0.5 text-xs font-semibold text-white">
+                            Billets gratuits - code promo
+                          </p>
+                        )}
                         <div className="flex justify-between items-center w-full">
                           {/* Équipe 1 (Gauche - 50% centré) */}
                           <div className="flex-1 min-w-0 flex items-center justify-center gap-2 text-center">
@@ -303,14 +330,18 @@ const Profil = () => {
 
                         <p className="text-sm text-gray-600 capitalize">
                           <span className="font-semibold">
-                            Nombre de billets:{" "}
+                            {order.isFreeRow
+                              ? "Nombre de billets gratuits: "
+                              : "Nombre de billets: "}
                           </span>
                           {order?.tickets?.length}
                         </p>
 
                         <p className="text-sm text-gray-600 capitalize">
-                          <span className="font-semibold">Total payé: </span>$
-                          {(order?.amount / 100).toFixed(2)}
+                          <span className="font-semibold">Total payé: </span>
+                          {order.isFreeRow
+                            ? "Gratuit"
+                            : `$${(order?.amount / 100).toFixed(2)}`}
                         </p>
 
                         <div className="flex justify-between items-center ">
@@ -324,10 +355,16 @@ const Profil = () => {
 
                         <div className="mt-4 flex justify-center">
                           <Link
-                            href={`/profil/achats/${order.id}`}
+                            href={
+                              order.isFreeRow
+                                ? `/profil/achats/${order.id}?gratuit=1`
+                                : `/profil/achats/${order.id}`
+                            }
                             className="bg-black font-bebas-neue text-white px-4 py-2 rounded-md hover:bg-gray-800 transition-colors duration-300"
                           >
-                            Voir les billets
+                            {order.isFreeRow
+                              ? "Voir les billets gratuits"
+                              : "Voir les billets"}
                           </Link>
                         </div>
                       </div>

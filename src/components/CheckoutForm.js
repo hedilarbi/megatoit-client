@@ -36,7 +36,7 @@ const CheckoutForm = ({
 
   const paymentIntentPayload = useMemo(
     () => ({
-      amount: Math.trunc(Number(amount) * 100),
+      amount: Math.round(Number(amount) * 100),
       currency: "cad",
       userId,
       quantity,

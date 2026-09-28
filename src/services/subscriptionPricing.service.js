@@ -1,11 +1,13 @@
 import admin from "@/lib/firebaseAdmin";
+import { applyPromoAndTaxes } from "@/services/orderPricing.service";
 
 const PRE_SALE_CUTOFF = new Date("2026-09-14T03:59:59.999Z");
 
+// `promo` must come from getValidPromoCode (already checked for this user)
 export const calculateSubscriptionOrderPricing = async ({
   abonnementId,
   quantity,
-  promoCodeId,
+  promo,
 }) => {
   const parsedQuantity = Number.parseInt(quantity, 10);
   if (!Number.isInteger(parsedQuantity) || parsedQuantity < 1 || parsedQuantity > 100) {
@@ -30,29 +32,15 @@ export const calculateSubscriptionOrderPricing = async ({
     throw new Error("Invalid subscription price");
   }
 
-  let subtotal = unitPrice * parsedQuantity;
-  if (promoCodeId) {
-    const promoDoc = await db.collection("promoCodes").doc(String(promoCodeId)).get();
-    if (!promoDoc.exists) throw new Error("Promo code not found");
-    const promo = promoDoc.data();
-    if (promo.type === "percent") {
-      subtotal *= 1 - Number(promo.percent || 0) / 100;
-    } else if (promo.type === "amount") {
-      subtotal = Math.max(0, subtotal - Number(promo.amount || 0));
-    }
-  }
-
-  const taxesSnapshot = await db.collection("taxes").get();
-  const taxTotal = taxesSnapshot.docs.reduce(
-    (sum, taxDoc) => sum + subtotal * (Number(taxDoc.data().valeur || 0) / 100),
-    0
+  const { total, amountInCents } = await applyPromoAndTaxes(
+    unitPrice * parsedQuantity,
+    promo
   );
-  const total = Number((subtotal + taxTotal).toFixed(2));
 
   return {
     quantity: parsedQuantity,
     unitPrice,
     total,
-    amountInCents: Math.round(total * 100),
+    amountInCents,
   };
 };

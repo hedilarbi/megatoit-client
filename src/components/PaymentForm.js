@@ -27,7 +27,7 @@ export default function PaymentForm({
       options={{
         mode: "payment",
         currency: "cad",
-        amount: Math.trunc(amount * 100), // amount in cents
+        amount: Math.round(Number(amount) * 100), // amount in cents
         locale: "fr",
       }}
     >

@@ -55,11 +55,19 @@ export const getUserOrders = async (uid) => {
         if (orderData.matchId) {
           const matchDoc = await getDoc(doc(db, "matchs", orderData.matchId));
           const matchData = matchDoc.exists() ? matchDoc.data() : null;
+          let freeMatchData = null;
+          if (orderData.freeMatchId) {
+            const freeMatchDoc = await getDoc(
+              doc(db, "matchs", orderData.freeMatchId)
+            );
+            freeMatchData = freeMatchDoc.exists() ? freeMatchDoc.data() : null;
+          }
 
           return {
             id: orderDoc.id,
             ...orderData,
             match: matchData,
+            freeMatch: freeMatchData,
           };
         }
         if (orderData.subscriptionId || orderData.subscriptionIds?.length) {
@@ -152,6 +160,24 @@ export const getOrderById = async (id) => {
           })
         );
         orderData.tickets = tickets.filter((ticket) => ticket !== null);
+      }
+      // Free tickets from a "freeTicket" promo code, for the next home match
+      if (orderData.freeTickets?.length) {
+        const freeTickets = await Promise.all(
+          orderData.freeTickets.map(async (ticketId) => {
+            const ticketDoc = await getDoc(doc(db, "tickets", ticketId));
+            return ticketDoc.exists()
+              ? { id: ticketDoc.id, ...ticketDoc.data() }
+              : null;
+          })
+        );
+        orderData.freeTickets = freeTickets.filter(Boolean);
+      }
+      if (orderData.freeMatchId) {
+        const freeMatchDoc = await getDoc(doc(db, "matchs", orderData.freeMatchId));
+        if (freeMatchDoc.exists()) {
+          orderData.freeMatch = { id: freeMatchDoc.id, ...freeMatchDoc.data() };
+        }
       }
       if (orderData.abonnementId) {
         const abonnementDoc = await getDoc(

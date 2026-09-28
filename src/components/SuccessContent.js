@@ -110,9 +110,18 @@ const SuccessContent = ({ paymentIntentId, orderId }) => {
               : `${order.quantity > 1 ? "Vos abonnements ont" : "Votre abonnement a"} été envoyé${order.quantity > 1 ? "s" : ""}`}{" "}
             à votre adresse courriel.
           </h2>
-          <p className="font-lato text-lg font-bold text-center">
-            Vérifiez votre boîte de réception et vos spams si nécessaire.
-          </p>
+          <div className="mt-4 rounded-md border border-[#0CA5E9] bg-[#0CA5E9]/10 px-4 py-4 text-center font-lato">
+            <p className="text-lg font-bold">
+              Vérifiez votre boîte de réception et vos spams si nécessaire.
+            </p>
+            <p className="mt-2 text-base text-[#414A5A]">
+              Vous pouvez également retrouver vos billets dans la page{" "}
+              <Link href="/profil" className="font-semibold underline">
+                Profil
+              </Link>{" "}
+              de notre site web.
+            </p>
+          </div>
           {!order.match && (
             <div className="mt-4">
               <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded-md shadow-sm flex items-start gap-2">
@@ -170,6 +179,38 @@ const SuccessContent = ({ paymentIntentId, orderId }) => {
                 <div className="flex justify-between items-center  pb-4 border-b border-gray-300 mt-4 ">
                   <p className="font-lato text-base text-[#414A5A]">Stade</p>
                   <p>{order.match.place}</p>
+                </div>
+              )}
+              {order.freeMatch && order.freeTickets?.length > 0 && (
+                <div className="mt-4 rounded-md border border-green-600 bg-green-50 p-4">
+                  <p className="font-lato font-semibold text-green-800">
+                    {order.freeTickets.length > 1
+                      ? `${order.freeTickets.length} billets offerts avec votre code promo`
+                      : "1 billet offert avec votre code promo"}
+                  </p>
+                  <div className="flex justify-between items-center pb-2 border-b border-green-200 mt-3 text-sm md:text-base">
+                    <p className="font-lato text-base text-[#414A5A]">Match</p>
+                    <p className="text-right">
+                      {order.freeMatch.type === "Domicile"
+                        ? `${order.freeMatch.opponent?.name || ""} vs ${order.freeMatch.homeTeam?.name || "BSR DE TROIS-RIVIÈRES"}`
+                        : `${order.freeMatch.homeTeam?.name || "BSR DE TROIS-RIVIÈRES"} vs ${order.freeMatch.opponent?.name || ""}`}
+                    </p>
+                  </div>
+                  <div className="flex justify-between items-center pb-2 border-b border-green-200 mt-2 text-sm md:text-base">
+                    <p className="font-lato text-base text-[#414A5A]">Date</p>
+                    <p className="text-right">
+                      <span className="capitalize">
+                        {formatDate(order.freeMatch.date).dayName},
+                      </span>{" "}
+                      <span className="capitalize">
+                        {formatDate(order.freeMatch.date).date}
+                      </span>
+                    </p>
+                  </div>
+                  <div className="flex justify-between items-center mt-2 text-sm md:text-base">
+                    <p className="font-lato text-base text-[#414A5A]">Stade</p>
+                    <p className="text-right">{order.freeMatch.place}</p>
+                  </div>
                 </div>
               )}
               <div className="flex justify-between items-center mb-4 mt-4">

@@ -76,7 +76,7 @@ function formatLocalDate(timestamp) {
   };
 }
 
-const OrderComponent = ({ id }) => {
+const OrderComponent = ({ id, freeTicketsOnly = false }) => {
   const { user } = useAuth();
   const [order, setOrder] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
@@ -113,15 +113,21 @@ const OrderComponent = ({ id }) => {
     );
   }
 
-  const isHome = order?.match?.type === "Domicile";
+  // ?gratuit=1: same page for the free tickets of a "freeTicket" promo code,
+  // shown under the next home match they were given for
+  const showFree = freeTicketsOnly && Boolean(order?.freeMatch);
+  const match = showFree ? order.freeMatch : order?.match;
+  const tickets = (showFree ? order?.freeTickets : order?.tickets) || [];
+
+  const isHome = match?.type === "Domicile";
 
   const homeTeamName =
-    order?.match?.homeTeam?.name || "BSR DE TROIS-RIVIÈRES";
+    match?.homeTeam?.name || "BSR DE TROIS-RIVIÈRES";
   const homeTeamImageUrl =
-    order?.match?.homeTeam?.imageUrl || "/logo-big.jpeg";
+    match?.homeTeam?.imageUrl || "/logo-big.jpeg";
 
-  const opponentName = order?.match?.opponent?.name || "";
-  const opponentImageUrl = order?.match?.opponent?.imageUrl || "";
+  const opponentName = match?.opponent?.name || "";
+  const opponentImageUrl = match?.opponent?.imageUrl || "";
 
   // Domicile => Opponent on Left, Trois-Rivières on Right
   // Non Domicile => Trois-Rivières on Left, Opponent on Right
@@ -140,7 +146,7 @@ const OrderComponent = ({ id }) => {
         <FaArrowLeftLong />
       </button>
 
-      {order?.match && (
+      {match && (
         <>
           <div className="flex justify-center w-full px-4">
             <div className="flex justify-between items-center w-full max-w-xl">
@@ -186,7 +192,7 @@ const OrderComponent = ({ id }) => {
             <p className="text-base text-gray-600 mt-1 md:text-lg capitalize">
               <span className="font-semibold capitalize">Date: </span>
               {(() => {
-                const d = formatDate(order.match.date);
+                const d = formatDate(match.date);
                 return (
                   <>
                     {d.dayName}, {d.date}
@@ -197,15 +203,28 @@ const OrderComponent = ({ id }) => {
 
             <p className="text-base text-gray-600 mt-1 md:text-lg">
               <span className="font-semibold">Stade: </span>
-              {order.match.place}
+              {match.place}
             </p>
 
             <p className="text-base text-gray-600 mt-1 md:text-lg">
-              <span className="font-semibold">Nombre de billets: </span>
-              {order.tickets.length}
+              <span className="font-semibold">
+                {showFree ? "Nombre de billets gratuits: " : "Nombre de billets: "}
+              </span>
+              {tickets.length}
             </p>
 
-            {order.promoCode && (
+            {order.promoCode && order.promoCode.type === "freeTicket" && (
+              <p className="text-base text-gray-600 mt-1 md:text-lg">
+                <span className="font-semibold">
+                  {showFree ? "Offerts avec le code promo: " : "Code promo: "}
+                </span>
+                {order.promoCode.code}
+                {!showFree &&
+                  ` (${order.freeTickets?.length || 0} billet(s) gratuit(s))`}
+              </p>
+            )}
+
+            {order.promoCode && order.promoCode.type !== "freeTicket" && (
               <p className="text-base text-gray-600 mt-1 md:text-lg">
                 <span className="font-semibold">Réduction: </span>
                 {order.promoCode.type === "percent"
@@ -215,21 +234,26 @@ const OrderComponent = ({ id }) => {
             )}
 
             <p className="text-base text-gray-600 mt-1 md:text-lg">
-              <span className="font-semibold">Total payé: </span>$
-              {(order.amount / 100).toFixed(2)}
+              <span className="font-semibold">Total payé: </span>
+              {showFree ? "Gratuit" : `$${(order.amount / 100).toFixed(2)}`}
             </p>
 
             <p className=" text-black font-semibold mt-4 text-lg md:text-xl">
-              Billets :
+              {showFree ? "Billets gratuits :" : "Billets :"}
             </p>
 
-            {order.tickets.map((ticket, index) => (
+            {tickets.map((ticket, index) => (
               <div
                 key={index}
                 className="mt-2 border border-black rounded-md shadow-md p-3 flex justify-between items-center"
               >
                 <p className="text-base text-gray-600 font-semibold">
                   Billet N° {ticket.TicketCode}
+                  {ticket.isFree && (
+                    <span className="ml-2 rounded bg-green-600 px-2 py-0.5 text-xs text-white">
+                      Gratuit
+                    </span>
+                  )}
                 </p>
                 <a
                   href={ticket.downloadUrl}

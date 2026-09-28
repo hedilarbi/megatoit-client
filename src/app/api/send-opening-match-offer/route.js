@@ -2,8 +2,13 @@ import { after, NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 import { collection, getDocs, limit, query, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { getOpeningMatchEmailTemplate } from "@/utils/openingMatchEmailTemplate";
-import path from "node:path";
+import {
+  BEDFORD_DATE,
+  MATCH_URL,
+  PROMO_CODE,
+  VALLEYFIELD_DATE,
+  getFreeTicketOfferEmailTemplate,
+} from "@/utils/freeTicketOfferEmailTemplate";
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const getUserName = (user) => [user.userName, user.firstName]
@@ -23,12 +28,19 @@ export async function GET(request) {
     return NextResponse.json({ error: "Adresse e-mail invalide" }, { status: 400 });
   }
 
+  if (!BEDFORD_DATE || MATCH_URL === "https://bsr3r.com/calendrier") {
+    return NextResponse.json(
+      { error: "Gabarit incomplet : date du match Bedford-Cowansville ou lien du match manquant" },
+      { status: 500 }
+    );
+  }
+
   after(() => processEmailsInBackground(email).catch((error) => {
-    console.error("Erreur lors de l'envoi de l'offre du match d'ouverture :", error);
+    console.error("Erreur lors de l'envoi de l'offre billets offerts :", error);
   }));
 
   return NextResponse.json(
-    { message: email ? `L'envoi du courriel à ${email} a démarré.` : "L'envoi des courriels du match d'ouverture a démarré." },
+    { message: email ? `L'envoi du courriel à ${email} a démarré.` : "L'envoi des courriels de l'offre billets offerts a démarré." },
     { status: 202 }
   );
 }
@@ -58,7 +70,7 @@ async function processEmailsInBackground(targetEmail) {
     });
   }
 
-  console.log(`${list.length} destinataires pour le match d'ouverture.`);
+  console.log(`${list.length} destinataires pour l'offre billets offerts.`);
 
   for (let i = 0; i < list.length; i += 50) {
     const batch = list.slice(i, i + 50);
@@ -67,14 +79,9 @@ async function processEmailsInBackground(targetEmail) {
         await transporter.sendMail({
           from: `"${process.env.EMAIL_FROM_NAME || "Billetterie BSR"}" <${process.env.EMAIL_USER}>`,
           to: email,
-          subject: "Match d'ouverture BSR le 25 septembre : 50 % de rabais",
-          text: `Bonjour${name ? ` ${name}` : ""},\n\nMATCH D'OUVERTURE — vendredi 25 septembre 2026 à 20 h : St-Lambert-de-Lauzon affronte le BSR Trois-Rivières.\n\nOuverture des portes à 17 h\nDJ et animation sur place\nRestaurant et bar ouverts\nUn chandail remis à chacun des 100 premiers partisans !\n\nArrivez tôt pour profiter de l'ambiance et encourager votre BSR !\n\nProfitez de 50 % de rabais avec le code promo BSR50 pour acheter votre billet : https://bsr3r.com/calendrier/ov2dS6VfPr7gWRd812sA`,
-          html: getOpeningMatchEmailTemplate(name),
-          attachments: [{
-            filename: "St-Lambert-de-Lauzon.png",
-            path: path.join(process.cwd(), "public", "St-Lambert-de-Lauzon.png"),
-            cid: "st-lambert-logo",
-          }],
+          subject: `Valleyfield vs Trois-Rivières : 1 billet acheté = 1 billet offert avec ${PROMO_CODE}`,
+          text: `Bonjour${name ? ` ${name}` : ""},\n\nOFFRE SPÉCIALE — Valleyfield vs Trois-Rivières, ${VALLEYFIELD_DATE}.\n\nAchetez vos billets pour ce match avec le code promo ${PROMO_CODE} et recevez automatiquement le même nombre de billets gratuits pour le match suivant à domicile : Bedford-Cowansville vs Trois-Rivières, ${BEDFORD_DATE}.\n\nExemple : 2 billets achetés pour Valleyfield = 2 billets offerts pour Bedford-Cowansville.\n\nAchetez vos billets : ${MATCH_URL}`,
+          html: getFreeTicketOfferEmailTemplate(name),
         });
       } catch (error) {
         console.error(`Échec d'envoi à ${email}:`, error);
@@ -84,5 +91,5 @@ async function processEmailsInBackground(targetEmail) {
     if (i + 50 < list.length) await delay(3000);
   }
 
-  console.log("Envoi des courriels du match d'ouverture terminé.");
+  console.log("Envoi des courriels de l'offre billets offerts terminé.");
 }

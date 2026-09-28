@@ -1,6 +1,12 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { calculateSubscriptionOrderPricing } from "@/services/subscriptionPricing.service";
+import { findNextHomeMatch } from "@/services/ticket.service";
+import {
+  PricingError,
+  calculateMatchOrderPricing,
+  getValidPromoCode,
+} from "@/services/orderPricing.service";
 
 import Stripe from "stripe";
 
@@ -64,6 +70,21 @@ const buildIntentIdempotencyKey = ({
   return `checkout_${sessionPart}_${hash.slice(0, 24)}`;
 };
 
+// The checkout page and the server use the same formula, so the amounts should
+// always be equal. 1 cent is still accepted (logged) so an unexpected rounding
+// never blocks a real customer; anything more is refused and logged.
+const isAmountAccepted = (expectedCents, receivedCents, details) => {
+  const gap = Math.abs(expectedCents - receivedCents);
+  if (gap === 0) return true;
+  const log = { expectedCents, receivedCents, ...details };
+  if (gap === 1) {
+    console.warn("Payment amount 1 cent off (accepted):", log);
+    return true;
+  }
+  console.error("Payment amount mismatch (refused):", log);
+  return false;
+};
+
 export async function POST(request) {
   try {
     const {
@@ -117,6 +138,68 @@ export async function POST(request) {
       );
     }
 
+    // The promo code and the price are checked here: the browser only displays
+    // them, so a request sent by hand must not get a cheaper order.
+    let promo = null;
+    if (codeId) {
+      try {
+        promo = await getValidPromoCode(codeId, userId);
+      } catch (err) {
+        return new Response(
+          JSON.stringify({ error: err instanceof PricingError ? err.message : "Code promo invalide" }),
+          { status: 400 }
+        );
+      }
+    }
+
+    // "freeTicket" promo codes only apply to match tickets: they add one free
+    // ticket for the next home match per purchased ticket.
+    let freeMatchId = null;
+    if (promo?.type === "freeTicket") {
+      if (!hasMatchPurchase) {
+        return new Response(
+          JSON.stringify({ error: "Ce code promo est valide uniquement pour des billets de match" }),
+          { status: 400 }
+        );
+      }
+      if (promo.matchId && promo.matchId !== matchId) {
+        return new Response(
+          JSON.stringify({ error: "Ce code promo n'est pas applicable à ce match" }),
+          { status: 400 }
+        );
+      }
+      const nextHomeMatch = await findNextHomeMatch(matchId);
+      if (!nextHomeMatch) {
+        return new Response(
+          JSON.stringify({ error: "Aucun match à domicile à venir pour ce code promo" }),
+          { status: 400 }
+        );
+      }
+      freeMatchId = nextHomeMatch.id;
+    }
+
+    // SERVER-SIDE MATCH TICKET PRICE VERIFICATION (Anti-Fraud)
+    let verifiedTicketPrice = ticketPrice;
+    let verifiedQuantity = quantity;
+    if (hasMatchPurchase) {
+      try {
+        const pricing = await calculateMatchOrderPricing({ matchId, quantity, promo });
+        verifiedTicketPrice = pricing.unitPrice;
+        verifiedQuantity = pricing.quantity;
+        if (!isAmountAccepted(pricing.amountInCents, amountInCents, { userId, matchId, quantity, codeId })) {
+          return new Response(JSON.stringify({ error: "Invalid payment amount" }), {
+            status: 400,
+          });
+        }
+      } catch (err) {
+        console.error("Error verifying match ticket price server-side:", err);
+        return new Response(
+          JSON.stringify({ error: err instanceof PricingError ? err.message : "Unable to verify ticket price" }),
+          { status: 400 }
+        );
+      }
+    }
+
     // SERVER-SIDE SUBSCRIPTION PRICE VERIFICATION (Anti-Fraud)
     let verifiedAbonnementPrice = abonnementPrice;
     if (hasAbonnementPurchase) {
@@ -124,10 +207,10 @@ export async function POST(request) {
         const pricing = await calculateSubscriptionOrderPricing({
           abonnementId,
           quantity: parsedAbonnementQuantity,
-          promoCodeId: codeId,
+          promo,
         });
         verifiedAbonnementPrice = pricing.unitPrice;
-        if (pricing.amountInCents !== amountInCents) {
+        if (!isAmountAccepted(pricing.amountInCents, amountInCents, { userId, abonnementId, quantity: parsedAbonnementQuantity, codeId })) {
           return new Response(JSON.stringify({ error: "Invalid payment amount" }), {
             status: 400,
           });
@@ -148,10 +231,10 @@ export async function POST(request) {
       amount: amountInCents,
       currency,
       matchId,
-      ticketPrice,
+      ticketPrice: verifiedTicketPrice,
       abonnementPrice: verifiedAbonnementPrice,
       abonnementId,
-      quantity: hasAbonnementPurchase ? parsedAbonnementQuantity : quantity,
+      quantity: hasAbonnementPurchase ? parsedAbonnementQuantity : verifiedQuantity,
       codeId,
     });
 
@@ -159,11 +242,12 @@ export async function POST(request) {
     if (hasMatchPurchase) {
       const metadata = {
         userId: String(userId),
-        quantity: String(quantity),
+        quantity: String(verifiedQuantity),
         matchId: String(matchId),
-        ticketPrice: String(ticketPrice),
+        ticketPrice: String(verifiedTicketPrice),
       };
       if (codeId) metadata.codeId = String(codeId);
+      if (freeMatchId) metadata.freeMatchId = String(freeMatchId);
       if (checkoutSessionId) {
         metadata.checkoutSessionId = String(checkoutSessionId);
       }

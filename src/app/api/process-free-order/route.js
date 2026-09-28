@@ -1,10 +1,16 @@
 import admin from "@/lib/firebaseAdmin";
 import {
   createTicketAndOrder,
+  findNextHomeMatch,
   getUserDocument,
 } from "@/services/ticket.service";
 import { generateAndSendTicketPDF } from "@/utils/generateAndSendTicketPDF";
 import { calculateSubscriptionOrderPricing } from "@/services/subscriptionPricing.service";
+import {
+  PricingError,
+  calculateMatchOrderPricing,
+  getValidPromoCode,
+} from "@/services/orderPricing.service";
 
 export const runtime = "nodejs";
 export const config = {
@@ -35,12 +41,9 @@ export async function POST(request) {
       userId,
       matchId,
       quantity,
-      ticketPrice,
       promoCodeId,
       abonnementId,
-      abonnementPrice,
       abonnementQuantity,
-      amount,
     } = body;
 
     // Ensure the token UID matches the requested userId
@@ -48,18 +51,11 @@ export async function POST(request) {
       return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403 });
     }
 
-    // BUG FIX #2: validate that at least one valid purchase type is present
-    // to avoid a TypeError crash when response stays null
-    const hasMatchPurchase = Boolean(matchId && quantity && ticketPrice);
-    const parsedAbonnementQuantity = Number.parseInt(abonnementQuantity || "1", 10);
-    const hasAbonnementPurchase = Boolean(
-      abonnementId &&
-        abonnementPrice &&
-        Number.isInteger(parsedAbonnementQuantity) &&
-        parsedAbonnementQuantity >= 1 &&
-        parsedAbonnementQuantity <= 100
-    );
-    if (!hasMatchPurchase && !hasAbonnementPurchase) {
+    // Exactly one purchase type. Prices sent by the browser are ignored: the
+    // order is priced on the server and must really come to $0.
+    const hasMatchPurchase = Boolean(matchId && quantity);
+    const hasAbonnementPurchase = Boolean(abonnementId);
+    if (hasMatchPurchase === hasAbonnementPurchase) {
       return new Response(
         JSON.stringify({ error: "Invalid purchase payload: matchId or abonnementId required" }),
         { status: 400 }
@@ -72,35 +68,90 @@ export async function POST(request) {
       console.error("User not found:", userId);
       return new Response("User not found", { status: 404 });
     }
-    if (promoCodeId) {
-      const promoCodeRef = admin
-        .firestore()
-        .collection("promoCodes")
-        .doc(promoCodeId);
-      const promoCodeDoc = await promoCodeRef.get();
-      if (promoCodeId && !promoCodeDoc.exists) {
-        console.error("Promo code not found:", promoCodeId);
-        return new Response("Promo code not found", { status: 404 });
-      }
 
+    // 1. Validate everything before writing anything
+    let promo = null;
+    if (promoCodeId) {
+      try {
+        promo = await getValidPromoCode(promoCodeId, userId);
+      } catch (err) {
+        return new Response(
+          JSON.stringify({ error: err instanceof PricingError ? err.message : "Code promo invalide" }),
+          { status: 400 }
+        );
+      }
+    }
+
+    let freeMatchId = null;
+    if (promo?.type === "freeTicket") {
+      if (!hasMatchPurchase) {
+        return new Response(
+          JSON.stringify({ error: "Ce code promo est valide uniquement pour des billets de match" }),
+          { status: 400 }
+        );
+      }
+      if (promo.matchId && promo.matchId !== matchId) {
+        return new Response(
+          JSON.stringify({ error: "Ce code promo n'est pas applicable à ce match" }),
+          { status: 400 }
+        );
+      }
+      const nextHomeMatch = await findNextHomeMatch(matchId);
+      if (!nextHomeMatch) {
+        return new Response(
+          JSON.stringify({ error: "Aucun match à domicile à venir pour ce code promo" }),
+          { status: 400 }
+        );
+      }
+      freeMatchId = nextHomeMatch.id;
+    }
+
+    let pricing;
+    try {
+      pricing = hasMatchPurchase
+        ? await calculateMatchOrderPricing({ matchId, quantity, promo })
+        : await calculateSubscriptionOrderPricing({
+            abonnementId,
+            quantity: abonnementQuantity || "1",
+            promo,
+          });
+    } catch (err) {
+      console.error("Error verifying price in process-free-order:", err);
+      return new Response(
+        JSON.stringify({ error: err instanceof PricingError ? err.message : "Unable to verify price" }),
+        { status: 400 }
+      );
+    }
+    if (pricing.amountInCents !== 0) {
+      return new Response(JSON.stringify({ error: "Invalid free order amount" }), {
+        status: 400,
+      });
+    }
+
+    // 2. Count the promo code use, then create the order
+    if (promo) {
       const usedPromoCodes = userDoc.data().usedPromoCodes || [];
       const existingPromoIndex = usedPromoCodes.findIndex(
-        (item) => item.promoCode === promoCodeId
+        (item) => item.promoCode === promo.id
       );
 
       if (existingPromoIndex !== -1) {
         usedPromoCodes[existingPromoIndex].numberOfUses += 1;
       } else {
         usedPromoCodes.push({
-          promoCode: promoCodeId,
+          promoCode: promo.id,
           numberOfUses: 1,
         });
       }
 
       await userRef.update({ usedPromoCodes });
-      await promoCodeRef.update({
-        used: admin.firestore.FieldValue.increment(1),
-      });
+      await admin
+        .firestore()
+        .collection("promoCodes")
+        .doc(promo.id)
+        .update({
+          used: admin.firestore.FieldValue.increment(1),
+        });
     }
 
     let response = null;
@@ -108,43 +159,22 @@ export async function POST(request) {
       response = await createTicketAndOrder({
         userId,
         matchId,
-        quantity,
-        ticketPrice: parseFloat(ticketPrice),
-        amount, // Convert from cents to dollars
+        quantity: pricing.quantity,
+        ticketPrice: pricing.unitPrice,
+        amount: 0,
         paymentIntentId: null,
-        promoCodeId,
+        promoCodeId: promo?.id || null,
+        freeMatchId,
       });
-    }
-    if (hasAbonnementPurchase) {
-      let verifiedPrice = abonnementPrice;
-      try {
-        const pricing = await calculateSubscriptionOrderPricing({
-          abonnementId,
-          quantity: parsedAbonnementQuantity,
-          promoCodeId,
-        });
-        verifiedPrice = pricing.unitPrice;
-        if (pricing.total !== 0 || Number(amount) !== 0) {
-          return new Response(JSON.stringify({ error: "Invalid free order amount" }), {
-            status: 400,
-          });
-        }
-      } catch (e) {
-        console.error("Error verifying abonnement price in process-free-order:", e);
-        return new Response(JSON.stringify({ error: "Unable to verify subscription price" }), {
-          status: 400,
-        });
-      }
-
+    } else {
       response = await createTicketAndOrder({
         userId,
         abonnementId,
         paymentIntentId: null,
-        abonnementPrice: verifiedPrice,
-        quantity: parsedAbonnementQuantity,
-        amount,
-
-        promoCodeId,
+        abonnementPrice: pricing.unitPrice,
+        quantity: pricing.quantity,
+        amount: 0,
+        promoCodeId: promo?.id || null,
       });
     }
 
@@ -160,7 +190,7 @@ export async function POST(request) {
     if (response.data.tickets.length) {
       await generateAndSendTicketPDF(
         userData,
-        response.data.tickets,
+        [...response.data.tickets, ...response.data.freeTickets],
         response.data.order
       );
     }

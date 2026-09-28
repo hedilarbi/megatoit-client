@@ -22,11 +22,11 @@ export const metadata = {
 export default function Home() {
   return (
     <div className="pb-20">
-      <div className="relative mb-48 md:mb-56">
+      <div className="relative ">
         <HomeBanner />
-        <div className="absolute left-1/2 -translate-x-1/2 -bottom-16 md:-bottom-8 translate-y-1/2 w-full z-20 flex justify-center px-4 md:px-0">
+        {/* <div className="absolute left-1/2 -translate-x-1/2 -bottom-16 md:-bottom-8 translate-y-1/2 w-full z-20 flex justify-center px-4 md:px-0">
           <CountDownVendredi />
-        </div>
+        </div> */}
       </div>
       <AbonnementSection />
       <MatchsList />

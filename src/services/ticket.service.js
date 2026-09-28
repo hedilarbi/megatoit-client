@@ -3,6 +3,62 @@ import admin from "@/lib/firebaseAdmin";
 import QRCode from "qrcode";
 import { getStorage } from "firebase-admin/storage";
 import crypto from "crypto";
+
+// Next home match strictly after the given match: the one a "freeTicket"
+// promo code gives free tickets for. Null when there is none.
+export const findNextHomeMatch = async (matchId) => {
+  const matchsRef = admin.firestore().collection("matchs");
+  const matchDoc = await matchsRef.doc(String(matchId)).get();
+  if (!matchDoc.exists) return null;
+
+  const snapshot = await matchsRef
+    .where("date", ">", matchDoc.data().date)
+    .orderBy("date", "asc")
+    .get();
+  const next = snapshot.docs.find((d) => d.data().type === "Domicile");
+  return next ? { id: next.id, ...next.data() } : null;
+};
+
+const createMatchTicket = async ({ ticketRef, userId, matchId, orderId, price, extra }) => {
+  const ticketId = ticketRef.id;
+  const toQrCode = "t/" + ticketId;
+  const qrImageBuffer = await QRCode.toBuffer(toQrCode, {
+    errorCorrectionLevel: "H",
+    type: "png",
+    width: 300,
+    margin: 1,
+  });
+  const bucket = getStorage().bucket();
+  const file = bucket.file(`qrcodes/${toQrCode}.png`);
+  await file.save(qrImageBuffer, {
+    metadata: {
+      contentType: "image/png",
+    },
+  });
+
+  // Rends-le public (ou utilise signed URL si privé)
+  await file.makePublic();
+  const qrCodeURL = file.publicUrl();
+  const buffer = crypto.randomBytes(Math.ceil(8 / 2));
+  const code = buffer.toString("hex").slice(0, 10);
+  const ticket = {
+    userId,
+    matchId,
+    orderId,
+    price,
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    isUsed: false,
+    TicketCode: code, // Generate a unique ticket code
+    qrCodeURL,
+    ...extra,
+  };
+  await ticketRef.set(ticket);
+  return {
+    ...ticket,
+    qrCodeImage: qrImageBuffer,
+  };
+};
+
 export const createTicketAndOrder = async ({
   userId,
   matchId,
@@ -13,6 +69,7 @@ export const createTicketAndOrder = async ({
   abonnementId,
   paymentIntentId,
   promoCodeId,
+  freeMatchId,
 }) => {
   try {
     const orderRef = admin.firestore().collection("orders").doc();
@@ -65,6 +122,20 @@ export const createTicketAndOrder = async ({
     // Retrieve the newly created order ID
     const orderId = orderRef.id;
 
+    // "freeTicket" promo code: resolve the free match before creating anything,
+    // so a match deleted since the payment can't fail an already paid order
+    // halfway (tickets created, order never saved).
+    let freeMatchRef = null;
+    let freeMatchDoc = null;
+    if (matchId && freeMatchId) {
+      freeMatchRef = admin.firestore().collection("matchs").doc(freeMatchId);
+      freeMatchDoc = await freeMatchRef.get();
+      if (!freeMatchDoc.exists) {
+        console.error(`Free ticket match ${freeMatchId} not found, order ${orderId} created without free tickets`);
+        freeMatchRef = null;
+      }
+    }
+
     let tickets = [];
     if (matchId) {
       // BUG FIX #1: verify seat availability BEFORE creating any tickets or uploading QR codes
@@ -84,47 +155,53 @@ export const createTicketAndOrder = async ({
 
       for (let i = 0; i < quantity; i++) {
         const ticketRef = admin.firestore().collection("tickets").doc();
-        const ticketId = ticketRef.id;
-        order.tickets.push(ticketId);
-        const toQrCode = "t/" + ticketId;
-        const qrImageBuffer = await QRCode.toBuffer(toQrCode, {
-          errorCorrectionLevel: "H",
-          type: "png",
-          width: 300,
-          margin: 1,
-        });
-        const bucket = getStorage().bucket();
-        const file = bucket.file(`qrcodes/${toQrCode}.png`);
-        await file.save(qrImageBuffer, {
-          metadata: {
-            contentType: "image/png",
-          },
-        });
-
-        // Rends-le public (ou utilise signed URL si privé)
-        await file.makePublic();
-        const qrCodeURL = file.publicUrl();
-        const buffer = crypto.randomBytes(Math.ceil(8 / 2));
-        const code = buffer.toString("hex").slice(0, 10);
-        const ticket = {
-          userId,
-          matchId,
-          orderId,
-          price: ticketPrice,
-          createdAt: admin.firestore.FieldValue.serverTimestamp(),
-          isUsed: false,
-          TicketCode: code, // Generate a unique ticket code
-          qrCodeURL,
-        };
-        await ticketRef.set(ticket);
-        tickets.push({
-          ...ticket,
-          qrCodeImage: qrImageBuffer,
-        });
+        order.tickets.push(ticketRef.id);
+        tickets.push(
+          await createMatchTicket({
+            ticketRef,
+            userId,
+            matchId,
+            orderId,
+            price: ticketPrice,
+          })
+        );
       }
 
       await matchRef.update({
         availableSeats: matchData.availableSeats - quantity,
+      });
+    }
+
+    // "freeTicket" promo code: one free ticket for the next home match per
+    // purchased ticket. The payment already succeeded, so the tickets are
+    // created even if that match has run out of seats.
+    const freeTickets = [];
+    if (freeMatchRef) {
+      order.freeMatchId = freeMatchId;
+      order.freeTickets = [];
+      for (let i = 0; i < quantity; i++) {
+        const ticketRef = admin.firestore().collection("tickets").doc();
+        order.freeTickets.push(ticketRef.id);
+        freeTickets.push(
+          await createMatchTicket({
+            ticketRef,
+            userId,
+            matchId: freeMatchId,
+            orderId,
+            price: 0,
+            extra: { isFree: true, sourceMatchId: matchId },
+          })
+        );
+      }
+
+      const freeSeats = Number(freeMatchDoc.data().availableSeats || 0);
+      if (freeSeats < quantity) {
+        console.warn(
+          `Free tickets for ${freeMatchId} exceed available seats (${freeSeats} < ${quantity})`
+        );
+      }
+      await freeMatchRef.update({
+        availableSeats: Math.max(0, freeSeats - quantity),
       });
     }
     let abonnement = null;
@@ -180,6 +257,7 @@ export const createTicketAndOrder = async ({
       success: true,
       data: {
         tickets,
+        freeTickets,
         abonnement,
         abonnements,
         order,
