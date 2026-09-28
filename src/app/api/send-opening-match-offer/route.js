@@ -79,8 +79,8 @@ async function processEmailsInBackground(targetEmail) {
         await transporter.sendMail({
           from: `"${process.env.EMAIL_FROM_NAME || "Billetterie BSR"}" <${process.env.EMAIL_USER}>`,
           to: email,
-          subject: `Valleyfield vs Trois-Rivières : 1 billet acheté = 1 billet offert avec ${PROMO_CODE}`,
-          text: `Bonjour${name ? ` ${name}` : ""},\n\nOFFRE SPÉCIALE — Valleyfield vs Trois-Rivières, ${VALLEYFIELD_DATE}.\n\nAchetez vos billets pour ce match avec le code promo ${PROMO_CODE} et recevez automatiquement le même nombre de billets gratuits pour le match suivant à domicile : Bedford-Cowansville vs Trois-Rivières, ${BEDFORD_DATE}.\n\nExemple : 2 billets achetés pour Valleyfield = 2 billets offerts pour Bedford-Cowansville.\n\nAchetez vos billets : ${MATCH_URL}`,
+          subject: "Valleyfield vs Trois-Rivières : 1 billet gratuit par billet acheté",
+          text: `Bonjour${name ? ` ${name}` : ""},\n\nOFFRE SPÉCIALE — Valleyfield vs Trois-Rivières, ${VALLEYFIELD_DATE}.\n\nAchetez vos billets pour ce match avec le code promo ${PROMO_CODE} et recevez automatiquement le même nombre de billets gratuits pour le match suivant à domicile : Bedford-Cowansville vs Trois-Rivières, ${BEDFORD_DATE}.\n\n1 billet gratuit par billet acheté.\n\nWEEK-END D'APPRÉCIATION DE NOS FANS (BSR x Casse-Croûte Courteau) — vendredi 2 et samedi 3 octobre, pendant les matchs : poutine, pogo, hot-dog, boisson gazeuse 591 ml et slush à 3 $ chacun, au Colisée Jean-Guy-Talbot.\n\nAchetez vos billets : ${MATCH_URL}`,
           html: getFreeTicketOfferEmailTemplate(name),
         });
       } catch (error) {
