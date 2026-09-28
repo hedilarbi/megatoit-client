@@ -2,7 +2,7 @@
 
 import HomeBanner from "@/components/HomeBanner";
 import MatchsList from "@/components/MatchsList";
-import CountDownVendredi from "@/components/CountDownVendredi";
+
 import FacebookFeed from "@/components/FacebookFeed";
 // import CtaBoutique from "@/components/CtaBoutique";
 import AbonnementSection from "@/components/AbonnementSection";
