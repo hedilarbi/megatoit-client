@@ -5,6 +5,7 @@ import {
 } from "@stripe/react-stripe-js";
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import { getAuth } from "firebase/auth";
 import Spinner from "./spinner/Spinner";
 import { getMatchById } from "@/services/match.service";
 
@@ -145,9 +146,16 @@ const CheckoutForm = ({
       setError("");
 
       try {
+        const idToken = await getAuth().currentUser?.getIdToken();
+        if (!idToken) {
+          throw new Error("Session expirée, reconnectez-vous.");
+        }
         const response = await fetch("/api/create-payment-intent", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${idToken}`,
+          },
           body: JSON.stringify(paymentIntentPayload),
           signal: controller.signal,
         });

@@ -7,8 +7,19 @@ import {
   calculateMatchOrderPricing,
   getValidPromoCode,
 } from "@/services/orderPricing.service";
+import {
+  consumeRateLimit,
+  getClientIp,
+  verifyBearerToken,
+} from "@/lib/apiAuth";
 
 import Stripe from "stripe";
+
+// Anti card testing: un compte ou une IP ne peut pas créer des paiements en rafale.
+const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000;
+const MAX_INTENTS_PER_USER = 15;
+const MAX_INTENTS_PER_IP = 40;
+const ALLOWED_CURRENCY = "cad";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2023-10-16",
@@ -87,6 +98,12 @@ const isAmountAccepted = (expectedCents, receivedCents, details) => {
 
 export async function POST(request) {
   try {
+    // Seul un utilisateur connecté peut créer un paiement, et uniquement pour lui-même.
+    const decodedToken = await verifyBearerToken(request);
+    if (!decodedToken) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+    }
+
     const {
       amount,
       currency,
@@ -98,17 +115,42 @@ export async function POST(request) {
       abonnementId,
       abonnementQuantity,
       userName,
-      email,
+      email: requestEmail,
       codeId,
       checkoutSessionId,
     } = await request.json();
+
+    if (decodedToken.uid !== userId) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403 });
+    }
+
+    const allowed = await consumeRateLimit(
+      [
+        { key: `paymentIntent_user_${decodedToken.uid}`, max: MAX_INTENTS_PER_USER },
+        { key: `paymentIntent_ip_${getClientIp(request)}`, max: MAX_INTENTS_PER_IP },
+      ],
+      RATE_LIMIT_WINDOW_MS
+    );
+    if (!allowed) {
+      console.warn("Payment intent rate limit reached:", {
+        userId: decodedToken.uid,
+        ip: getClientIp(request),
+      });
+      return new Response(
+        JSON.stringify({ error: "Trop de tentatives de paiement. Réessayez dans quelques minutes." }),
+        { status: 429 }
+      );
+    }
+
+    // L'e-mail du client Stripe est celui du compte connecté, pas celui envoyé par le navigateur.
+    const email = decodedToken.email || requestEmail;
 
     // Validate input
     const amountInCents = Number(amount);
     if (
       !Number.isInteger(amountInCents) ||
       amountInCents <= 0 ||
-      !currency ||
+      currency !== ALLOWED_CURRENCY ||
       !userId
     ) {
       return new Response(

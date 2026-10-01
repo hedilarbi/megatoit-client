@@ -1,4 +1,5 @@
 import admin from "@/lib/firebaseAdmin";
+import { isAdminUser, verifyBearerToken } from "@/lib/apiAuth";
 import { createTicketAndOrder } from "@/services/ticket.service";
 import { generateAndSendTicketPDF } from "@/utils/generateAndSendTicketPDF";
 
@@ -11,7 +12,7 @@ export const config = {
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, x-admin-key",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
 };
 
 export async function OPTIONS() {
@@ -23,18 +24,25 @@ export async function OPTIONS() {
 
 export async function POST(request) {
   try {
-    const authHeader = request.headers.get("x-admin-key") || "";
-    const adminKey = process.env.ADMIN_API_KEY || "my-super-secret-admin-key-2026";
-    
-    if (authHeader !== adminKey) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), { 
-        status: 401, 
-        headers: { ...corsHeaders, "Content-Type": "application/json" } 
+    // Réservé aux comptes admin : le jeton Firebase de l'admin connecté est vérifié
+    // (aucune clé partagée ne transite par le navigateur).
+    const decodedToken = await verifyBearerToken(request);
+    if (!decodedToken) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" }
       });
     }
+    if (!(await isAdminUser(decodedToken.uid))) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" }
+      });
+    }
+    const adminId = decodedToken.uid;
 
     const body = await request.json();
-    const { fullName, email, adminId } = body;
+    const { fullName, email } = body;
 
     if (!fullName || !email) {
       return new Response(JSON.stringify({ error: "Nom complet et adresse email requis" }), { 
@@ -42,13 +50,6 @@ export async function POST(request) {
         headers: { ...corsHeaders, "Content-Type": "application/json" } 
       });
     }
-    if (!adminId) {
-      return new Response(JSON.stringify({ error: "Identifiant administrateur manquant" }), { 
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" } 
-      });
-    }
-
     // 1. Find or fallback to admin user
     let userId;
     let userData = null;

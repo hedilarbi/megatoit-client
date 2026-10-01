@@ -29,6 +29,12 @@ export async function POST(request) {
     }
 
     if (event.type === "payment_intent.succeeded") {
+      // Un paiement créé hors du site (sans les métadonnées de /api/create-payment-intent)
+      // ne correspond à aucune commande : on l'ignore au lieu de faire réessayer Stripe.
+      if (!event.data.object.metadata?.userId) {
+        console.warn("PaymentIntent without site metadata ignored:", event.data.object.id);
+        return Response.json({ received: true, ignored: true });
+      }
       const result = await fulfillSuccessfulPaymentIntent(event.data.object, event.id);
       return Response.json({ received: true, ...result });
     }
