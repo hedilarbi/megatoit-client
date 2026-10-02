@@ -82,7 +82,12 @@ if (matchIdsArg) {
 } else {
   for (const day of ANNOUNCED_DAYS) matchDocs.push(await findMatchOnDay(day));
 }
-const matches = matchDocs.map(describe);
+// Heures écrites en dur (ne pas recalculer depuis la base)
+const STATIC_LABELS = [
+  { dateLabel: "vendredi 2 octobre 2026", hourLabel: "20 h" },
+  { dateLabel: "samedi 3 octobre 2026", hourLabel: "19 h" },
+];
+const matches = matchDocs.map((doc, i) => ({ ...describe(doc), ...STATIC_LABELS[i] }));
 const recipientMatch = matches[0]; // les destinataires sont les acheteurs du premier match
 
 console.log("Matchs annoncés dans l'e-mail (vérifie les heures) :");

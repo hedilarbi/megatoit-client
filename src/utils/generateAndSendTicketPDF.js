@@ -312,8 +312,9 @@ export async function generateAndSendTicketPDF(user, tickets, order, subscriptio
 
         const ms = match.date.seconds * 1000 + match.date.nanoseconds / 1000000;
         const dateObj = new Date(ms);
-        // Toujours à l'heure du Québec, quel que soit le fuseau horaire du serveur
-        const tz = { timeZone: "America/Toronto" };
+        // Même convention que l'affichage du site et de l'admin : les dates des matchs sont
+        // lues en UTC+1 fixe (Etc/GMT-1), quel que soit le fuseau horaire du serveur.
+        const tz = { timeZone: "Etc/GMT-1" };
         const dayStr = dateObj.toLocaleDateString("fr-FR", { ...tz, day: "numeric" });
         const monthYearStr = dateObj.toLocaleDateString("fr-FR", { ...tz, month: "long", year: "numeric" }).toUpperCase();
         const weekdayStr = dateObj.toLocaleDateString("fr-FR", { ...tz, weekday: "long" });
