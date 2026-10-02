@@ -312,9 +312,13 @@ export async function generateAndSendTicketPDF(user, tickets, order, subscriptio
 
         const ms = match.date.seconds * 1000 + match.date.nanoseconds / 1000000;
         const dateObj = new Date(ms);
-        const dayStr = dateObj.getDate().toString();
-        const monthYearStr = dateObj.toLocaleDateString("fr-FR", { month: "long", year: "numeric" }).toUpperCase();
-        const timeStr = `${dateObj.toLocaleDateString("fr-FR", { weekday: "long" })} · ${dateObj.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}`.toUpperCase();
+        // Toujours à l'heure du Québec, quel que soit le fuseau horaire du serveur
+        const tz = { timeZone: "America/Toronto" };
+        const dayStr = dateObj.toLocaleDateString("fr-FR", { ...tz, day: "numeric" });
+        const monthYearStr = dateObj.toLocaleDateString("fr-FR", { ...tz, month: "long", year: "numeric" }).toUpperCase();
+        const weekdayStr = dateObj.toLocaleDateString("fr-FR", { ...tz, weekday: "long" });
+        const hourStr = dateObj.toLocaleTimeString("fr-FR", { ...tz, hour: "2-digit", minute: "2-digit" });
+        const timeStr = `${weekdayStr} · ${hourStr}`.toUpperCase();
 
         let addr1 = "1740 Av. Gilles-Villeneuve";
         let addr2 = "Trois-Rivières, QC G8Y 7B6";
@@ -333,7 +337,7 @@ export async function generateAndSendTicketPDF(user, tickets, order, subscriptio
           team1Name, team1ImageUrl, team2Name, team2ImageUrl,
           dayStr, monthYearStr, timeStr, addr1, addr2,
           // Same values as the PDF ticket, so the email and the PDF always agree
-          dateLabel: `${dateObj.toLocaleDateString("fr-FR", { weekday: "long" })} ${dayStr} ${dateObj.toLocaleDateString("fr-FR", { month: "long", year: "numeric" })} à ${dateObj.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}`,
+          dateLabel: `${weekdayStr} ${dayStr} ${dateObj.toLocaleDateString("fr-FR", { ...tz, month: "long", year: "numeric" })} à ${hourStr}`,
         });
       }
 
