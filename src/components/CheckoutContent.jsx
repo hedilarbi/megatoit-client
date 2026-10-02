@@ -358,7 +358,9 @@ const CheckoutContent = ({ matchId, quantity: rawQuantity, abonnementId }) => {
     }
   };
 
-  if (isLoading) {
+  // Après une déconnexion, `user` est vide le temps que la redirection vers
+  // l'accueil s'exécute : on n'affiche pas le formulaire qui a besoin de user.uid.
+  if (isLoading || !user) {
     return (
       <div className="h-screen flex justify-center items-center">
         <Spinner />

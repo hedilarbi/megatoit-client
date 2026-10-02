@@ -6,6 +6,37 @@ import {
   getUserDocument,
 } from "@/services/ticket.service";
 import { generateAndSendTicketPDF } from "@/utils/generateAndSendTicketPDF";
+import { applyPromoAndTaxes } from "@/services/orderPricing.service";
+import { calculateSubscriptionOrderPricing } from "@/services/subscriptionPricing.service";
+
+const PAYMENT_CURRENCY = "cad";
+
+// Montant attendu pour la commande décrite par les métadonnées, recalculé avec les
+// prix en base (jamais avec le prix écrit dans les métadonnées). Contrairement à la
+// création du paiement, ni les places restantes ni l'usage du code promo ne sont
+// revérifiés : le client a déjà payé.
+const expectedAmountInCents = async ({ matchId, abonnementId, quantity, promoCodeId }) => {
+  const db = admin.firestore();
+  const promoDoc = promoCodeId ? await db.collection("promoCodes").doc(promoCodeId).get() : null;
+  const promo = promoDoc?.exists ? promoDoc.data() : null;
+
+  if (matchId) {
+    const matchDoc = await db.collection("matchs").doc(String(matchId)).get();
+    if (!matchDoc.exists) return NaN;
+    const { amountInCents } = await applyPromoAndTaxes(
+      Number(matchDoc.data().price) * quantity,
+      promo
+    );
+    return amountInCents;
+  }
+
+  const { amountInCents } = await calculateSubscriptionOrderPricing({
+    abonnementId,
+    quantity,
+    promo,
+  });
+  return amountInCents;
+};
 
 const updatePromoCodeUsage = async ({ userRef, userDoc, promoCodeId }) => {
   if (!promoCodeId) return;
@@ -93,6 +124,24 @@ export const fulfillSuccessfulPaymentIntent = async (paymentIntent, sourceId) =>
     const userRef = admin.firestore().collection("users").doc(userId);
     const userDoc = await userRef.get();
     if (!userDoc.exists) throw new Error(`User not found: ${userId}`);
+
+    // Les billets ne sont émis que si le montant réellement encaissé couvre la commande :
+    // une clé Stripe volée ne permet pas de créer un paiement à 1 ¢ marqué « 50 billets ».
+    const paidCents = paymentIntent.amount_received ?? paymentIntent.amount;
+    const expectedCents = await expectedAmountInCents({ matchId, abonnementId, quantity, promoCodeId });
+    if (paymentIntent.currency !== PAYMENT_CURRENCY || !(paidCents >= expectedCents - 1)) {
+      console.error("Paid amount does not cover the order, tickets not issued:", {
+        paymentIntentId: paymentIntent.id,
+        currency: paymentIntent.currency,
+        paidCents,
+        expectedCents,
+        userId,
+        matchId,
+        abonnementId,
+        quantity,
+      });
+      return { state: "rejected", orderId: null };
+    }
 
     let response;
     if (matchId && Number.isInteger(quantity) && quantity > 0 && ticketPrice) {
